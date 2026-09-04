@@ -18,7 +18,7 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #050508;
+            background-color: #030305;
             font-family: 'VT323', monospace;
             color: #00ffcc;
             display: flex;
@@ -35,7 +35,7 @@
             background: #090a0f;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 25px rgba(0, 255, 204, 0.2);
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.25);
             overflow: hidden;
             border: 2px solid #1f293d;
         }
@@ -80,7 +80,7 @@
             display: flex;
             width: 100%;
             height: 90px;
-            background: #050508;
+            background: #030305;
             border-top: 2px solid #1f293d;
             flex-shrink: 0;
         }
@@ -112,7 +112,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(5, 5, 8, 0.94);
+            background: rgba(3, 3, 5, 0.95);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -122,10 +122,10 @@
             z-index: 10;
         }
         h1 {
-            font-size: 54px;
+            font-size: 56px;
             margin-bottom: 5px;
             color: #ff007f;
-            text-shadow: 0 0 18px rgba(255, 0, 127, 0.7);
+            text-shadow: 0 0 20px rgba(255, 0, 127, 0.7);
             letter-spacing: 3px;
         }
         p {
@@ -137,7 +137,7 @@
         }
         .btn {
             background: #00ffcc;
-            color: #050508;
+            color: #030305;
             border: none;
             padding: 10px 35px;
             font-family: 'VT323', monospace;
@@ -211,6 +211,7 @@
         let audioCtx = null;
         let engineOsc = null;
         let engineGain = null;
+        let bgmInterval = null;
 
         function initAudio() {
             if (!audioCtx) {
@@ -220,8 +221,10 @@
                 audioCtx.resume();
             }
             startEngineSound();
+            startBGM();
         }
 
+        // Suara Mesin Latar Belakang (Engine Hum)
         function startEngineSound() {
             if (engineOsc) return;
             try {
@@ -229,13 +232,13 @@
                 engineGain = audioCtx.createGain();
                 
                 engineOsc.type = "sawtooth";
-                engineOsc.frequency.setValueAtTime(60, audioCtx.currentTime);
+                engineOsc.frequency.setValueAtTime(55, audioCtx.currentTime);
                 
                 let filter = audioCtx.createBiquadFilter();
                 filter.type = "lowpass";
-                filter.frequency.setValueAtTime(180, audioCtx.currentTime);
+                filter.frequency.setValueAtTime(150, audioCtx.currentTime);
 
-                engineGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+                engineGain.gain.setValueAtTime(0.015, audioCtx.currentTime);
 
                 engineOsc.connect(filter);
                 filter.connect(engineGain);
@@ -255,6 +258,37 @@
                 } catch(e) {}
                 engineOsc = null;
             }
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
+
+        // Musik Latar Belakang Synthwave Loop (*Arpeggio Synthesizer*)
+        function startBGM() {
+            if (bgmInterval) return;
+            const notes = [110, 130.81, 146.83, 164.81, 196, 220]; // Skala Minor Retro
+            let step = 0;
+            
+            bgmInterval = setInterval(() => {
+                if (!isPlaying || !audioCtx) return;
+                try {
+                    let osc = audioCtx.createOscillator();
+                    let gain = audioCtx.createGain();
+                    osc.type = "triangle";
+                    osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
+                    
+                    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.2);
+                    step++;
+                } catch(e) {}
+            }, 250); // Tempo ketukan stabil
         }
 
         function playSound(type) {
@@ -267,37 +301,38 @@
                 let now = audioCtx.currentTime;
 
                 if (type === "move") {
+                    // Suara pindah lajur yang renyah dan tegas
                     osc.type = "sine";
-                    osc.frequency.setValueAtTime(180, now);
-                    osc.frequency.exponentialRampToValueAtTime(320, now + 0.06);
-                    gain.gain.setValueAtTime(0.06, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+                    osc.frequency.setValueAtTime(240, now);
+                    osc.frequency.exponentialRampToValueAtTime(480, now + 0.08);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
                     osc.start(now);
-                    osc.stop(now + 0.06);
+                    osc.stop(now + 0.08);
                 } else if (type === "powerup") {
                     osc.type = "triangle";
-                    osc.frequency.setValueAtTime(300, now);
-                    osc.frequency.exponentialRampToValueAtTime(900, now + 0.15);
-                    gain.gain.setValueAtTime(0.1, now);
+                    osc.frequency.setValueAtTime(350, now);
+                    osc.frequency.exponentialRampToValueAtTime(950, now + 0.15);
+                    gain.gain.setValueAtTime(0.12, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
                     osc.start(now);
                     osc.stop(now + 0.15);
                 } else if (type === "shield_break") {
                     osc.type = "sawtooth";
-                    osc.frequency.setValueAtTime(200, now);
-                    osc.frequency.linearRampToValueAtTime(50, now + 0.25);
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.linearRampToValueAtTime(60, now + 0.3);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
                     osc.start(now);
-                    osc.stop(now + 0.25);
+                    osc.stop(now + 0.3);
                 } else if (type === "gameover") {
                     osc.type = "sawtooth";
-                    osc.frequency.setValueAtTime(120, now);
-                    osc.frequency.linearRampToValueAtTime(20, now + 0.5);
-                    gain.gain.setValueAtTime(0.18, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                    osc.frequency.setValueAtTime(140, now);
+                    osc.frequency.linearRampToValueAtTime(25, now + 0.6);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
                     osc.start(now);
-                    osc.stop(now + 0.5);
+                    osc.stop(now + 0.6);
                 }
             } catch (e) {
                 console.log(e);
@@ -333,8 +368,8 @@
             let newLane = playerLane + direction;
             if (newLane >= 0 && newLane < lanes.length) {
                 playerLane = newLane;
-                playSound("move");
-                createParticles(lanes[playerLane], player.y + 42, "#00ffcc", 5);
+                playSound("move"); // Memastikan suara pindah lajur aktif berbunyi
+                createParticles(lanes[playerLane], player.y + 42, "#00ffcc", 6);
             }
         }
 
@@ -498,75 +533,95 @@
             }
         }
 
-        // Fungsi render mobil yang sangat detail dan presisi menyerupai sedan/sport retro arcade
-        function drawRealisticCar(x, y, w, h, primaryColor, isPlayer) {
+        // Fungsi Render Mobil Sangat Detail (Gaya Retro Vektor Premium)
+        function drawAdvancedCar(x, y, w, h, primaryColor, isPlayer) {
             ctx.save();
             let cx = x - w / 2;
 
-            // Roda Samping (Ban & Velg)
-            ctx.fillStyle = "#010103";
-            ctx.fillRect(cx - 6, y + 16, 6, 20);
-            ctx.fillRect(cx + w, y + 16, 6, 20);
-            ctx.fillRect(cx - 6, y + h - 28, 6, 20);
-            ctx.fillRect(cx + w, y + h - 28, 6, 20);
+            // Efek Bayangan Bodi Mobil di Aspal
+            ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+            ctx.fillRect(cx - 3, y + 6, w + 6, h - 12);
 
-            // Bodi Utama Mobil dengan Kurva Aerodinamis
+            // Roda Mobil Kiri & Kanan (Dilengkapi Velg Bersinar)
+            ctx.fillStyle = "#010103";
+            ctx.fillRect(cx - 7, y + 15, 6, 22);
+            ctx.fillRect(cx + w + 1, y + 15, 6, 22);
+            ctx.fillRect(cx - 7, y + h - 30, 6, 22);
+            ctx.fillRect(cx + w + 1, y + h - 30, 6, 22);
+            
+            // Velg Roda
+            ctx.fillStyle = "#334155";
+            ctx.fillRect(cx - 6, y + 21, 4, 10);
+            ctx.fillRect(cx + w + 2, y + 21, 4, 10);
+            ctx.fillRect(cx - 6, y + h - 24, 4, 10);
+            ctx.fillRect(cx + w + 2, y + h - 24, 4, 10);
+
+            // Bodi Utama Mobil Aerodinamis
             ctx.fillStyle = primaryColor;
             ctx.beginPath();
-            ctx.moveTo(cx + 12, y + 2);                    // Hidung depan tengah
-            ctx.lineTo(cx + w - 12, y + 2);
-            ctx.quadraticCurveTo(cx + w - 2, y + 10, cx + w, y + 24); // Sisi kanan depan
-            ctx.lineTo(cx + w - 3, y + h - 10);            // Samping kanan bodi
-            ctx.quadraticCurveTo(cx + w / 2, y + h, cx + 3, y + h - 10); // Bumper belakang
-            ctx.lineTo(cx, y + 24);                        // Sisi kiri depan
-            ctx.quadraticCurveTo(cx + 2, y + 10, cx + 12, y + 2);
+            ctx.moveTo(cx + 10, y + 4);
+            ctx.lineTo(cx + w - 10, y + 4);
+            ctx.quadraticCurveTo(cx + w - 2, y + 12, cx + w, y + 26);
+            ctx.lineTo(cx + w - 4, y + h - 6);
+            ctx.quadraticCurveTo(cx + w / 2, y + h + 2, cx + 4, y + h - 6);
+            ctx.lineTo(cx, y + 26);
+            ctx.quadraticCurveTo(cx + 2, y + 12, cx + 10, y + 4);
             ctx.closePath();
             ctx.fill();
 
-            // Kontur Pinggiran Bodi
-            ctx.strokeStyle = isPlayer ? "#ffffff" : "#cc0052";
+            // Garis Kontur Samping & Cahaya Refleksi
+            ctx.strokeStyle = isPlayer ? "#ffffff" : "#ff1a75";
             ctx.lineWidth = 1.5;
             ctx.stroke();
 
-            // Kap Mesin Depan (Detail Garis)
-            ctx.fillStyle = isPlayer ? "#00b38f" : "#b30047";
-            ctx.fillRect(cx + 12, y + 5, w - 24, 10);
+            // Kap Mesin / Detail Depan
+            ctx.fillStyle = isPlayer ? "#00b38f" : "#cc0052";
+            ctx.fillRect(cx + 10, y + 8, w - 20, 10);
 
-            // Kaca Depan (Windshield Trapezoid Melengkung)
+            // Kaca Spion Samping
+            ctx.fillStyle = primaryColor;
+            ctx.fillRect(cx - 3, y + 26, 4, 8);
+            ctx.fillRect(cx + w - 1, y + 26, 4, 8);
+
+            // Kaca Depan (Windshield Melengkung)
             ctx.fillStyle = "#050508";
             ctx.beginPath();
-            ctx.moveTo(cx + 10, y + 18);
-            ctx.lineTo(cx + w - 10, y + 18);
-            ctx.lineTo(cx + w - 6, y + 38);
-            ctx.lineTo(cx + 6, y + 38);
+            ctx.moveTo(cx + 8, y + 20);
+            ctx.lineTo(cx + w - 8, y + 20);
+            ctx.lineTo(cx + w - 6, y + 40);
+            ctx.lineTo(cx + 6, y + 40);
             ctx.closePath();
             ctx.fill();
 
-            // Atap Kabin Mobil
-            ctx.fillRect(cx + 8, y + 42, w - 16, 20);
+            // Atap Kabin Tengah
+            ctx.fillRect(cx + 6, y + 44, w - 12, 18);
 
             // Kaca Belakang
             ctx.fillStyle = isPlayer ? "#008066" : "#800033";
-            ctx.fillRect(cx + 10, y + 64, w - 20, 8);
+            ctx.fillRect(cx + 8, y + 64, w - 16, 8);
 
             // Lampu (Headlights & Taillights)
             if (isPlayer) {
-                // Lampu Taksi Menyala Terang
+                // Lampu Sorot Depan Taksi
                 ctx.fillStyle = "#ffff00";
-                ctx.fillRect(cx + 4, y, 7, 4);
-                ctx.fillRect(cx + w - 11, y, 7, 4);
-                // Atap Taksi Banner Sign
+                ctx.fillRect(cx + 3, y, 8, 5);
+                ctx.fillRect(cx + w - 11, y, 8, 5);
+                // Papan Taksi Menyala di Atap
                 ctx.fillStyle = "#ff007f";
-                ctx.fillRect(cx + 10, y + 46, w - 20, 8);
+                ctx.fillRect(cx + 10, y + 48, w - 20, 8);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 9px 'VT323', monospace";
+                ctx.textAlign = "center";
+                ctx.fillText("TAXI", x, y + 55);
             } else {
-                // Lampu Rem Musuh Merah Menyala
+                // Lampu Belakang Merah Musuh
                 ctx.fillStyle = "#ff1a1a";
-                ctx.fillRect(cx + 3, y + h - 4, 8, 4);
-                ctx.fillRect(cx + w - 11, y + h - 4, 8, 4);
+                ctx.fillRect(cx + 3, y + h - 5, 8, 5);
+                ctx.fillRect(cx + w - 11, y + h - 5, 8, 5);
                 // Lampu Depan Musuh
                 ctx.fillStyle = "#ffffff";
-                ctx.fillRect(cx + 4, y, 6, 3);
-                ctx.fillRect(cx + w - 10, y, 6, 3);
+                ctx.fillRect(cx + 4, y, 6, 4);
+                ctx.fillRect(cx + w - 10, y, 6, 4);
             }
 
             ctx.restore();
@@ -609,21 +664,21 @@
                 ctx.restore();
             }
 
-            // Draw Player Car (Cyber Taxi - Hijau Neon Detail)
-            drawRealisticCar(lanes[playerLane], player.y, player.width, player.height, "#00ffcc", true);
+            // Draw Player Car (Cyber Taxi Detail)
+            drawAdvancedCar(lanes[playerLane], player.y, player.width, player.height, "#00ffcc", true);
 
             // Shield Aura Ring
             if (player.shields > 0) {
                 ctx.strokeStyle = "#00ffcc";
                 ctx.lineWidth = 3;
                 ctx.beginPath();
-                ctx.arc(lanes[playerLane], player.y + player.height / 2, 45, 0, Math.PI * 2);
+                ctx.arc(lanes[playerLane], player.y + player.height / 2, 46, 0, Math.PI * 2);
                 ctx.stroke();
             }
 
-            // Draw Obstacle Cars (Musuh - 1 Warna Seragam Magenta/Merah Muda Cyber)
+            // Draw Obstacle Cars (Musuh Warna Seragam Merah Magenta)
             for (let obs of obstacles) {
-                drawRealisticCar(lanes[obs.lane], obs.y, obs.width, obs.height, "#ff0066", false);
+                drawAdvancedCar(lanes[obs.lane], obs.y, obs.width, obs.height, "#ff0066", false);
             }
 
             // Draw Power-ups
@@ -637,11 +692,11 @@
                 ctx.arc(px, py, p.size / 2, 0, Math.PI * 2);
                 ctx.fill();
                 
-                ctx.strokeStyle = "#050508";
+                ctx.strokeStyle = "#030305";
                 ctx.lineWidth = 3;
                 ctx.stroke();
 
-                ctx.fillStyle = "#050508";
+                ctx.fillStyle = "#030305";
                 ctx.font = "bold 18px 'VT323', monospace";
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
