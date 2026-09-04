@@ -122,23 +122,24 @@
             z-index: 10;
         }
         h1 {
-            font-size: 48px;
+            font-size: 54px;
             margin-bottom: 5px;
             color: #ff007f;
-            text-shadow: 0 0 15px rgba(255, 0, 127, 0.7);
+            text-shadow: 0 0 18px rgba(255, 0, 127, 0.7);
             letter-spacing: 3px;
         }
         p {
-            color: #8b949e;
-            font-size: 20px;
-            margin-bottom: 25px;
-            line-height: 1.4;
+            color: #00ffcc;
+            font-size: 22px;
+            margin-bottom: 35px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 6px rgba(0, 255, 204, 0.4);
         }
         .btn {
             background: #00ffcc;
             color: #050508;
             border: none;
-            padding: 10px 30px;
+            padding: 10px 35px;
             font-family: 'VT323', monospace;
             font-size: 28px;
             font-weight: bold;
@@ -183,14 +184,14 @@
         <!-- Start Screen -->
         <div id="startScreen" class="screen">
             <h1>CYBER TAXI</h1>
-            <p>DETAILED CAR SILHOUETTES • UNIFORM OBSTACLES<br>FAST ARCADE ACTION</p>
+            <p>Dodge the Grid. Own the Neon Night.</p>
             <button class="btn" onclick="startGame()">INSERT COIN</button>
         </div>
 
         <!-- Game Over Screen -->
         <div id="gameOverScreen" class="screen hidden">
             <h1 style="color: #ff3333; text-shadow: 0 0 15px rgba(255,51,51,0.7);">GAME OVER</h1>
-            <p id="finalScoreText">FINAL SCORE: 0</p>
+            <p id="finalScoreText" style="color: #8b949e;">FINAL SCORE: 0</p>
             <button class="btn" onclick="startGame()">PLAY AGAIN</button>
         </div>
     </div>
@@ -312,8 +313,8 @@
         let playerLane = 1;
 
         let player = {
-            width: 42,
-            height: 80,
+            width: 44,
+            height: 84,
             y: 0,
             shields: 0
         };
@@ -333,7 +334,7 @@
             if (newLane >= 0 && newLane < lanes.length) {
                 playerLane = newLane;
                 playSound("move");
-                createParticles(lanes[playerLane], player.y + 40, "#00ffcc", 5);
+                createParticles(lanes[playerLane], player.y + 42, "#00ffcc", 5);
             }
         }
 
@@ -400,9 +401,9 @@
                 
                 obstacles.push({
                     lane: chosenLane,
-                    y: -85,
-                    width: 42,
-                    height: 80
+                    y: -90,
+                    width: 44,
+                    height: 84
                 });
             }
 
@@ -437,7 +438,6 @@
             if (powerupTimer > 0) {
                 powerupTimer--;
                 if (powerupTimer <= 0) {
-                    turboActual = false;
                     turboActive = false;
                     activePowerupName = "NORMAL";
                 }
@@ -498,70 +498,75 @@
             }
         }
 
-        // Fungsi render mobil yang disempurnakan menyerupai siluet bodi mobil sport/sedan asli
-        function drawDetailedCar(x, y, w, h, primaryColor, isPlayer) {
+        // Fungsi render mobil yang sangat detail dan presisi menyerupai sedan/sport retro arcade
+        function drawRealisticCar(x, y, w, h, primaryColor, isPlayer) {
             ctx.save();
             let cx = x - w / 2;
 
-            // Roda Mobil (Ban Samping)
-            ctx.fillStyle = "#030305";
-            ctx.fillRect(cx - 5, y + 14, 5, 18);
-            ctx.fillRect(cx + w, y + 14, 5, 18);
-            ctx.fillRect(cx - 5, y + h - 24, 5, 18);
-            ctx.fillRect(cx + w, y + h - 24, 5, 18);
+            // Roda Samping (Ban & Velg)
+            ctx.fillStyle = "#010103";
+            ctx.fillRect(cx - 6, y + 16, 6, 20);
+            ctx.fillRect(cx + w, y + 16, 6, 20);
+            ctx.fillRect(cx - 6, y + h - 28, 6, 20);
+            ctx.fillRect(cx + w, y + h - 28, 6, 20);
 
-            // Bodi Utama Mobil dengan Kurva Melengkung
+            // Bodi Utama Mobil dengan Kurva Aerodinamis
             ctx.fillStyle = primaryColor;
             ctx.beginPath();
-            // Moncong Depan
-            ctx.moveTo(cx + 10, y + 4);
-            ctx.lineTo(cx + w - 10, y + 4);
-            // Fender Depan ke Pintu Samping
-            ctx.quadraticCurveTo(cx + w - 2, y + 12, cx + w, y + 26);
-            ctx.lineTo(cx + w - 2, y + h - 8);
-            // Bumper Belakang
-            ctx.quadraticCurveTo(cx + w / 2, y + h, cx + 2, y + h - 8);
-            ctx.lineTo(cx, y + 26);
-            // Fender Kiri Depan
-            ctx.quadraticCurveTo(cx + 2, y + 12, cx + 10, y + 4);
+            ctx.moveTo(cx + 12, y + 2);                    // Hidung depan tengah
+            ctx.lineTo(cx + w - 12, y + 2);
+            ctx.quadraticCurveTo(cx + w - 2, y + 10, cx + w, y + 24); // Sisi kanan depan
+            ctx.lineTo(cx + w - 3, y + h - 10);            // Samping kanan bodi
+            ctx.quadraticCurveTo(cx + w / 2, y + h, cx + 3, y + h - 10); // Bumper belakang
+            ctx.lineTo(cx, y + 24);                        // Sisi kiri depan
+            ctx.quadraticCurveTo(cx + 2, y + 10, cx + 12, y + 2);
             ctx.closePath();
             ctx.fill();
 
-            // Outline tipis bodi
-            ctx.strokeStyle = isPlayer ? "#ffffff" : "#ff1a75";
+            // Kontur Pinggiran Bodi
+            ctx.strokeStyle = isPlayer ? "#ffffff" : "#cc0052";
             ctx.lineWidth = 1.5;
             ctx.stroke();
 
-            // Kap Mesin / Hidung Detail
-            ctx.fillStyle = isPlayer ? "#00cca3" : "#cc0052";
-            ctx.fillRect(cx + 10, y + 6, w - 20, 10);
+            // Kap Mesin Depan (Detail Garis)
+            ctx.fillStyle = isPlayer ? "#00b38f" : "#b30047";
+            ctx.fillRect(cx + 12, y + 5, w - 24, 10);
 
-            // Kaca Depan (Windshield Melengkung)
+            // Kaca Depan (Windshield Trapezoid Melengkung)
             ctx.fillStyle = "#050508";
             ctx.beginPath();
-            ctx.moveTo(cx + 8, y + 18);
-            ctx.lineTo(cx + w - 8, y + 18);
-            ctx.lineTo(cx + w - 6, y + 36);
-            ctx.lineTo(cx + 6, y + 36);
+            ctx.moveTo(cx + 10, y + 18);
+            ctx.lineTo(cx + w - 10, y + 18);
+            ctx.lineTo(cx + w - 6, y + 38);
+            ctx.lineTo(cx + 6, y + 38);
             ctx.closePath();
             ctx.fill();
 
-            // Atap Mobil & Kaca Belakang
-            ctx.fillRect(cx + 7, y + 40, w - 14, 18);
+            // Atap Kabin Mobil
+            ctx.fillRect(cx + 8, y + 42, w - 16, 20);
 
-            // Lampu Depan (Headlights) & Lampu Belakang (Tailights)
+            // Kaca Belakang
+            ctx.fillStyle = isPlayer ? "#008066" : "#800033";
+            ctx.fillRect(cx + 10, y + 64, w - 20, 8);
+
+            // Lampu (Headlights & Taillights)
             if (isPlayer) {
-                ctx.fillStyle = "#ffff00"; // Kuning terang taksi
-                ctx.fillRect(cx + 3, y + 2, 8, 4);
-                ctx.fillRect(cx + w - 11, y + 2, 8, 4);
+                // Lampu Taksi Menyala Terang
+                ctx.fillStyle = "#ffff00";
+                ctx.fillRect(cx + 4, y, 7, 4);
+                ctx.fillRect(cx + w - 11, y, 7, 4);
+                // Atap Taksi Banner Sign
+                ctx.fillStyle = "#ff007f";
+                ctx.fillRect(cx + 10, y + 46, w - 20, 8);
             } else {
-                ctx.fillStyle = "#ff3333"; // Lampu merah rem musuh
+                // Lampu Rem Musuh Merah Menyala
+                ctx.fillStyle = "#ff1a1a";
                 ctx.fillRect(cx + 3, y + h - 4, 8, 4);
                 ctx.fillRect(cx + w - 11, y + h - 4, 8, 4);
-                // Lampu depan musuh
+                // Lampu Depan Musuh
                 ctx.fillStyle = "#ffffff";
-                ctx.fillRect(cx + 4, y + 2, 6, 3);
-                ctx.fillRect(cx + w - 10, y + 2, 6, 3);
+                ctx.fillRect(cx + 4, y, 6, 3);
+                ctx.fillRect(cx + w - 10, y, 6, 3);
             }
 
             ctx.restore();
@@ -604,21 +609,21 @@
                 ctx.restore();
             }
 
-            // Draw Player Car (Cyber Taxi - Warna Hijau Neon)
-            drawDetailedCar(lanes[playerLane], player.y, player.width, player.height, "#00ffcc", true);
+            // Draw Player Car (Cyber Taxi - Hijau Neon Detail)
+            drawRealisticCar(lanes[playerLane], player.y, player.width, player.height, "#00ffcc", true);
 
             // Shield Aura Ring
             if (player.shields > 0) {
                 ctx.strokeStyle = "#00ffcc";
                 ctx.lineWidth = 3;
                 ctx.beginPath();
-                ctx.arc(lanes[playerLane], player.y + player.height / 2, 42, 0, Math.PI * 2);
+                ctx.arc(lanes[playerLane], player.y + player.height / 2, 45, 0, Math.PI * 2);
                 ctx.stroke();
             }
 
-            // Draw Obstacle Cars (Musuh - 1 Warna Seragam Merah Menyala Khas Cyberpunk)
+            // Draw Obstacle Cars (Musuh - 1 Warna Seragam Magenta/Merah Muda Cyber)
             for (let obs of obstacles) {
-                drawDetailedCar(lanes[obs.lane], obs.y, obs.width, obs.height, "#ff0066", false);
+                drawRealisticCar(lanes[obs.lane], obs.y, obs.width, obs.height, "#ff0066", false);
             }
 
             // Draw Power-ups
