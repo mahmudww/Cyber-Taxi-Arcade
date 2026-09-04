@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Neon Taxi Dodger</title>
+    <title>Turbo Taxi Dodger</title>
     <style>
         * {
             box-sizing: border-box;
@@ -160,7 +160,7 @@
                 <span id="speedDisplay" style="color: #38bdf8;">1.0x</span>
             </div>
             <div class="status-hud">
-                <span id="shieldStatus">SHIELD: ❌</span>
+                <span id="shieldStatus">SHIELD: 0 🛡️</span>
                 <span id="activePowerup" style="color: #facc15;">-</span>
             </div>
         </div>
@@ -173,9 +173,9 @@
 
         <!-- Layar Mulai / Game Over -->
         <div id="startScreen" class="screen">
-            <h1>TAXI DODGER</h1>
-            <p>Hindari mobil patroli, kumpulkan drum power-up (Shield, Slow-Mo, Multiplier). Gunakan tombol di bawah!</p>
-            <button class="btn" onclick="startGame()">MULAI JALAN</button>
+            <h1>TURBO TAXI</h1>
+            <p>Hindari rintangan, tumpuk Shield sebanyak mungkin, ambil Turbo untuk ngebut & skor ganda!</p>
+            <button class="btn" onclick="startGame()">MULAI GAS</button>
         </div>
 
         <div id="gameOverScreen" class="screen hidden">
@@ -189,7 +189,6 @@
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
 
-        // Penyesuaian ukuran otomatis dengan elemen container
         function resizeCanvas() {
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight - document.querySelector('.mobile-controls').offsetHeight;
@@ -198,7 +197,6 @@
         const container = document.getElementById("game-container");
         resizeCanvas();
 
-        // Web Audio API untuk SFX yang lebih empuk
         let audioCtx = null;
         function initAudio() {
             if (!audioCtx) {
@@ -217,31 +215,31 @@
 
                 if (type === "move") {
                     osc.type = "sine";
-                    osc.frequency.setValueAtTime(220, now);
-                    osc.frequency.exponentialRampToValueAtTime(440, now + 0.05);
-                    gain.gain.setValueAtTime(0.05, now);
+                    osc.frequency.setValueAtTime(250, now);
+                    osc.frequency.exponentialRampToValueAtTime(500, now + 0.05);
+                    gain.gain.setValueAtTime(0.04, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
                     osc.start(now);
                     osc.stop(now + 0.05);
                 } else if (type === "powerup") {
                     osc.type = "triangle";
-                    osc.frequency.setValueAtTime(350, now);
-                    osc.frequency.exponentialRampToValueAtTime(700, now + 0.12);
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.12);
                     gain.gain.setValueAtTime(0.08, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
                     osc.start(now);
                     osc.stop(now + 0.12);
                 } else if (type === "shield_break") {
                     osc.type = "sawtooth";
-                    osc.frequency.setValueAtTime(180, now);
-                    osc.frequency.linearRampToValueAtTime(60, now + 0.2);
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.linearRampToValueAtTime(80, now + 0.2);
                     gain.gain.setValueAtTime(0.1, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
                     osc.start(now);
                     osc.stop(now + 0.2);
                 } else if (type === "gameover") {
                     osc.type = "sawtooth";
-                    osc.frequency.setValueAtTime(120, now);
+                    osc.frequency.setValueAtTime(140, now);
                     osc.frequency.linearRampToValueAtTime(30, now + 0.4);
                     gain.gain.setValueAtTime(0.15, now);
                     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
@@ -262,9 +260,10 @@
         let playerLane = 1;
 
         let player = {
-            size: 45,
+            width: 36,
+            height: 64,
             y: 0,
-            shieldActive: false
+            shields: 0 // Sistem tumpuk shield
         };
 
         let obstacles = [];
@@ -272,8 +271,7 @@
         let particles = [];
         let activePowerupName = "-";
         let powerupTimer = 0;
-        let slowMoActive = false;
-        let doubleScoreActive = false;
+        let turboActive = false;
         let spawnTimer = 0;
 
         function movePlayer(direction) {
@@ -283,11 +281,10 @@
             if (newLane >= 0 && newLane < lanes.length) {
                 playerLane = newLane;
                 playSound("move");
-                createParticles(lanes[playerLane], player.y + 25, "#38bdf8", 4);
+                createParticles(lanes[playerLane], player.y + 32, "#38bdf8", 4);
             }
         }
 
-        // Kontrol Keyboard Laptop
         window.addEventListener("keydown", (e) => {
             if (!isPlaying) return;
             if (e.key === "ArrowLeft" || e.key === "a") movePlayer(-1);
@@ -310,7 +307,7 @@
         function startGame() {
             initAudio();
             resizeCanvas();
-            player.y = canvas.height - 90;
+            player.y = canvas.height - 100;
 
             document.getElementById("startScreen").classList.add("hidden");
             document.getElementById("gameOverScreen").classList.add("hidden");
@@ -321,9 +318,8 @@
             obstacles = [];
             powerups = [];
             particles = [];
-            player.shieldActive = false;
-            slowMoActive = false;
-            doubleScoreActive = false;
+            player.shields = 0;
+            turboActive = false;
             activePowerupName = "-";
             powerupTimer = 0;
             spawnTimer = 0;
@@ -346,43 +342,40 @@
             let lanes = getLanes();
             if (spawnTimer % 45 === 0) {
                 let randomLane = Math.floor(Math.random() * lanes.length);
-                let enemyTypes = ["🚔", "🚙", "🚚"];
-                let chosenEnemy = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
                 obstacles.push({
                     lane: randomLane,
-                    y: -60,
-                    emoji: chosenEnemy,
-                    size: 42
+                    y: -70,
+                    width: 36,
+                    height: 64,
+                    color: "#f43f5e"
                 });
             }
-            if (spawnTimer % 160 === 0) {
+            if (spawnTimer % 170 === 0) {
                 let randomLane = Math.floor(Math.random() * lanes.length);
-                let types = ["shield", "slow", "double"];
+                let types = ["shield", "turbo"];
                 let chosenType = types[Math.floor(Math.random() * types.length)];
                 powerups.push({
                     lane: randomLane,
                     y: -40,
-                    size: 36,
-                    type: chosenType,
-                    emoji: "🛢️"
+                    size: 30,
+                    type: chosenType
                 });
             }
         }
 
         function update() {
             gameSpeed = 4 + (score / 400);
-            let currentSpeed = slowMoActive ? gameSpeed * 0.5 : gameSpeed;
+            let currentSpeed = turboActive ? gameSpeed * 1.6 : gameSpeed;
 
             roadOffset += currentSpeed;
             if (roadOffset > 40) roadOffset = 0;
 
-            score += doubleScoreActive ? 0.4 : 0.2;
+            score += turboActive ? 0.5 : 0.2;
 
             if (powerupTimer > 0) {
                 powerupTimer--;
                 if (powerupTimer <= 0) {
-                    slowMoActive = false;
-                    doubleScoreActive = false;
+                    turboActive = false;
                     activePowerupName = "-";
                 }
             }
@@ -395,13 +388,13 @@
                 obstacles[i].y += currentSpeed;
                 if (
                     obstacles[i].lane === playerLane &&
-                    obstacles[i].y < player.y + player.size &&
-                    obstacles[i].y + obstacles[i].size > player.y
+                    obstacles[i].y < player.y + player.height &&
+                    obstacles[i].y + obstacles[i].height > player.y
                 ) {
-                    if (player.shieldActive) {
-                        player.shieldActive = false;
+                    if (player.shields > 0) {
+                        player.shields--; // Kurangi simpanan shield
                         playSound("shield_break");
-                        createParticles(lanes[playerLane], player.y, "#22c55e", 12);
+                        createParticles(lanes[playerLane], player.y, "#22c55e", 15);
                         obstacles.splice(i, 1);
                     } else {
                         gameOver();
@@ -417,23 +410,19 @@
                 powerups[i].y += currentSpeed;
                 if (
                     powerups[i].lane === playerLane &&
-                    powerups[i].y < player.y + player.size &&
+                    powerups[i].y < player.y + player.height &&
                     powerups[i].y + powerups[i].size > player.y
                 ) {
                     playSound("powerup");
-                    createParticles(lanes[playerLane], powerups[i].y, "#eab308", 10);
+                    createParticles(lanes[playerLane], powerups[i].y, "#eab308", 12);
 
                     if (powerups[i].type === "shield") {
-                        player.shieldActive = true;
-                        activePowerupName = "SHIELD AKTIF";
-                    } else if (powerups[i].type === "slow") {
-                        slowMoActive = true;
-                        activePowerupName = "SLOW-MO";
-                        powerupTimer = 250;
-                    } else if (powerups[i].type === "double") {
-                        doubleScoreActive = true;
-                        activePowerupName = "2X SCORE";
-                        powerupTimer = 250;
+                        player.shields++; // Tambah jumlah tumpukan shield
+                        activePowerupName = `SHIELD (+1)`;
+                    } else if (powerups[i].type === "turbo") {
+                        turboActive = true;
+                        activePowerupName = "TURBO SPEED!";
+                        powerupTimer = 220;
                     }
                     powerups.splice(i, 1);
                 } else if (powerups[i].y > canvas.height) {
@@ -452,16 +441,16 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Gambar Jalan Asli (Aspal Gelap & Trotoar)
+            // Background Jalan Aspal
             ctx.fillStyle = "#1e293b";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Garis Bahu Jalan / Trotoar Samping
+            // Bahu Jalan Samping
             ctx.fillStyle = "#0f172a";
             ctx.fillRect(0, 0, 20, canvas.height);
             ctx.fillRect(canvas.width - 20, 0, 20, canvas.height);
 
-            // Marka Garis Jalan Bergerak
+            // Garis Marka Jalan Bergerak
             ctx.strokeStyle = "#e2e8f0";
             ctx.lineWidth = 4;
             ctx.setLineDash([25, 25]);
@@ -487,38 +476,50 @@
                 ctx.restore();
             }
 
-            // Gambar Mobil Player (Taksimu 🚗)
-            let targetX = lanes[playerLane];
-            ctx.font = `${player.size}px sans-serif`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText("🚗", targetX, player.y + player.size / 2);
+            // Gambar Mobil Player (Taksi Geometris Menghadap ke Atas)
+            let targetX = lanes[playerLane] - player.width / 2;
+            ctx.fillStyle = "#38bdf8"; // Badan Taksi
+            ctx.fillRect(targetX, player.y, player.width, player.height);
+            ctx.fillStyle = "#0f172a"; // Kaca Depan & Belakang
+            ctx.fillRect(targetX + 4, player.y + 10, player.width - 8, 14);
+            ctx.fillRect(targetX + 4, player.y + player.height - 18, player.width - 8, 10);
 
-            // Efek Lingkaran Shield
-            if (player.shieldActive) {
+            // Efek Lingkaran Pelindung Shield (Jika Ada Simpanan)
+            if (player.shields > 0) {
                 ctx.strokeStyle = "#22c55e";
                 ctx.lineWidth = 3;
                 ctx.beginPath();
-                ctx.arc(targetX, player.y + player.size / 2, 30, 0, Math.PI * 2);
+                ctx.arc(targetX + player.width / 2, player.y + player.height / 2, 34, 0, Math.PI * 2);
                 ctx.stroke();
             }
 
-            // Gambar Obstacle / Mobil Lain
+            // Gambar Mobil Obstacle (Menghadap ke Atas)
             for (let obs of obstacles) {
-                let obsX = lanes[obs.lane];
-                ctx.fillText(obs.emoji, obsX, obs.y + obs.size / 2);
+                let obsX = lanes[obs.lane] - obs.width / 2;
+                ctx.fillStyle = obs.color;
+                ctx.fillRect(obsX, obs.y, obs.width, obs.height);
+                ctx.fillStyle = "#0f172a"; // Kaca musuh
+                ctx.fillRect(obsX + 4, obs.y + 10, obs.width - 8, 14);
             }
 
-            // Gambar Power-up (Drum 🛢️)
+            // Gambar Power-up (Bentuk Barel / Kotak Neon)
             for (let p of powerups) {
-                let pX = lanes[p.lane];
-                ctx.fillText(p.emoji, pX, p.y + p.size / 2);
+                let pX = lanes[p.lane] - p.size / 2;
+                ctx.fillStyle = p.type === "shield" ? "#22c55e" : "#eab308";
+                ctx.fillRect(pX, p.y, p.size, p.size);
+                
+                // Huruf Singkatan di dalam Power-up
+                ctx.fillStyle = "#0f172a";
+                ctx.font = "bold 12px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(p.type === "shield" ? "S" : "T", lanes[p.lane], p.y + p.size / 2);
             }
 
             // Update Tampilan HUD
             document.getElementById("scoreDisplay").innerText = `SCORE: ${Math.floor(score)}`;
             document.getElementById("speedDisplay").innerText = `${gameSpeed.toFixed(1)}x`;
-            document.getElementById("shieldStatus").innerText = `SHIELD: ${player.shieldActive ? '🛡️' : '❌'}`;
+            document.getElementById("shieldStatus").innerText = `SHIELD: ${player.shields} 🛡️`;
             document.getElementById("activePowerup").innerText = activePowerupName;
         }
 
