@@ -1,5 +1,12 @@
 /* ========================================
    CYBER TAXI — ENTITIES
+   ========================================
+
+   Player
+   Enemies
+   Power-ups
+   Particles
+   Smooth movement
    ======================================== */
 
 
@@ -10,28 +17,29 @@
 const player = {
 
     width: 44,
+
     height: 84,
 
     y: 0,
 
     shields: 0,
 
-    /* Target lane */
+    /* Actual lane */
     lane: 1,
 
-    /* Visual / movement lane */
+    /* Visual movement */
 
     visualLane: 1,
-
-    laneProgress: 0,
 
     moveFromLane: 1,
 
     moveToLane: 1,
 
+    laneProgress: 1,
+
     isMoving: false,
 
-    moveSpeed: 0.22,
+    /* Car leaning while turning */
 
     tilt: 0
 
@@ -60,16 +68,23 @@ const particles = [];
 
 
 /* ========================================
-   MOVE PLAYER
+   PLAYER MOVEMENT
    ======================================== */
 
 function movePlayer(direction) {
+
+    /* Don't move while already transitioning */
+
+    if (player.isMoving) {
+        return false;
+    }
+
 
     const newLane =
         player.lane + direction;
 
 
-    /* Outside road */
+    /* Stay inside 3 lanes */
 
     if (
         newLane < 0 ||
@@ -81,26 +96,25 @@ function movePlayer(direction) {
     }
 
 
-    /* Already moving */
-
-    if (player.isMoving) {
-
-        return false;
-
-    }
-
+    /* Remember starting lane */
 
     player.moveFromLane =
         player.lane;
 
 
+    /* New target lane */
+
     player.moveToLane =
         newLane;
 
 
+    /* Actual gameplay lane changes immediately */
+
     player.lane =
         newLane;
 
+
+    /* Start visual animation */
 
     player.laneProgress =
         0;
@@ -110,10 +124,12 @@ function movePlayer(direction) {
         true;
 
 
-    /* Lean into the turn */
+    /* Turn direction */
 
     player.tilt =
-        direction * 0.12;
+        direction > 0
+            ? 0.10
+            : -0.10;
 
 
     return true;
@@ -127,13 +143,11 @@ function movePlayer(direction) {
 
 function updatePlayerMovement() {
 
-    if (
-        !player.isMoving
-    ) {
+    if (!player.isMoving) {
 
-        /* Slowly return car upright */
+        /* Slowly return car to straight */
 
-        player.tilt *= 0.8;
+        player.tilt *= 0.82;
 
         if (
             Math.abs(player.tilt) < 0.001
@@ -148,8 +162,14 @@ function updatePlayerMovement() {
     }
 
 
-    player.laneProgress +=
-        player.moveSpeed;
+    /*
+     * Movement speed.
+     *
+     * Higher number =
+     * faster lane transition.
+     */
+
+    player.laneProgress += 0.16;
 
 
     if (
@@ -164,8 +184,7 @@ function updatePlayerMovement() {
         player.isMoving =
             false;
 
-        player.tilt =
-            0;
+        player.tilt = 0;
 
         return;
 
@@ -173,18 +192,24 @@ function updatePlayerMovement() {
 
 
     /*
-     * Smoothstep easing.
-
-     * Instead of moving at constant speed,
-     * the taxi accelerates and decelerates.
+     * Smooth easing.
+     *
+     * Starts quickly,
+     * slows down near target.
      */
 
     const t =
         player.laneProgress;
 
 
-    const smoothT =
-        t * t * (3 - 2 * t);
+    const eased =
+        t < 0.5
+            ? 2 * t * t
+            : 1 -
+              Math.pow(
+                  -2 * t + 2,
+                  2
+              ) / 2;
 
 
     player.visualLane =
@@ -192,8 +217,26 @@ function updatePlayerMovement() {
         (
             player.moveToLane -
             player.moveFromLane
-        ) *
-        smoothT;
+        ) * eased;
+
+
+    /*
+     * Slight lean while moving.
+     */
+
+    const direction =
+        player.moveToLane >
+        player.moveFromLane
+            ? 1
+            : -1;
+
+
+    player.tilt =
+        direction *
+        0.10 *
+        Math.sin(
+            t * Math.PI
+        );
 
 }
 
@@ -262,6 +305,7 @@ function updateParticles() {
         particle.x +=
             particle.vx;
 
+
         particle.y +=
             particle.vy;
 
@@ -307,7 +351,7 @@ function resetEntities() {
 
     player.moveToLane = 1;
 
-    player.laneProgress = 0;
+    player.laneProgress = 1;
 
     player.isMoving = false;
 
