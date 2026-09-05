@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
 
@@ -10,29 +11,35 @@
 
     <title>Cyber Taxi Arcade</title>
 
-    <!-- Game stylesheet -->
-    <link rel="stylesheet" href="css/style.css">
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
 </head>
+
 
 <body>
 
     <div id="game-container">
 
-        <!-- ==================== -->
-        <!-- GAME CANVAS           -->
-        <!-- ==================== -->
+        <!-- =================================
+             GAME CANVAS
+             ================================= -->
 
         <canvas id="gameCanvas"></canvas>
 
 
-        <!-- ==================== -->
-        <!-- HUD                   -->
-        <!-- ==================== -->
+        <!-- =================================
+             HUD
+             ================================= -->
 
         <div class="ui-layer">
 
             <div class="header-hud">
-                <span id="scoreDisplay">SCORE: 0000</span>
+
+                <span id="scoreDisplay">
+                    SCORE: 0000
+                </span>
 
                 <span
                     id="speedDisplay"
@@ -40,6 +47,7 @@
                 >
                     1.0X
                 </span>
+
             </div>
 
 
@@ -61,24 +69,23 @@
         </div>
 
 
-        <!-- ==================== -->
-        <!-- MOBILE CONTROLS       -->
-        <!-- ==================== -->
+        <!-- =================================
+             MOBILE CONTROLS
+             ================================= -->
 
         <div class="mobile-controls">
 
             <button
                 class="control-btn"
-                id="leftBtn"
-                type="button"
+                id="leftButton"
             >
                 &lt; LEFT
             </button>
 
+
             <button
                 class="control-btn"
-                id="rightBtn"
-                type="button"
+                id="rightButton"
             >
                 RIGHT &gt;
             </button>
@@ -86,25 +93,28 @@
         </div>
 
 
-        <!-- ==================== -->
-        <!-- START SCREEN          -->
-        <!-- ==================== -->
+        <!-- =================================
+             START SCREEN
+             ================================= -->
 
         <div
             id="startScreen"
             class="screen"
         >
 
-            <h1>CYBER TAXI</h1>
+            <h1>
+                CYBER TAXI
+            </h1>
+
 
             <p>
                 Dodge the Grid. Own the Neon Night.
             </p>
 
+
             <button
                 class="btn"
-                id="startBtn"
-                type="button"
+                id="startButton"
             >
                 INSERT COIN
             </button>
@@ -112,9 +122,9 @@
         </div>
 
 
-        <!-- ==================== -->
-        <!-- GAME OVER SCREEN      -->
-        <!-- ==================== -->
+        <!-- =================================
+             GAME OVER SCREEN
+             ================================= -->
 
         <div
             id="gameOverScreen"
@@ -125,6 +135,7 @@
                 GAME OVER
             </h1>
 
+
             <p
                 id="finalScoreText"
                 class="final-score"
@@ -132,10 +143,10 @@
                 FINAL SCORE: 0
             </p>
 
+
             <button
                 class="btn"
-                id="playAgainBtn"
-                type="button"
+                id="restartButton"
             >
                 PLAY AGAIN
             </button>
@@ -145,17 +156,9 @@
     </div>
 
 
-    <!-- ==================== -->
-    <!-- GAME JAVASCRIPT       -->
-    <!-- ==================== -->
-
-    <!--
-        The game code will live inside
-        the /js folder.
-
-        "module" allows the JavaScript
-        files to communicate with each other.
-    -->
+    <!-- =====================================
+         GAME JAVASCRIPT
+         ===================================== -->
 
     <script
         type="module"
@@ -163,4 +166,5 @@
     ></script>
 
 </body>
+
 </html>
