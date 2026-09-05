@@ -1,5 +1,6 @@
 /* ========================================
    CYBER TAXI — GAME
+   Clean 3-Lane Version
    ======================================== */
 
 import {
@@ -23,7 +24,7 @@ import {
 
 
 /* ========================================
-   CANVAS
+   DOM
    ======================================== */
 
 const canvas =
@@ -61,12 +62,18 @@ let powerupTimer = 0;
 
 let activePowerupName = "READY";
 
+let animationFrame = null;
+
 
 /* ========================================
-   RESIZE
+   CANVAS
    ======================================== */
 
 function resizeCanvas() {
+
+    if (!container || !controls) {
+        return;
+    }
 
     canvas.width =
         container.clientWidth;
@@ -74,6 +81,19 @@ function resizeCanvas() {
     canvas.height =
         container.clientHeight -
         controls.offsetHeight;
+
+
+    /*
+     * Keep player at the correct
+     * position after resize.
+     */
+
+    if (isPlaying) {
+
+        player.y =
+            canvas.height - 110;
+
+    }
 
 }
 
@@ -87,17 +107,20 @@ function getLanes() {
     const center =
         canvas.width / 2;
 
+    const laneSpacing =
+        75;
+
     return [
-        center - 75,
+        center - laneSpacing,
         center,
-        center + 75
+        center + laneSpacing
     ];
 
 }
 
 
 /* ========================================
-   MOVE PLAYER
+   PLAYER CONTROL
    ======================================== */
 
 function movePlayer(direction) {
@@ -106,6 +129,11 @@ function movePlayer(direction) {
         return;
     }
 
+
+    /*
+     * entities.js handles the actual
+     * lane change and smooth animation.
+     */
 
     const moved =
         entityMovePlayer(direction);
@@ -119,13 +147,18 @@ function movePlayer(direction) {
     playSound("move");
 
 
+    /*
+     * Create a little neon trail
+     * during lane changes.
+     */
+
     const lanes =
         getLanes();
 
 
     createParticles(
         lanes[player.lane],
-        player.y + 42,
+        player.y + player.height / 2,
         "#00ffcc",
         6
     );
@@ -134,32 +167,29 @@ function movePlayer(direction) {
 
 
 /* ========================================
-   KEYBOARD CONTROLS
+   KEYBOARD
    ======================================== */
 
 window.addEventListener(
     "keydown",
     (event) => {
 
-        if (!isPlaying) {
-            return;
-        }
+        const key =
+            event.key.toLowerCase();
 
 
-        if (
-            event.key === "ArrowLeft" ||
-            event.key.toLowerCase() === "a"
-        ) {
+        if (key === "arrowleft" || key === "a") {
+
+            event.preventDefault();
 
             movePlayer(-1);
 
         }
 
 
-        if (
-            event.key === "ArrowRight" ||
-            event.key.toLowerCase() === "d"
-        ) {
+        if (key === "arrowright" || key === "d") {
+
+            event.preventDefault();
 
             movePlayer(1);
 
@@ -175,12 +205,24 @@ window.addEventListener(
 
 function startGame() {
 
+    /*
+     * Start audio after user interaction.
+     */
+
     initAudio();
+
 
     resizeCanvas();
 
+
+    /*
+     * Reset all entities.
+     */
+
     resetEntities();
 
+
+    /* Reset game state */
 
     score = 0;
 
@@ -196,54 +238,88 @@ function startGame() {
 
     powerupTimer = 0;
 
-    activePowerupName =
-        "READY";
+    activePowerupName = "READY";
 
+
+    /*
+     * Player starts in CENTER lane.
+     *
+     * lane:
+     * 0 = left
+     * 1 = center
+     * 2 = right
+     */
 
     player.lane = 1;
 
-player.isMoving = false;
+    player.visualLane = 1;
 
-player.tilt = 0;
+    player.moveFromLane = 1;
 
-player.shields = 0;
+    player.moveToLane = 1;
 
-player.y =
-    canvas.height - 110;
+    player.laneProgress = 0;
 
-player.x =
-    getLanes()[player.lane];
+    player.isMoving = false;
 
-player.targetX =
-    player.x;
+    player.tilt = 0;
 
-   player.x =
-    getLanes()[player.lane];
-
-player.targetX =
-    player.x;
+    player.shields = 0;
 
 
-    document
-        .getElementById("startScreen")
-        .classList.add("hidden");
+    /*
+     * Player vertical position.
+     */
+
+    player.y =
+        canvas.height - 110;
 
 
-    document
-        .getElementById("gameOverScreen")
-        .classList.add("hidden");
+    /*
+     * Hide screens.
+     */
 
+    const startScreen =
+        document.getElementById("startScreen");
+
+    const gameOverScreen =
+        document.getElementById("gameOverScreen");
+
+
+    if (startScreen) {
+        startScreen.classList.add("hidden");
+    }
+
+
+    if (gameOverScreen) {
+        gameOverScreen.classList.add("hidden");
+    }
+
+
+    /*
+     * Start game.
+     */
 
     isPlaying = true;
 
 
-    requestAnimationFrame(loop);
+    /*
+     * Prevent multiple game loops.
+     */
+
+    if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+    }
+
+
+    animationFrame =
+        requestAnimationFrame(loop);
 
 }
 
 
 /* ========================================
-   SPAWN ENTITIES
+   SPAWN ENTITY
    ======================================== */
 
 function spawnEntity() {
@@ -251,9 +327,9 @@ function spawnEntity() {
     spawnTimer++;
 
 
-    /* ------------------------------
-       ENEMY
-       ------------------------------ */
+    /* ==================================
+       ENEMY SPAWN
+       ================================== */
 
     const obstacleInterval =
         Math.max(
@@ -264,9 +340,12 @@ function spawnEntity() {
 
 
     if (
-        spawnTimer %
-        obstacleInterval === 0
+        spawnTimer % obstacleInterval === 0
     ) {
+
+        /*
+         * Pick random lane.
+         */
 
         const lane =
             Math.floor(
@@ -274,34 +353,56 @@ function spawnEntity() {
             );
 
 
-        obstacles.push({
+        /*
+         * Don't spawn directly on top
+         * of another enemy near the top.
+         */
 
-            lane: lane,
+        const blocked =
+            obstacles.some(
+                obstacle =>
+                    obstacle.lane === lane &&
+                    obstacle.y < 120
+            );
 
-            y: -90,
 
-            width: 44,
+        if (!blocked) {
 
-            height: 84
+            obstacles.push({
 
-        });
+                lane: lane,
+
+                y: -90,
+
+                width: 44,
+
+                height: 84
+
+            });
+
+        }
 
     }
 
 
-    /* ------------------------------
-       POWER-UP
-       ------------------------------ */
+    /* ==================================
+       POWER-UP SPAWN
+       ================================== */
 
     if (
         spawnTimer % 160 === 0
     ) {
 
+        /*
+         * Find lanes that don't currently
+         * have an enemy near the top.
+         */
+
         const blockedLanes =
             obstacles
                 .filter(
                     obstacle =>
-                        obstacle.y < 50
+                        obstacle.y < 160
                 )
                 .map(
                     obstacle =>
@@ -316,9 +417,7 @@ function spawnEntity() {
             );
 
 
-        if (
-            safeLanes.length > 0
-        ) {
+        if (safeLanes.length > 0) {
 
             const lane =
                 safeLanes[
@@ -360,18 +459,21 @@ function spawnEntity() {
 
 function update() {
 
-    /* Player movement */
-
-    const lanes =
-        getLanes();
-
-    player.targetX =
-        lanes[player.lane];
+    /*
+     * Update smooth player animation.
+     *
+     * entities.js handles:
+     * visualLane
+     * laneProgress
+     * tilt
+     */
 
     updatePlayerMovement();
 
 
-    /* Speed */
+    /* ==================================
+       SPEED
+       ================================== */
 
     gameSpeed =
         4.5 +
@@ -384,22 +486,22 @@ function update() {
             : gameSpeed;
 
 
-    /* Road */
+    /* ==================================
+       ROAD
+       ================================== */
 
     roadOffset +=
         currentSpeed;
 
 
-    if (
-        roadOffset > 40
-    ) {
-
+    if (roadOffset > 40) {
         roadOffset = 0;
-
     }
 
 
-    /* Score */
+    /* ==================================
+       SCORE
+       ================================== */
 
     score +=
         turboActive
@@ -407,18 +509,16 @@ function update() {
             : 0.3;
 
 
-    /* Turbo timer */
+    /* ==================================
+       TURBO TIMER
+       ================================== */
 
-    if (
-        powerupTimer > 0
-    ) {
+    if (powerupTimer > 0) {
 
         powerupTimer--;
 
 
-        if (
-            powerupTimer <= 0
-        ) {
+        if (powerupTimer <= 0) {
 
             turboActive = false;
 
@@ -430,9 +530,15 @@ function update() {
     }
 
 
-    /* Spawn */
+    /* ==================================
+       SPAWN
+       ================================== */
+
+    spawnEntity();
 
 
+    const lanes =
+        getLanes();
 
 
     /* ==================================
@@ -449,9 +555,21 @@ function update() {
             obstacles[i];
 
 
+        /*
+         * Move enemy downward.
+         */
+
         obstacle.y +=
             currentSpeed;
 
+
+        /*
+         * Collision uses the logical lane,
+         * not visualLane.
+         *
+         * This means collision remains stable
+         * during animation.
+         */
 
         const collision =
             obstacle.lane === player.lane &&
@@ -463,13 +581,13 @@ function update() {
                 player.y;
 
 
-        if (
-            collision
-        ) {
+        if (collision) {
 
-            if (
-                player.shields > 0
-            ) {
+            /* ==========================
+               SHIELD HIT
+               ========================== */
+
+            if (player.shields > 0) {
 
                 player.shields--;
 
@@ -484,7 +602,8 @@ function update() {
 
                 createParticles(
                     lanes[player.lane],
-                    player.y,
+                    player.y +
+                        player.height / 2,
                     "#00ffcc",
                     18
                 );
@@ -496,6 +615,12 @@ function update() {
                 );
 
             }
+
+
+            /* ==========================
+               GAME OVER
+               ========================== */
+
             else {
 
                 gameOver();
@@ -505,9 +630,15 @@ function update() {
             }
 
         }
+
+
+        /* ==============================
+           REMOVE OFFSCREEN ENEMY
+           ============================== */
+
         else if (
             obstacle.y >
-            canvas.height
+            canvas.height + 100
         ) {
 
             obstacles.splice(
@@ -534,9 +665,17 @@ function update() {
             powerups[i];
 
 
+        /*
+         * Move downward.
+         */
+
         powerup.y +=
             currentSpeed;
 
+
+        /*
+         * Collision.
+         */
 
         const collision =
             powerup.lane === player.lane &&
@@ -548,9 +687,7 @@ function update() {
                 player.y;
 
 
-        if (
-            collision
-        ) {
+        if (collision) {
 
             playSound(
                 "powerup"
@@ -559,18 +696,23 @@ function update() {
 
             createParticles(
                 lanes[player.lane],
-                powerup.y,
+                powerup.y +
+                    powerup.size / 2,
                 "#ffb86c",
                 15
             );
 
 
+            /* ==========================
+               SHIELD
+               ========================== */
+
             if (
-                powerup.type ===
-                "shield"
+                powerup.type === "shield"
             ) {
 
                 player.shields++;
+
 
                 activePowerupName =
                     "SHIELD +1";
@@ -578,18 +720,27 @@ function update() {
             }
 
 
-            if (
-                powerup.type ===
-                "turbo"
+            /* ==========================
+               TURBO
+               ========================== */
+
+            else if (
+                powerup.type === "turbo"
             ) {
 
                 turboActive = true;
 
+
                 activePowerupName =
                     "TURBO BOOST!";
 
-                powerupTimer =
-                    180;
+
+                /*
+                 * 180 frames ≈ 3 seconds
+                 * at 60 FPS.
+                 */
+
+                powerupTimer = 180;
 
             }
 
@@ -600,9 +751,15 @@ function update() {
             );
 
         }
+
+
+        /* ==============================
+           REMOVE OFFSCREEN POWERUP
+           ============================== */
+
         else if (
             powerup.y >
-            canvas.height
+            canvas.height + 100
         ) {
 
             powerups.splice(
@@ -615,7 +772,9 @@ function update() {
     }
 
 
-    /* Particles */
+    /* ==================================
+       PARTICLES
+       ================================== */
 
     updateParticles();
 
@@ -639,7 +798,9 @@ function drawCar(
     ctx.save();
 
 
-    /* Smooth car rotation */
+    /* ==================================
+       ROTATION
+       ================================== */
 
     ctx.translate(
         x,
@@ -662,10 +823,29 @@ function drawCar(
         x - w / 2;
 
 
-    /* Shadow */
+    /* ==================================
+       GLOW
+       ================================== */
+
+    ctx.shadowBlur =
+        isPlayer ? 14 : 10;
+
+
+    ctx.shadowColor =
+        isPlayer
+            ? "#00ffcc"
+            : "#ff0066";
+
+
+    /* ==================================
+       SHADOW
+       ================================== */
+
+    ctx.shadowBlur = 0;
 
     ctx.fillStyle =
-        "rgba(0,0,0,0.5)";
+        "rgba(0,0,0,0.55)";
+
 
     ctx.fillRect(
         cx - 4,
@@ -675,7 +855,9 @@ function drawCar(
     );
 
 
-    /* Tires */
+    /* ==================================
+       TIRES
+       ================================== */
 
     ctx.fillStyle =
         "#010103";
@@ -713,7 +895,9 @@ function drawCar(
     );
 
 
-    /* Wheels */
+    /* ==================================
+       WHEEL HUBS
+       ================================== */
 
     ctx.fillStyle =
         "#64748b";
@@ -751,7 +935,18 @@ function drawCar(
     );
 
 
-    /* Main body */
+    /* ==================================
+       MAIN BODY
+       ================================== */
+
+    ctx.shadowBlur =
+        isPlayer ? 10 : 8;
+
+    ctx.shadowColor =
+        isPlayer
+            ? "#00ffcc"
+            : "#ff0066";
+
 
     ctx.fillStyle =
         color;
@@ -813,7 +1008,12 @@ function drawCar(
     ctx.fill();
 
 
-    /* Outline */
+    /* ==================================
+       OUTLINE
+       ================================== */
+
+    ctx.shadowBlur = 0;
+
 
     ctx.strokeStyle =
         isPlayer
@@ -826,7 +1026,27 @@ function drawCar(
     ctx.stroke();
 
 
-    /* Windshield */
+    /* ==================================
+       FRONT HOOD
+       ================================== */
+
+    ctx.fillStyle =
+        isPlayer
+            ? "#00b38f"
+            : "#cc0052";
+
+
+    ctx.fillRect(
+        cx + 8,
+        y + 6,
+        w - 16,
+        12
+    );
+
+
+    /* ==================================
+       WINDSHIELD
+       ================================== */
 
     ctx.fillStyle =
         "#050508";
@@ -864,7 +1084,9 @@ function drawCar(
     ctx.fill();
 
 
-    /* Cabin */
+    /* ==================================
+       CABIN
+       ================================== */
 
     ctx.fillStyle =
         color;
@@ -892,7 +1114,9 @@ function drawCar(
     );
 
 
-    /* Rear window */
+    /* ==================================
+       REAR WINDOW
+       ================================== */
 
     ctx.fillStyle =
         "#050508";
@@ -906,11 +1130,15 @@ function drawCar(
     );
 
 
-    /* Lights */
+    /* ==================================
+       LIGHTS
+       ================================== */
 
-    if (
-        isPlayer
-    ) {
+    if (isPlayer) {
+
+        /*
+         * Front headlights
+         */
 
         ctx.fillStyle =
             "#ffff00";
@@ -932,7 +1160,9 @@ function drawCar(
         );
 
 
-        /* TAXI SIGN */
+        /*
+         * Taxi sign
+         */
 
         ctx.fillStyle =
             "#ff007f";
@@ -951,7 +1181,7 @@ function drawCar(
 
 
         ctx.font =
-            "bold 9px VT323";
+            "bold 9px VT323, monospace";
 
 
         ctx.textAlign =
@@ -969,7 +1199,37 @@ function drawCar(
         );
 
     }
+
+
     else {
+
+        /*
+         * Enemy headlights
+         */
+
+        ctx.fillStyle =
+            "#ffffff";
+
+
+        ctx.fillRect(
+            cx + 3,
+            y,
+            6,
+            4
+        );
+
+
+        ctx.fillRect(
+            cx + w - 9,
+            y,
+            6,
+            4
+        );
+
+
+        /*
+         * Enemy tail lights
+         */
 
         ctx.fillStyle =
             "#ff1a1a";
@@ -999,31 +1259,14 @@ function drawCar(
 
 
 /* ========================================
-   DRAW
+   DRAW ROAD
    ======================================== */
 
-function draw() {
+function drawRoad() {
 
-    ctx.save();
-
-
-    /* Screen shake */
-
-    if (
-        screenShakeTimer > 0
-    ) {
-
-        ctx.translate(
-            (Math.random() - 0.5) * 8,
-            (Math.random() - 0.5) * 8
-        );
-
-        screenShakeTimer--;
-
-    }
-
-
-    /* Background */
+    /* ==================================
+       BACKGROUND
+       ================================== */
 
     ctx.fillStyle =
         "#0d1117";
@@ -1037,7 +1280,9 @@ function draw() {
     );
 
 
-    /* Sidewalks */
+    /* ==================================
+       SIDEWALKS
+       ================================== */
 
     ctx.fillStyle =
         "#161b22";
@@ -1059,7 +1304,79 @@ function draw() {
     );
 
 
-    /* Road lines */
+    /* ==================================
+       SIDE NEON GLOW
+       ================================== */
+
+    const sideGradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            35,
+            0
+        );
+
+
+    sideGradient.addColorStop(
+        0,
+        "rgba(0,255,204,0)"
+    );
+
+
+    sideGradient.addColorStop(
+        1,
+        "rgba(0,255,204,0.10)"
+    );
+
+
+    ctx.fillStyle =
+        sideGradient;
+
+
+    ctx.fillRect(
+        18,
+        0,
+        20,
+        canvas.height
+    );
+
+
+    const rightGradient =
+        ctx.createLinearGradient(
+            canvas.width - 35,
+            0,
+            canvas.width,
+            0
+        );
+
+
+    rightGradient.addColorStop(
+        0,
+        "rgba(255,0,127,0.10)"
+    );
+
+
+    rightGradient.addColorStop(
+        1,
+        "rgba(255,0,127,0)"
+    );
+
+
+    ctx.fillStyle =
+        rightGradient;
+
+
+    ctx.fillRect(
+        canvas.width - 38,
+        0,
+        20,
+        canvas.height
+    );
+
+
+    /* ==================================
+       LANE LINES
+       ================================== */
 
     const lanes =
         getLanes();
@@ -1070,6 +1387,12 @@ function draw() {
 
 
     ctx.lineWidth = 3;
+
+
+    ctx.shadowBlur = 8;
+
+    ctx.shadowColor =
+        "#00ffcc";
 
 
     ctx.setLineDash([
@@ -1085,26 +1408,34 @@ function draw() {
     ctx.beginPath();
 
 
+    const leftLine =
+        (lanes[0] + lanes[1]) / 2;
+
+
+    const rightLine =
+        (lanes[1] + lanes[2]) / 2;
+
+
     ctx.moveTo(
-        (lanes[0] + lanes[1]) / 2,
+        leftLine,
         0
     );
 
 
     ctx.lineTo(
-        (lanes[0] + lanes[1]) / 2,
+        leftLine,
         canvas.height
     );
 
 
     ctx.moveTo(
-        (lanes[1] + lanes[2]) / 2,
+        rightLine,
         0
     );
 
 
     ctx.lineTo(
-        (lanes[1] + lanes[2]) / 2,
+        rightLine,
         canvas.height
     );
 
@@ -1115,7 +1446,16 @@ function draw() {
     ctx.setLineDash([]);
 
 
-    /* Particles */
+    ctx.shadowBlur = 0;
+
+}
+
+
+/* ========================================
+   DRAW PARTICLES
+   ======================================== */
+
+function drawParticles() {
 
     for (
         const particle of particles
@@ -1129,6 +1469,12 @@ function draw() {
 
 
         ctx.fillStyle =
+            particle.color;
+
+
+        ctx.shadowBlur = 8;
+
+        ctx.shadowColor =
             particle.color;
 
 
@@ -1151,79 +1497,18 @@ function draw() {
 
     }
 
-
-    /* Player */
-
-const playerX =
-    player.visualLane === 0
-        ? lanes[0]
-        : player.visualLane === 1
-            ? lanes[1]
-            : lanes[2];
-
-drawCar(
-    player.x,
-    player.y,
-    player.width,
-    player.height,
-    "#00ffcc",
-    true,
-    player.tilt
-);
+}
 
 
+/* ========================================
+   DRAW POWER-UPS
+   ======================================== */
 
+function drawPowerups() {
 
-    /* Shield */
+    const lanes =
+        getLanes();
 
-    if (
-        player.shields > 0
-    ) {
-
-        ctx.strokeStyle =
-            "#00ffcc";
-
-
-        ctx.lineWidth = 3;
-
-
-        ctx.beginPath();
-
-
-        ctx.arc(
-            lanes[player.visualLane],
-            player.y +
-                player.height / 2,
-            48,
-            0,
-            Math.PI * 2
-        );
-
-
-        ctx.stroke();
-
-    }
-
-
-    /* Enemies */
-
-    for (
-        const obstacle of obstacles
-    ) {
-
-        drawCar(
-            lanes[obstacle.lane],
-            obstacle.y,
-            obstacle.width,
-            obstacle.height,
-            "#ff0066",
-            false
-        );
-
-    }
-
-
-    /* Power-ups */
 
     for (
         const powerup of powerups
@@ -1238,30 +1523,53 @@ drawCar(
             powerup.size / 2;
 
 
-        ctx.save();
-
-
-        ctx.fillStyle =
+        const color =
             powerup.type === "shield"
                 ? "#00ffcc"
                 : "#ffb86c";
+
+
+        ctx.save();
+
+
+        /*
+         * Glow
+         */
+
+        ctx.shadowBlur = 18;
+
+        ctx.shadowColor =
+            color;
+
+
+        /*
+         * Outer circle
+         */
+
+        ctx.fillStyle =
+            color;
 
 
         ctx.beginPath();
 
 
         ctx.arc(
-    player.x,
-    player.y +
-        player.height / 2,
-    48,
-    0,
-    Math.PI * 2
-);
-
+            px,
+            py,
+            powerup.size / 2,
+            0,
+            Math.PI * 2
+        );
 
 
         ctx.fill();
+
+
+        /*
+         * Dark outline
+         */
+
+        ctx.shadowBlur = 0;
 
 
         ctx.strokeStyle =
@@ -1270,15 +1578,20 @@ drawCar(
 
         ctx.lineWidth = 3;
 
+
         ctx.stroke();
 
+
+        /*
+         * Icon
+         */
 
         ctx.fillStyle =
             "#030305";
 
 
         ctx.font =
-            "bold 18px VT323";
+            "bold 18px VT323, monospace";
 
 
         ctx.textAlign =
@@ -1302,8 +1615,219 @@ drawCar(
 
     }
 
+}
 
-    /* CRT scanlines */
+
+/* ========================================
+   DRAW PLAYER
+   ======================================== */
+
+function drawPlayer() {
+
+    const lanes =
+        getLanes();
+
+
+    /*
+     * IMPORTANT:
+     *
+     * visualLane is fractional while
+     * the player is moving.
+     *
+     * Example:
+     *
+     * 1 -> 0
+     *
+     * visualLane:
+     * 1.00
+     * 0.82
+     * 0.64
+     * 0.46
+     * 0.28
+     * 0.00
+     *
+     * Therefore we interpolate the actual
+     * X position between the two lanes.
+     */
+
+    const fromLane =
+        player.moveFromLane;
+
+
+    const toLane =
+        player.moveToLane;
+
+
+    const visualX =
+        lanes[fromLane] +
+        (
+            lanes[toLane] -
+            lanes[fromLane]
+        ) *
+        player.laneProgress;
+
+
+    /*
+     * When not moving, make absolutely sure
+     * the car sits on its logical lane.
+     */
+
+    const finalX =
+        player.isMoving
+            ? visualX
+            : lanes[player.lane];
+
+
+    drawCar(
+        finalX,
+        player.y,
+        player.width,
+        player.height,
+        "#00ffcc",
+        true,
+        player.tilt
+    );
+
+
+    /* ==================================
+       SHIELD
+       ================================== */
+
+    if (player.shields > 0) {
+
+        ctx.save();
+
+
+        ctx.strokeStyle =
+            "#00ffcc";
+
+
+        ctx.lineWidth = 3;
+
+
+        ctx.shadowBlur = 14;
+
+        ctx.shadowColor =
+            "#00ffcc";
+
+
+        ctx.beginPath();
+
+
+        ctx.arc(
+            finalX,
+            player.y +
+                player.height / 2,
+            48,
+            0,
+            Math.PI * 2
+        );
+
+
+        ctx.stroke();
+
+
+        ctx.restore();
+
+    }
+
+}
+
+
+/* ========================================
+   DRAW ENEMIES
+   ======================================== */
+
+function drawEnemies() {
+
+    const lanes =
+        getLanes();
+
+
+    for (
+        const obstacle of obstacles
+    ) {
+
+        drawCar(
+            lanes[obstacle.lane],
+            obstacle.y,
+            obstacle.width,
+            obstacle.height,
+            "#ff0066",
+            false
+        );
+
+    }
+
+}
+
+
+/* ========================================
+   DRAW
+   ======================================== */
+
+function draw() {
+
+    ctx.save();
+
+
+    /* ==================================
+       SCREEN SHAKE
+       ================================== */
+
+    if (
+        screenShakeTimer > 0
+    ) {
+
+        ctx.translate(
+            (Math.random() - 0.5) * 8,
+            (Math.random() - 0.5) * 8
+        );
+
+
+        screenShakeTimer--;
+
+    }
+
+
+    /* ==================================
+       ROAD
+       ================================== */
+
+    drawRoad();
+
+
+    /* ==================================
+       PARTICLES
+       ================================== */
+
+    drawParticles();
+
+
+    /* ==================================
+       POWERUPS
+       ================================== */
+
+    drawPowerups();
+
+
+    /* ==================================
+       ENEMIES
+       ================================== */
+
+    drawEnemies();
+
+
+    /* ==================================
+       PLAYER
+       ================================== */
+
+    drawPlayer();
+
+
+    /* ==================================
+       CRT SCANLINES
+       ================================== */
 
     ctx.fillStyle =
         "rgba(0,0,0,0.15)";
@@ -1336,32 +1860,66 @@ drawCar(
 
 function updateHUD() {
 
-    document
-        .getElementById("scoreDisplay")
-        .innerText =
-        `SCORE: ${
-            Math.floor(score)
-                .toString()
-                .padStart(4, "0")
-        }`;
+    const scoreDisplay =
+        document.getElementById(
+            "scoreDisplay"
+        );
 
 
-    document
-        .getElementById("speedDisplay")
-        .innerText =
-        `${gameSpeed.toFixed(1)}X`;
+    const speedDisplay =
+        document.getElementById(
+            "speedDisplay"
+        );
 
 
-    document
-        .getElementById("shieldStatus")
-        .innerText =
-        `SHIELD: ${player.shields} 🛡️`;
+    const shieldStatus =
+        document.getElementById(
+            "shieldStatus"
+        );
 
 
-    document
-        .getElementById("activePowerup")
-        .innerText =
-        activePowerupName;
+    const activePowerup =
+        document.getElementById(
+            "activePowerup"
+        );
+
+
+    if (scoreDisplay) {
+
+        scoreDisplay.innerText =
+            `SCORE: ${
+                Math.floor(score)
+                    .toString()
+                    .padStart(4, "0")
+            }`;
+
+    }
+
+
+    if (speedDisplay) {
+
+        speedDisplay.innerText =
+            `${gameSpeed.toFixed(1)}X`;
+
+    }
+
+
+    if (shieldStatus) {
+
+        shieldStatus.innerText =
+            `SHIELD: ${
+                player.shields
+            } 🛡️`;
+
+    }
+
+
+    if (activePowerup) {
+
+        activePowerup.innerText =
+            activePowerupName;
+
+    }
 
 }
 
@@ -1372,13 +1930,25 @@ function updateHUD() {
 
 function gameOver() {
 
+    /*
+     * Stop gameplay.
+     */
+
     isPlaying = false;
 
+
+    /*
+     * Stop engine and BGM.
+     */
 
     stopEngineSound();
 
     stopBGM();
 
+
+    /*
+     * Play game over sound.
+     */
 
     playSound(
         "gameover"
@@ -1388,24 +1958,60 @@ function gameOver() {
     screenShakeTimer = 30;
 
 
+    /*
+     * Explosion particles.
+     */
+
+    const lanes =
+        getLanes();
+
+
     createParticles(
-    player.x,
-    player.y,
-    "#ff007f",
-    25
-);
+        lanes[player.lane],
+        player.y +
+            player.height / 2,
+        "#ff007f",
+        25
+    );
 
 
+    /*
+     * Final score.
+     */
 
-    document
-        .getElementById("finalScoreText")
-        .innerText =
-        `FINAL SCORE: ${Math.floor(score)}`;
+    const finalScore =
+        document.getElementById(
+            "finalScoreText"
+        );
 
 
-    document
-        .getElementById("gameOverScreen")
-        .classList.remove("hidden");
+    if (finalScore) {
+
+        finalScore.innerText =
+            `FINAL SCORE: ${
+                Math.floor(score)
+            }`;
+
+    }
+
+
+    /*
+     * Show game over screen.
+     */
+
+    const gameOverScreen =
+        document.getElementById(
+            "gameOverScreen"
+        );
+
+
+    if (gameOverScreen) {
+
+        gameOverScreen.classList.remove(
+            "hidden"
+        );
+
+    }
 
 }
 
@@ -1417,6 +2023,7 @@ function gameOver() {
 function loop() {
 
     if (!isPlaying) {
+        animationFrame = null;
         return;
     }
 
@@ -1428,9 +2035,10 @@ function loop() {
     updateHUD();
 
 
-    requestAnimationFrame(
-        loop
-    );
+    animationFrame =
+        requestAnimationFrame(
+            loop
+        );
 
 }
 
@@ -1440,77 +2048,6 @@ function loop() {
    ======================================== */
 
 resizeCanvas();
-
-
-/* ========================================
-   MAKE FUNCTIONS AVAILABLE TO HTML
-   ======================================== */
-
-window.startGame =
-    startGame;
-
-window.movePlayer =
-    movePlayer;
-
-window.resizeCanvas =
-    resizeCanvas;
-
-
-/* ========================================
-   UI BUTTONS
-   ======================================== */
-
-const startButton =
-    document.getElementById("startButton");
-
-const restartButton =
-    document.getElementById("restartButton");
-
-const leftButton =
-    document.getElementById("leftButton");
-
-const rightButton =
-    document.getElementById("rightButton");
-
-
-if (startButton) {
-
-    startButton.addEventListener(
-        "click",
-        startGame
-    );
-
-}
-
-
-if (restartButton) {
-
-    restartButton.addEventListener(
-        "click",
-        startGame
-    );
-
-}
-
-
-if (leftButton) {
-
-    leftButton.addEventListener(
-        "click",
-        () => movePlayer(-1)
-    );
-
-}
-
-
-if (rightButton) {
-
-    rightButton.addEventListener(
-        "click",
-        () => movePlayer(1)
-    );
-
-}
 
 
 window.addEventListener(
