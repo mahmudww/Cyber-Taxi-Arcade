@@ -4,30 +4,45 @@ import {
     resizeCanvas
 } from "./game.js";
 
+
+/* ========================================
+   MAKE FUNCTIONS AVAILABLE TO HTML
+   ======================================== */
+
+window.startGame = startGame;
+window.movePlayer = movePlayer;
+
+
+/* ========================================
+   INITIALIZE
+   ======================================== */
+
 resizeCanvas();
 
-window.movePlayer = movePlayer;
-window.startGame = startGame;
+
+/* ========================================
+   KEYBOARD
+   ======================================== */
 
 window.addEventListener("keydown", (event) => {
 
-    if (
-        event.key === "ArrowLeft" ||
-        event.key.toLowerCase() === "a"
-    ) {
+    const key = event.key.toLowerCase();
+
+    if (key === "arrowleft" || key === "a") {
         movePlayer(-1);
     }
 
-    if (
-        event.key === "ArrowRight" ||
-        event.key.toLowerCase() === "d"
-    ) {
+    if (key === "arrowright" || key === "d") {
         movePlayer(1);
     }
 
 });
 
-window.addEventListener(
-    "resize",
-    resizeCanvas
-);
+
+/* ========================================
+   RESIZE
+   ======================================== */
+
+window.addEventListener("resize", () => {
+    resizeCanvas();
+});
