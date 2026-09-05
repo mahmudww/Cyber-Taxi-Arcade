@@ -1251,12 +1251,14 @@ drawCar(
 
 
         ctx.arc(
-            px,
-            py,
-            powerup.size / 2,
-            0,
-            Math.PI * 2
-        );
+    player.x,
+    player.y +
+        player.height / 2,
+    48,
+    0,
+    Math.PI * 2
+);
+
 
 
         ctx.fill();
@@ -1387,11 +1389,12 @@ function gameOver() {
 
 
     createParticles(
-        lanes[player.visualLane],
-        player.y,
-        "#ff007f",
-        25
-    );
+    player.x,
+    player.y,
+    "#ff007f",
+    25
+);
+
 
 
     document
