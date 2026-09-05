@@ -8,9 +8,13 @@ I grew up playing one of those “99-in-1” handheld games where the graphics w
 The idea is simple: dodge traffic, collect power-ups, survive as long as you can, and beat your high score.
 
 ✨ Features
+
 🚕 3-lane arcade gameplay — Move left and right to dodge incoming cars.
+
 📈 Progressive difficulty — The game gradually gets faster as your score increases.
+
 🛡️ Shield power-up — Absorb one collision without ending the run.
+
 🚀 Turbo boost — Temporarily increases your speed and score gain.
 
 
