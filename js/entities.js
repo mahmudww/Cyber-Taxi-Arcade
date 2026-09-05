@@ -1,13 +1,5 @@
 /* ========================================
    CYBER TAXI — ENTITIES
-   ========================================
-
-   Manages:
-   - Player
-   - Enemies
-   - Power-ups
-   - Particles
-   - Smooth lane movement
    ======================================== */
 
 
@@ -24,21 +16,17 @@ const player = {
 
     shields: 0,
 
-    // Actual gameplay lane
+    // Gameplay lane
     lane: 1,
 
-    // Visual lane used for smooth animation
-    visualLane: 1,
+    // Visual position
+    x: 0,
 
-    moveFromLane: 1,
-
-    moveToLane: 1,
-
-    laneProgress: 0,
+    targetX: 0,
 
     isMoving: false,
 
-    // Small rotation while changing lane
+    // Visual tilt
     tilt: 0
 
 };
@@ -71,15 +59,11 @@ const particles = [];
 
 function movePlayer(direction) {
 
-    // Calculate requested lane
     const newLane =
         player.lane + direction;
 
 
-    // Only three lanes exist:
-    // 0 = left
-    // 1 = center
-    // 2 = right
+    // Stay inside the 3 lanes
     if (
         newLane < 0 ||
         newLane > 2
@@ -88,35 +72,13 @@ function movePlayer(direction) {
     }
 
 
-    // Prevent movement from being
-    // triggered repeatedly while
-    // the current animation is running.
-    if (player.isMoving) {
-        return false;
-    }
+    // Update gameplay lane immediately
+    player.lane = newLane;
 
 
-    // Remember starting position
-    player.moveFromLane =
-        player.lane;
-
-
-    // Remember destination
-    player.moveToLane =
-        newLane;
-
-
-    // Update actual gameplay lane
-    player.lane =
-        newLane;
-
-
-    // Start animation
-    player.laneProgress = 0;
-
+    // game.js will set targetX
+    // during the next update.
     player.isMoving = true;
-
-    player.tilt = 0;
 
 
     return true;
@@ -130,106 +92,72 @@ function movePlayer(direction) {
 function updatePlayerMovement() {
 
     /*
-     * If the player isn't moving,
-     * make sure the visual position
-     * matches the actual lane.
-     */
-
-    if (!player.isMoving) {
-
-        player.visualLane =
-            player.lane;
-
-        player.tilt = 0;
-
-        return;
-    }
-
-
-    /*
-     * Increase animation progress.
-     *
-     * 0 = beginning
-     * 1 = finished
-     */
-
-    player.laneProgress += 0.12;
-
-
-    /*
-     * Finish movement
+     * targetX is assigned by game.js.
+     * If we don't have a valid target yet,
+     * don't move.
      */
 
     if (
-        player.laneProgress >= 1
+        !Number.isFinite(player.targetX)
     ) {
-
-        player.laneProgress = 1;
-
-        player.visualLane =
-            player.moveToLane;
-
-        player.isMoving = false;
-
-        player.tilt = 0;
-
         return;
     }
 
 
     /*
-     * Smooth ease-in-out.
+     * Smoothly move toward target.
      *
-     * This makes the car:
-     *
-     * slow → fast → slow
-     *
-     * instead of moving at a robotic
-     * constant speed.
+     * This is frame-rate friendly and
+     * gives a nice arcade-style slide.
      */
 
-    const t =
-        player.laneProgress;
+    const difference =
+        player.targetX -
+        player.x;
 
 
-    const eased =
-        t < 0.5
-            ? 2 * t * t
-            : 1 -
-              Math.pow(
-                  -2 * t + 2,
-                  2
-              ) / 2;
+    player.x +=
+        difference * 0.22;
 
 
     /*
-     * Calculate visual lane position.
+     * Snap when we're very close.
      */
 
-    player.visualLane =
-        player.moveFromLane +
-        (
-            player.moveToLane -
-            player.moveFromLane
-        ) * eased;
+    if (
+        Math.abs(difference) < 0.5
+    ) {
+
+        player.x =
+            player.targetX;
+
+        player.isMoving =
+            false;
+
+        player.tilt = 0;
+
+    }
+    else {
+
+        /*
+         * Determine movement direction.
+         */
+
+        const direction =
+            difference > 0
+                ? 1
+                : -1;
 
 
-    /*
-     * Slight vehicle tilt while
-     * changing lanes.
-     */
+        /*
+         * Small lean while changing lane.
+         */
 
-    const direction =
-        player.moveToLane -
-        player.moveFromLane;
+        player.tilt =
+            direction * 0.10;
 
+    }
 
-    player.tilt =
-        direction *
-        0.10 *
-        Math.sin(
-            t * Math.PI
-        );
 }
 
 
@@ -272,6 +200,7 @@ function createParticles(
         });
 
     }
+
 }
 
 
@@ -315,65 +244,34 @@ function updateParticles() {
         }
 
     }
+
 }
 
 
 /* ========================================
-   RESET ENTITIES
+   RESET
    ======================================== */
 
 function resetEntities() {
 
-    /*
-     * Clear enemies
-     */
-
     obstacles.length = 0;
 
-
-    /*
-     * Clear power-ups
-     */
-
     powerups.length = 0;
-
-
-    /*
-     * Clear particles
-     */
 
     particles.length = 0;
 
 
-    /*
-     * Reset player lane
-     */
-
     player.lane = 1;
 
-    player.visualLane = 1;
+    player.x = 0;
 
-    player.moveFromLane = 1;
-
-    player.moveToLane = 1;
-
-    player.laneProgress = 0;
+    player.targetX = 0;
 
     player.isMoving = false;
 
     player.tilt = 0;
 
-
-    /*
-     * Reset shield
-     */
-
     player.shields = 0;
-
-
-    /*
-     * Position will be set by game.js
-     */
 
     player.y = 0;
 
