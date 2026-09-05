@@ -1148,15 +1148,23 @@ function draw() {
 
     /* Player */
 
-    drawCar(
-        lanes[player.visualLane],
-        player.y,
-        player.width,
-        player.height,
-        "#00ffcc",
-        true,
-        player.tilt
-    );
+const playerX =
+    player.visualLane === 0
+        ? lanes[0]
+        : player.visualLane === 1
+            ? lanes[1]
+            : lanes[2];
+
+drawCar(
+    playerX,
+    player.y,
+    player.width,
+    player.height,
+    "#00ffcc",
+    true,
+    player.tilt
+);
+
 
 
     /* Shield */
