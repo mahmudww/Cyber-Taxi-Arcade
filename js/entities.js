@@ -1,12 +1,5 @@
 /* ========================================
    CYBER TAXI — ENTITIES
-   ========================================
-
-   Player
-   Enemies
-   Power-ups
-   Particles
-   Smooth movement
    ======================================== */
 
 
@@ -24,10 +17,7 @@ const player = {
 
     shields: 0,
 
-    /* Actual lane */
     lane: 1,
-
-    /* Visual movement */
 
     visualLane: 1,
 
@@ -38,8 +28,6 @@ const player = {
     laneProgress: 1,
 
     isMoving: false,
-
-    /* Car leaning while turning */
 
     tilt: 0
 
@@ -68,23 +56,16 @@ const particles = [];
 
 
 /* ========================================
-   PLAYER MOVEMENT
+   MOVE PLAYER
    ======================================== */
 
 function movePlayer(direction) {
-
-    /* Don't move while already transitioning */
-
-    if (player.isMoving) {
-        return false;
-    }
-
 
     const newLane =
         player.lane + direction;
 
 
-    /* Stay inside 3 lanes */
+    /* Keep player inside 3 lanes */
 
     if (
         newLane < 0 ||
@@ -96,40 +77,40 @@ function movePlayer(direction) {
     }
 
 
-    /* Remember starting lane */
+    player.lane =
+        newLane;
+
+
+    /*
+     * For now visual lane follows
+     * immediately.
+     *
+     * We will add smooth movement
+     * later after everything is stable.
+     */
+
+    player.visualLane =
+        newLane;
+
 
     player.moveFromLane =
-        player.lane;
+        newLane;
 
-
-    /* New target lane */
 
     player.moveToLane =
         newLane;
 
 
-    /* Actual gameplay lane changes immediately */
-
-    player.lane =
-        newLane;
-
-
-    /* Start visual animation */
-
     player.laneProgress =
-        0;
+        1;
 
 
     player.isMoving =
-        true;
+        false;
 
-
-    /* Turn direction */
 
     player.tilt =
-        direction > 0
-            ? 0.10
-            : -0.10;
+        0;
 
 
     return true;
@@ -138,105 +119,19 @@ function movePlayer(direction) {
 
 
 /* ========================================
-   UPDATE PLAYER MOVEMENT
+   PLAYER MOVEMENT UPDATE
    ======================================== */
 
 function updatePlayerMovement() {
 
-    if (!player.isMoving) {
-
-        /* Slowly return car to straight */
-
-        player.tilt *= 0.82;
-
-        if (
-            Math.abs(player.tilt) < 0.001
-        ) {
-
-            player.tilt = 0;
-
-        }
-
-        return;
-
-    }
-
-
     /*
-     * Movement speed.
+     * Movement is currently instant.
      *
-     * Higher number =
-     * faster lane transition.
-     */
-
-    player.laneProgress += 0.16;
-
-
-    if (
-        player.laneProgress >= 1
-    ) {
-
-        player.laneProgress = 1;
-
-        player.visualLane =
-            player.moveToLane;
-
-        player.isMoving =
-            false;
-
-        player.tilt = 0;
-
-        return;
-
-    }
-
-
-    /*
-     * Smooth easing.
+     * This function exists because
+     * game.js expects it.
      *
-     * Starts quickly,
-     * slows down near target.
+     * We will upgrade this later.
      */
-
-    const t =
-        player.laneProgress;
-
-
-    const eased =
-        t < 0.5
-            ? 2 * t * t
-            : 1 -
-              Math.pow(
-                  -2 * t + 2,
-                  2
-              ) / 2;
-
-
-    player.visualLane =
-        player.moveFromLane +
-        (
-            player.moveToLane -
-            player.moveFromLane
-        ) * eased;
-
-
-    /*
-     * Slight lean while moving.
-     */
-
-    const direction =
-        player.moveToLane >
-        player.moveFromLane
-            ? 1
-            : -1;
-
-
-    player.tilt =
-        direction *
-        0.10 *
-        Math.sin(
-            t * Math.PI
-        );
 
 }
 
@@ -265,12 +160,10 @@ function createParticles(
             y: y,
 
             vx:
-                (Math.random() - 0.5) *
-                6,
+                (Math.random() - 0.5) * 6,
 
             vy:
-                (Math.random() - 0.5) *
-                6,
+                (Math.random() - 0.5) * 6,
 
             radius:
                 Math.random() * 3 + 1,
@@ -331,7 +224,7 @@ function updateParticles() {
 
 
 /* ========================================
-   RESET ENTITIES
+   RESET
    ======================================== */
 
 function resetEntities() {
