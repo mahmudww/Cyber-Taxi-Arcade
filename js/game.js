@@ -1442,6 +1442,73 @@ window.resizeCanvas =
     resizeCanvas;
 
 
+/* ========================================
+   UI BUTTONS
+   ======================================== */
+
+const startButton =
+    document.getElementById("startButton");
+
+const restartButton =
+    document.getElementById("restartButton");
+
+const leftButton =
+    document.getElementById("leftButton");
+
+const rightButton =
+    document.getElementById("rightButton");
+
+
+if (startButton) {
+
+    startButton.addEventListener(
+        "click",
+        startGame
+    );
+
+}
+
+
+if (restartButton) {
+
+    restartButton.addEventListener(
+        "click",
+        startGame
+    );
+
+}
+
+
+if (leftButton) {
+
+    leftButton.addEventListener(
+        "click",
+        () => movePlayer(-1)
+    );
+
+}
+
+
+if (rightButton) {
+
+    rightButton.addEventListener(
+        "click",
+        () => movePlayer(1)
+    );
+
+}
+
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+
+
+/* ========================================
+   EXPORTS
+   ======================================== */
+
 export {
     startGame,
     movePlayer,
