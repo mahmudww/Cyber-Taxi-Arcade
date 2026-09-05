@@ -1440,3 +1440,10 @@ window.movePlayer =
 
 window.resizeCanvas =
     resizeCanvas;
+
+
+export {
+    startGame,
+    movePlayer,
+    resizeCanvas
+};
