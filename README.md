@@ -7,6 +7,7 @@ I grew up playing one of those “99-in-1” handheld games where the graphics w
 
 The idea is simple: dodge traffic, collect power-ups, survive as long as you can, and beat your high score.
 
+
 ✨ Features
 
 🚕 3-lane arcade gameplay — Move left and right to dodge incoming cars.
@@ -19,13 +20,18 @@ The idea is simple: dodge traffic, collect power-ups, survive as long as you can
 
 
 🎮 How to Play
+
 Start the game with INSERT COIN.
+
 Move between the three lanes to avoid incoming cars.
+
 Collect Shield and Turbo power-ups.
+
 Keep driving as long as possible.
+
 Try to get the highest score you can.
 
-That's it. No complicated mechanics — just a tiny arcade game with a bit of nostalgia behind it.
+That's it. No complicated mechanics, just a tiny arcade game with a bit of nostalgia behind it.
 
 📌 Project
 
