@@ -1,8 +1,22 @@
 /* ========================================
    CYBER TAXI — ENTITIES
+   ========================================
+
+   Manages:
+   - Player
+   - Enemies
+   - Power-ups
+   - Particles
+   - Smooth lane movement
+   ======================================== */
+
+
+/* ========================================
+   PLAYER
    ======================================== */
 
 const player = {
+
     width: 44,
     height: 84,
 
@@ -10,16 +24,23 @@ const player = {
 
     shields: 0,
 
+    // Actual gameplay lane
     lane: 1,
 
-    // Visual movement
+    // Visual lane used for smooth animation
     visualLane: 1,
+
     moveFromLane: 1,
+
     moveToLane: 1,
+
     laneProgress: 0,
 
     isMoving: false,
+
+    // Small rotation while changing lane
     tilt: 0
+
 };
 
 
@@ -50,47 +71,98 @@ const particles = [];
 
 function movePlayer(direction) {
 
+    // Calculate requested lane
     const newLane =
         player.lane + direction;
 
-    // Only allow lanes 0, 1, 2
-    if (newLane < 0 || newLane > 2) {
+
+    // Only three lanes exist:
+    // 0 = left
+    // 1 = center
+    // 2 = right
+    if (
+        newLane < 0 ||
+        newLane > 2
+    ) {
         return false;
     }
 
-    // Don't start another movement
-    // while already moving.
+
+    // Prevent movement from being
+    // triggered repeatedly while
+    // the current animation is running.
     if (player.isMoving) {
         return false;
     }
 
-    player.moveFromLane = player.lane;
-    player.moveToLane = newLane;
 
-    player.lane = newLane;
+    // Remember starting position
+    player.moveFromLane =
+        player.lane;
 
+
+    // Remember destination
+    player.moveToLane =
+        newLane;
+
+
+    // Update actual gameplay lane
+    player.lane =
+        newLane;
+
+
+    // Start animation
     player.laneProgress = 0;
+
     player.isMoving = true;
+
+    player.tilt = 0;
+
 
     return true;
 }
 
 
 /* ========================================
-   SMOOTH PLAYER MOVEMENT
+   UPDATE PLAYER MOVEMENT
    ======================================== */
 
 function updatePlayerMovement() {
 
+    /*
+     * If the player isn't moving,
+     * make sure the visual position
+     * matches the actual lane.
+     */
+
     if (!player.isMoving) {
-        player.visualLane = player.lane;
+
+        player.visualLane =
+            player.lane;
+
         player.tilt = 0;
+
         return;
     }
 
-    player.laneProgress += 0.18;
 
-    if (player.laneProgress >= 1) {
+    /*
+     * Increase animation progress.
+     *
+     * 0 = beginning
+     * 1 = finished
+     */
+
+    player.laneProgress += 0.12;
+
+
+    /*
+     * Finish movement
+     */
+
+    if (
+        player.laneProgress >= 1
+    ) {
 
         player.laneProgress = 1;
 
@@ -104,25 +176,60 @@ function updatePlayerMovement() {
         return;
     }
 
-    // Smooth interpolation
-    const t = player.laneProgress;
+
+    /*
+     * Smooth ease-in-out.
+     *
+     * This makes the car:
+     *
+     * slow → fast → slow
+     *
+     * instead of moving at a robotic
+     * constant speed.
+     */
+
+    const t =
+        player.laneProgress;
+
+
+    const eased =
+        t < 0.5
+            ? 2 * t * t
+            : 1 -
+              Math.pow(
+                  -2 * t + 2,
+                  2
+              ) / 2;
+
+
+    /*
+     * Calculate visual lane position.
+     */
 
     player.visualLane =
         player.moveFromLane +
         (
             player.moveToLane -
             player.moveFromLane
-        ) * t;
+        ) * eased;
 
-    // Small visual tilt while changing lane
+
+    /*
+     * Slight vehicle tilt while
+     * changing lanes.
+     */
+
     const direction =
         player.moveToLane -
         player.moveFromLane;
 
+
     player.tilt =
         direction *
-        0.08 *
-        Math.sin(t * Math.PI);
+        0.10 *
+        Math.sin(
+            t * Math.PI
+        );
 }
 
 
@@ -137,7 +244,11 @@ function createParticles(
     count
 ) {
 
-    for (let i = 0; i < count; i++) {
+    for (
+        let i = 0;
+        i < count;
+        i++
+    ) {
 
         particles.push({
 
@@ -179,19 +290,27 @@ function updateParticles() {
         const particle =
             particles[i];
 
+
         particle.x +=
             particle.vx;
+
 
         particle.y +=
             particle.vy;
 
-        particle.alpha -= 0.05;
+
+        particle.alpha -=
+            0.05;
+
 
         if (
             particle.alpha <= 0
         ) {
 
-            particles.splice(i, 1);
+            particles.splice(
+                i,
+                1
+            );
 
         }
 
@@ -205,11 +324,30 @@ function updateParticles() {
 
 function resetEntities() {
 
+    /*
+     * Clear enemies
+     */
+
     obstacles.length = 0;
+
+
+    /*
+     * Clear power-ups
+     */
 
     powerups.length = 0;
 
+
+    /*
+     * Clear particles
+     */
+
     particles.length = 0;
+
+
+    /*
+     * Reset player lane
+     */
 
     player.lane = 1;
 
@@ -225,9 +363,20 @@ function resetEntities() {
 
     player.tilt = 0;
 
+
+    /*
+     * Reset shield
+     */
+
     player.shields = 0;
 
+
+    /*
+     * Position will be set by game.js
+     */
+
     player.y = 0;
+
 }
 
 
