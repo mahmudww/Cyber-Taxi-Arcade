@@ -202,22 +202,21 @@ function startGame() {
 
     player.lane = 1;
 
-    player.visualLane = 1;
+player.isMoving = false;
 
-    player.moveFromLane = 1;
+player.tilt = 0;
 
-    player.moveToLane = 1;
+player.shields = 0;
 
-    player.laneProgress = 0;
+player.y =
+    canvas.height - 110;
 
-    player.isMoving = false;
+player.x =
+    getLanes()[player.lane];
 
-    player.tilt = 0;
+player.targetX =
+    player.x;
 
-    player.shields = 0;
-
-    player.y =
-        canvas.height - 110;
    player.x =
     getLanes()[player.lane];
 
@@ -361,9 +360,7 @@ function spawnEntity() {
 
 function update() {
 
-    /* ==================================
-       PLAYER MOVEMENT
-       ================================== */
+    /* Player movement */
 
     const lanes =
         getLanes();
@@ -434,8 +431,6 @@ function update() {
 
 
     /* Spawn */
-
-    spawnEntity();
 
 
 
@@ -1389,10 +1384,6 @@ function gameOver() {
 
 
     screenShakeTimer = 30;
-
-
-    const lanes =
-        getLanes();
 
 
     createParticles(
