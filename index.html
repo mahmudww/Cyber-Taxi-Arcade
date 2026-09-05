@@ -2,736 +2,165 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cyber Taxi Arcade</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-        }
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #030305;
-            font-family: 'VT323', monospace;
-            color: #00ffcc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-        #game-container {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            height: 100%;
-            max-height: 100vh;
-            background: #090a0f;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.25);
-            overflow: hidden;
-            border: 2px solid #1f293d;
-        }
-        canvas {
-            display: block;
-            width: 100%;
-            flex-grow: 1;
-            background: #0d1117;
-        }
-        .ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 12px 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            pointer-events: none;
-            z-index: 5;
-        }
-        .header-hud {
-            display: flex;
-            justify-content: space-between;
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-shadow: 0 0 8px rgba(0, 255, 204, 0.6);
-        }
-        .status-hud {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 18px;
-            background: rgba(13, 17, 23, 0.85);
-            padding: 4px 10px;
-            border-radius: 4px;
-            border: 1px solid #1f293d;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
-        }
-        .mobile-controls {
-            display: flex;
-            width: 100%;
-            height: 90px;
-            background: #030305;
-            border-top: 2px solid #1f293d;
-            flex-shrink: 0;
-        }
-        .control-btn {
-            flex: 1;
-            background: #0d1117;
-            border: none;
-            color: #00ffcc;
-            font-family: 'VT323', monospace;
-            font-size: 32px;
-            letter-spacing: 2px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.1s;
-        }
-        .control-btn:active {
-            background: #1f293d;
-            color: #ffffff;
-            box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.5);
-        }
-        .control-btn:first-child {
-            border-right: 2px solid #1f293d;
-        }
-        .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(3, 3, 5, 0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-            z-index: 10;
-        }
-        h1 {
-            font-size: 56px;
-            margin-bottom: 5px;
-            color: #ff007f;
-            text-shadow: 0 0 20px rgba(255, 0, 127, 0.7);
-            letter-spacing: 3px;
-        }
-        p {
-            color: #00ffcc;
-            font-size: 22px;
-            margin-bottom: 35px;
-            letter-spacing: 1px;
-            text-shadow: 0 0 6px rgba(0, 255, 204, 0.4);
-        }
-        .btn {
-            background: #00ffcc;
-            color: #030305;
-            border: none;
-            padding: 10px 35px;
-            font-family: 'VT323', monospace;
-            font-size: 28px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
-            transition: all 0.1s;
-        }
-        .btn:active {
-            transform: scale(0.95);
-            background: #ffffff;
-        }
-        .hidden {
-            display: none !important;
-        }
-    </style>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <title>Cyber Taxi Arcade</title>
+
+    <!-- Game stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
     <div id="game-container">
-        <!-- Canvas Game -->
+
+        <!-- ==================== -->
+        <!-- GAME CANVAS           -->
+        <!-- ==================== -->
+
         <canvas id="gameCanvas"></canvas>
 
-        <!-- HUD Layer -->
+
+        <!-- ==================== -->
+        <!-- HUD                   -->
+        <!-- ==================== -->
+
         <div class="ui-layer">
+
             <div class="header-hud">
                 <span id="scoreDisplay">SCORE: 0000</span>
-                <span id="speedDisplay" style="color: #ff007f;">1.0X</span>
+
+                <span
+                    id="speedDisplay"
+                    style="color: #ff007f;"
+                >
+                    1.0X
+                </span>
             </div>
+
+
             <div class="status-hud">
-                <span id="shieldStatus">SHIELD: 0 🛡️</span>
-                <span id="activePowerup" style="color: #ffb86c;">READY</span>
+
+                <span id="shieldStatus">
+                    SHIELD: 0 🛡️
+                </span>
+
+                <span
+                    id="activePowerup"
+                    style="color: #ffb86c;"
+                >
+                    READY
+                </span>
+
             </div>
+
         </div>
 
-        <!-- Mobile Controls -->
+
+        <!-- ==================== -->
+        <!-- MOBILE CONTROLS       -->
+        <!-- ==================== -->
+
         <div class="mobile-controls">
-            <button class="control-btn" onclick="movePlayer(-1)">&lt; LEFT</button>
-            <button class="control-btn" onclick="movePlayer(1)">RIGHT &gt;</button>
+
+            <button
+                class="control-btn"
+                id="leftBtn"
+                type="button"
+            >
+                &lt; LEFT
+            </button>
+
+            <button
+                class="control-btn"
+                id="rightBtn"
+                type="button"
+            >
+                RIGHT &gt;
+            </button>
+
         </div>
 
-        <!-- Start Screen -->
-        <div id="startScreen" class="screen">
+
+        <!-- ==================== -->
+        <!-- START SCREEN          -->
+        <!-- ==================== -->
+
+        <div
+            id="startScreen"
+            class="screen"
+        >
+
             <h1>CYBER TAXI</h1>
-            <p>Dodge the Grid. Own the Neon Night.</p>
-            <button class="btn" onclick="startGame()">INSERT COIN</button>
+
+            <p>
+                Dodge the Grid. Own the Neon Night.
+            </p>
+
+            <button
+                class="btn"
+                id="startBtn"
+                type="button"
+            >
+                INSERT COIN
+            </button>
+
         </div>
 
-        <!-- Game Over Screen -->
-        <div id="gameOverScreen" class="screen hidden">
-            <h1 style="color: #ff3333; text-shadow: 0 0 15px rgba(255,51,51,0.7);">GAME OVER</h1>
-            <p id="finalScoreText" style="color: #8b949e;">FINAL SCORE: 0</p>
-            <button class="btn" onclick="startGame()">PLAY AGAIN</button>
+
+        <!-- ==================== -->
+        <!-- GAME OVER SCREEN      -->
+        <!-- ==================== -->
+
+        <div
+            id="gameOverScreen"
+            class="screen hidden"
+        >
+
+            <h1 class="game-over-title">
+                GAME OVER
+            </h1>
+
+            <p
+                id="finalScoreText"
+                class="final-score"
+            >
+                FINAL SCORE: 0
+            </p>
+
+            <button
+                class="btn"
+                id="playAgainBtn"
+                type="button"
+            >
+                PLAY AGAIN
+            </button>
+
         </div>
+
     </div>
 
-    <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
 
-        function resizeCanvas() {
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight - document.querySelector('.mobile-controls').offsetHeight;
-        }
+    <!-- ==================== -->
+    <!-- GAME JAVASCRIPT       -->
+    <!-- ==================== -->
 
-        const container = document.getElementById("game-container");
-        resizeCanvas();
+    <!--
+        The game code will live inside
+        the /js folder.
 
-        let audioCtx = null;
-        let engineOsc = null;
-        let engineGain = null;
-        let bgmInterval = null;
-        let screenShakeTimer = 0;
+        "module" allows the JavaScript
+        files to communicate with each other.
+    -->
 
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            startEngineSound();
-            startBGM();
-        }
+    <script
+        type="module"
+        src="js/main.js"
+    ></script>
 
-        function startEngineSound() {
-            if (engineOsc) return;
-            try {
-                engineOsc = audioCtx.createOscillator();
-                engineGain = audioCtx.createGain();
-                
-                engineOsc.type = "sawtooth";
-                engineOsc.frequency.setValueAtTime(55, audioCtx.currentTime);
-                
-                let filter = audioCtx.createBiquadFilter();
-                filter.type = "lowpass";
-                filter.frequency.setValueAtTime(150, audioCtx.currentTime);
-
-                engineGain.gain.setValueAtTime(0.015, audioCtx.currentTime);
-
-                engineOsc.connect(filter);
-                filter.connect(engineGain);
-                engineGain.connect(audioCtx.destination);
-                
-                engineOsc.start();
-            } catch (e) {
-                console.log(e);
-            }
-        }
-
-        function stopEngineSound() {
-            if (engineOsc) {
-                try {
-                    engineOsc.stop();
-                    engineOsc.disconnect();
-                } catch(e) {}
-                engineOsc = null;
-            }
-            if (bgmInterval) {
-                clearInterval(bgmInterval);
-                bgmInterval = null;
-            }
-        }
-
-        function startBGM() {
-            if (bgmInterval) return;
-            const notes = [110, 130.81, 146.83, 164.81, 196, 220];
-            let step = 0;
-            
-            bgmInterval = setInterval(() => {
-                if (!isPlaying || !audioCtx) return;
-                try {
-                    let osc = audioCtx.createOscillator();
-                    let gain = audioCtx.createGain();
-                    osc.type = "triangle";
-                    osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
-                    
-                    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.2);
-                    step++;
-                } catch(e) {}
-            }, 250);
-        }
-
-        function playSound(type) {
-            if (!audioCtx) return;
-            try {
-                let osc = audioCtx.createOscillator();
-                let gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                let now = audioCtx.currentTime;
-
-                if (type === "move") {
-                    osc.type = "sine";
-                    osc.frequency.setValueAtTime(240, now);
-                    osc.frequency.exponentialRampToValueAtTime(480, now + 0.08);
-                    gain.gain.setValueAtTime(0.08, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-                    osc.start(now);
-                    osc.stop(now + 0.08);
-                } else if (type === "powerup") {
-                    osc.type = "triangle";
-                    osc.frequency.setValueAtTime(350, now);
-                    osc.frequency.exponentialRampToValueAtTime(950, now + 0.15);
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-                    osc.start(now);
-                    osc.stop(now + 0.15);
-                } else if (type === "shield_break") {
-                    screenShakeTimer = 15; // Efek getar layar
-                    osc.type = "sawtooth";
-                    osc.frequency.setValueAtTime(220, now);
-                    osc.frequency.linearRampToValueAtTime(60, now + 0.3);
-                    gain.gain.setValueAtTime(0.15, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-                    osc.start(now);
-                    osc.stop(now + 0.3);
-                } else if (type === "gameover") {
-                    screenShakeTimer = 30; // Efek getar layar kuat
-                    osc.type = "sawtooth";
-                    osc.frequency.setValueAtTime(140, now);
-                    osc.frequency.linearRampToValueAtTime(25, now + 0.6);
-                    gain.gain.setValueAtTime(0.2, now);
-                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-                    osc.start(now);
-                    osc.stop(now + 0.6);
-                }
-            } catch (e) {
-                console.log(e);
-            }
-        }
-
-        let isPlaying = false;
-        let score = 0;
-        let gameSpeed = 4;
-        let roadOffset = 0;
-        
-        const getLanes = () => [canvas.width / 2 - 75, canvas.width / 2, canvas.width / 2 + 75];
-        let playerLane = 1;
-
-        let player = {
-            width: 44,
-            height: 84,
-            y: 0,
-            shields: 0
-        };
-
-        let obstacles = [];
-        let powerups = [];
-        let particles = [];
-        let activePowerupName = "READY";
-        let powerupTimer = 0;
-        let turboActive = false;
-        let spawnTimer = 0;
-
-        function movePlayer(direction) {
-            if (!isPlaying) return;
-            let lanes = getLanes();
-            let newLane = playerLane + direction;
-            if (newLane >= 0 && newLane < lanes.length) {
-                playerLane = newLane;
-                playSound("move");
-                createParticles(lanes[playerLane], player.y + 42, "#00ffcc", 6);
-            }
-        }
-
-        window.addEventListener("keydown", (e) => {
-            if (!isPlaying) return;
-            if (e.key === "ArrowLeft" || e.key === "a") movePlayer(-1);
-            if (e.key === "ArrowRight" || e.key === "d") movePlayer(1);
-        });
-
-        function createParticles(x, y, color, count) {
-            for (let i = 0; i < count; i++) {
-                particles.push({
-                    x: x, y: y,
-                    vx: (Math.random() - 0.5) * 6,
-                    vy: (Math.random() - 0.5) * 6,
-                    radius: Math.random() * 3 + 1,
-                    color: color,
-                    alpha: 1
-                });
-            }
-        }
-
-        function startGame() {
-            initAudio();
-            resizeCanvas();
-            player.y = canvas.height - 110;
-
-            document.getElementById("startScreen").classList.add("hidden");
-            document.getElementById("gameOverScreen").classList.add("hidden");
-            
-            score = 0;
-            gameSpeed = 4.5;
-            playerLane = 1;
-            obstacles = [];
-            powerups = [];
-            particles = [];
-            player.shields = 0;
-            turboActive = false;
-            activePowerupName = "READY";
-            powerupTimer = 0;
-            spawnTimer = 0;
-            isPlaying = true;
-            
-            loop();
-        }
-
-        function gameOver() {
-            isPlaying = false;
-            stopEngineSound();
-            playSound("gameover");
-            let lanes = getLanes();
-            createParticles(lanes[playerLane], player.y, "#ff007f", 25);
-            document.getElementById("finalScoreText").innerText = `FINAL SCORE: ${Math.floor(score)}`;
-            document.getElementById("gameOverScreen").classList.remove("hidden");
-        }
-
-        function spawnEntity() {
-            spawnTimer++;
-            let lanes = getLanes();
-            
-            if (spawnTimer % Math.max(22, 45 - Math.floor(score / 150)) === 0) {
-                let availableLanes = [0, 1, 2];
-                let chosenLane = availableLanes[Math.floor(Math.random() * availableLanes.length)];
-                
-                obstacles.push({
-                    lane: chosenLane,
-                    y: -90,
-                    width: 44,
-                    height: 84
-                });
-            }
-
-            if (spawnTimer % 160 === 0) {
-                let obstacleLanes = obstacles.filter(o => o.y < 50).map(o => o.lane);
-                let safeLanes = [0, 1, 2].filter(l => !obstacleLanes.includes(l));
-                
-                if (safeLanes.length > 0) {
-                    let chosenLane = safeLanes[Math.floor(Math.random() * safeLanes.length)];
-                    let types = ["shield", "turbo"];
-                    let chosenType = types[Math.floor(Math.random() * types.length)];
-                    
-                    powerups.push({
-                        lane: chosenLane,
-                        y: -50,
-                        size: 34,
-                        type: chosenType
-                    });
-                }
-            }
-        }
-
-        function update() {
-            gameSpeed = 4.5 + (score / 200);
-            let currentSpeed = turboActive ? gameSpeed * 1.8 : gameSpeed;
-
-            roadOffset += currentSpeed;
-            if (roadOffset > 40) roadOffset = 0;
-
-            score += turboActive ? 0.8 : 0.3;
-
-            if (powerupTimer > 0) {
-                powerupTimer--;
-                if (powerupTimer <= 0) {
-                    turboActive = false;
-                    activePowerupName = "NORMAL";
-                }
-            }
-
-            spawnEntity();
-            let lanes = getLanes();
-
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                obstacles[i].y += currentSpeed;
-                if (
-                    obstacles[i].lane === playerLane &&
-                    obstacles[i].y < player.y + player.height &&
-                    obstacles[i].y + obstacles[i].height > player.y
-                ) {
-                    if (player.shields > 0) {
-                        player.shields--;
-                        playSound("shield_break");
-                        createParticles(lanes[playerLane], player.y, "#00ffcc", 18);
-                        obstacles.splice(i, 1);
-                    } else {
-                        gameOver();
-                        return;
-                    }
-                } else if (obstacles[i].y > canvas.height) {
-                    obstacles.splice(i, 1);
-                }
-            }
-
-            for (let i = powerups.length - 1; i >= 0; i--) {
-                powerups[i].y += currentSpeed;
-                if (
-                    powerups[i].lane === playerLane &&
-                    powerups[i].y < player.y + player.height &&
-                    powerups[i].y + powerups[i].size > player.y
-                ) {
-                    playSound("powerup");
-                    createParticles(lanes[playerLane], powerups[i].y, "#ffb86c", 15);
-
-                    if (powerups[i].type === "shield") {
-                        player.shields++;
-                        activePowerupName = `SHIELD +1`;
-                    } else if (powerups[i].type === "turbo") {
-                        turboActive = true;
-                        activePowerupName = "TURBO BOOST!";
-                        powerupTimer = 180;
-                    }
-                    powerups.splice(i, 1);
-                } else if (powerups[i].y > canvas.height) {
-                    powerups.splice(i, 1);
-                }
-            }
-
-            for (let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i];
-                p.x += p.vx; p.y += p.vy; p.alpha -= 0.05;
-                if (p.alpha <= 0) particles.splice(i, 1);
-            }
-        }
-
-        // FUNGSI RENDER MOBIL BARU: Bentuk Vektor Presisi Mirip Mobil Sport/Sedan Nyata
-        function drawRealisticCar(x, y, w, h, primaryColor, isPlayer) {
-            ctx.save();
-            let cx = x - w / 2;
-
-            // Bayangan bodi mobil
-            ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-            ctx.fillRect(cx - 4, y + 8, w + 8, h - 14);
-
-            // Ban Roda Kiri & Kanan (Detail dengan Tapak Ban)
-            ctx.fillStyle = "#010103";
-            ctx.fillRect(cx - 7, y + 16, 6, 22);
-            ctx.fillRect(cx + w + 1, y + 16, 6, 22);
-            ctx.fillRect(cx - 7, y + h - 32, 6, 22);
-            ctx.fillRect(cx + w + 1, y + h - 32, 6, 22);
-            
-            // Velg Roda Crom
-            ctx.fillStyle = "#64748b";
-            ctx.fillRect(cx - 6, y + 23, 4, 8);
-            ctx.fillRect(cx + w + 2, y + 23, 4, 8);
-            ctx.fillRect(cx - 6, y + h - 25, 4, 8);
-            ctx.fillRect(cx + w + 2, y + h - 25, 4, 8);
-
-            // Bodi Utama Mobil (Bentuk aerodinamis bersudut tajam ala mobil retro)
-            ctx.fillStyle = primaryColor;
-            ctx.beginPath();
-            ctx.moveTo(cx + 8, y + 2);                    // Hidung moncong depan
-            ctx.lineTo(cx + w - 8, y + 2);
-            ctx.quadraticCurveTo(cx + w - 2, y + 10, cx + w, y + 26); // Fender kanan depan
-            ctx.lineTo(cx + w - 3, y + h - 6);            // Samping bodi kanan
-            ctx.quadraticCurveTo(cx + w / 2, y + h + 2, cx + 3, y + h - 6); // Bumper belakang
-            ctx.lineTo(cx, y + 26);                        // Samping bodi kiri
-            ctx.quadraticCurveTo(cx + 2, y + 10, cx + 8, y + 2); // Fender kiri depan
-            ctx.closePath();
-            ctx.fill();
-
-            // Garis Kontur Luar Bodi
-            ctx.strokeStyle = isPlayer ? "#ffffff" : "#ff1a75";
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-
-            // Kap Mesin Depan
-            ctx.fillStyle = isPlayer ? "#00b38f" : "#cc0052";
-            ctx.fillRect(cx + 8, y + 6, w - 16, 12);
-
-            // Kaca Depan (Windshield Miring Trapezoid)
-            ctx.fillStyle = "#050508";
-            ctx.beginPath();
-            ctx.moveTo(cx + 6, y + 22);
-            ctx.lineTo(cx + w - 6, y + 22);
-            ctx.lineTo(cx + w - 4, y + 42);
-            ctx.lineTo(cx + 4, y + 42);
-            ctx.closePath();
-            ctx.fill();
-
-            // Atap Kabin Mobil
-            ctx.fillStyle = primaryColor;
-            ctx.fillRect(cx + 5, y + 44, w - 10, 20);
-            ctx.strokeStyle = isPlayer ? "#ffffff" : "#ff1a75";
-            ctx.strokeRect(cx + 5, y + 44, w - 10, 20);
-
-            // Kaca Belakang
-            ctx.fillStyle = "#050508";
-            ctx.fillRect(cx + 6, y + 66, w - 12, 8);
-
-            // Lampu (Headlights & Taillights)
-            if (isPlayer) {
-                // Lampu Sorot Depan Taksi
-                ctx.fillStyle = "#ffff00";
-                ctx.fillRect(cx + 2, y, 7, 5);
-                ctx.fillRect(cx + w - 9, y, 7, 5);
-                // Papan Taksi "TAXI" di Atap
-                ctx.fillStyle = "#ff007f";
-                ctx.fillRect(cx + 10, y + 49, w - 20, 8);
-                ctx.fillStyle = "#ffffff";
-                ctx.font = "bold 9px 'VT323', monospace";
-                ctx.textAlign = "center";
-                ctx.fillText("TAXI", x, y + 56);
-            } else {
-                // Lampu Belakang Merah Musuh
-                ctx.fillStyle = "#ff1a1a";
-                ctx.fillRect(cx + 2, y + h - 5, 8, 5);
-                ctx.fillRect(cx + w - 10, y + h - 5, 8, 5);
-                // Lampu Depan Musuh
-                ctx.fillStyle = "#ffffff";
-                ctx.fillRect(cx + 3, y, 6, 4);
-                ctx.fillRect(cx + w - 9, y, 6, 4);
-            }
-
-            ctx.restore();
-        }
-
-        function draw() {
-            ctx.save();
-            
-            // Efek Getar Layar (Screen Shake) saat terjadi tabrakan / shield pecah
-            if (screenShakeTimer > 0) {
-                let shakeX = (Math.random() - 0.5) * 8;
-                let shakeY = (Math.random() - 0.5) * 8;
-                ctx.translate(shakeX, shakeY);
-                screenShakeTimer--;
-            }
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Retro Asphalt Road
-            ctx.fillStyle = "#0d1117";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Sidewalk Shoulders
-            ctx.fillStyle = "#161b22";
-            ctx.fillRect(0, 0, 18, canvas.height);
-            ctx.fillRect(canvas.width - 18, 0, 18, canvas.height);
-
-            // Neon Road Striping Line
-            ctx.strokeStyle = "#00ffcc";
-            ctx.lineWidth = 3;
-            ctx.setLineDash([20, 20]);
-            ctx.lineDashOffset = -roadOffset;
-
-            let lanes = getLanes();
-            ctx.beginPath();
-            ctx.moveTo((lanes[0] + lanes[1]) / 2, 0);
-            ctx.lineTo((lanes[0] + lanes[1]) / 2, canvas.height);
-            ctx.moveTo((lanes[1] + lanes[2]) / 2, 0);
-            ctx.lineTo((lanes[1] + lanes[2]) / 2, canvas.height);
-            ctx.stroke();
-            ctx.setLineDash([]);
-
-            for (let p of particles) {
-                ctx.save();
-                ctx.globalAlpha = p.alpha;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
-
-            // Draw Player Car (Cyber Taxi Desain Baru)
-            drawRealisticCar(lanes[playerLane], player.y, player.width, player.height, "#00ffcc", true);
-
-            // Shield Aura Ring
-            if (player.shields > 0) {
-                ctx.strokeStyle = "#00ffcc";
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(lanes[playerLane], player.y + player.height / 2, 48, 0, Math.PI * 2);
-                ctx.stroke();
-            }
-
-            // Draw Obstacle Cars (Musuh Desain Baru)
-            for (let obs of obstacles) {
-                drawRealisticCar(lanes[obs.lane], obs.y, obs.width, obs.height, "#ff0066", false);
-            }
-
-            // Draw Power-ups
-            for (let p of powerups) {
-                let px = lanes[p.lane];
-                let py = p.y + p.size / 2;
-                
-                ctx.save();
-                ctx.fillStyle = p.type === "shield" ? "#00ffcc" : "#ffb86c";
-                ctx.beginPath();
-                ctx.arc(px, py, p.size / 2, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.strokeStyle = "#030305";
-                ctx.lineWidth = 3;
-                ctx.stroke();
-
-                ctx.fillStyle = "#030305";
-                ctx.font = "bold 18px 'VT323', monospace";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(p.type === "shield" ? "S" : "T", px, py);
-                ctx.restore();
-            }
-
-            // CRT Scanline Overlay Effect
-            ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
-            for (let sy = 0; sy < canvas.height; sy += 4) {
-                ctx.fillRect(0, sy, canvas.width, 1);
-            }
-
-            ctx.restore(); // Mengembalikan posisi canvas dari screen shake
-
-            document.getElementById("scoreDisplay").innerText = `SCORE: ${Math.floor(score).toString().padStart(4, '0')}`;
-            document.getElementById("speedDisplay").innerText = `${gameSpeed.toFixed(1)}X`;
-            document.getElementById("shieldStatus").innerText = `SHIELD: ${player.shields} 🛡️`;
-            document.getElementById("activePowerup").innerText = activePowerupName;
-        }
-
-        function loop() {
-            if (!isPlaying) return;
-            update();
-            draw();
-            requestAnimationFrame(loop);
-        }
-    </script>
 </body>
 </html>
