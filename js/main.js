@@ -1,33 +1,13 @@
-/* ========================================
-   CYBER TAXI — MAIN
-   ======================================== */
-
 import {
     startGame,
     movePlayer,
     resizeCanvas
 } from "./game.js";
 
-
-/* ========================================
-   INITIALIZE
-   ======================================== */
-
 resizeCanvas();
 
-
-/* ========================================
-   BUTTON CONTROLS
-   ======================================== */
-
 window.movePlayer = movePlayer;
-
 window.startGame = startGame;
-
-
-/* ========================================
-   KEYBOARD CONTROLS
-   ======================================== */
 
 window.addEventListener("keydown", (event) => {
 
@@ -38,7 +18,6 @@ window.addEventListener("keydown", (event) => {
         movePlayer(-1);
     }
 
-
     if (
         event.key === "ArrowRight" ||
         event.key.toLowerCase() === "d"
@@ -47,11 +26,6 @@ window.addEventListener("keydown", (event) => {
     }
 
 });
-
-
-/* ========================================
-   RESIZE
-   ======================================== */
 
 window.addEventListener(
     "resize",
