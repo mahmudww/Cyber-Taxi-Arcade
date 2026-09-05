@@ -10,24 +10,28 @@
 const player = {
 
     width: 44,
-
     height: 84,
 
     y: 0,
 
     shields: 0,
 
+    /* Target lane */
     lane: 1,
 
+    /* Visual / movement lane */
+
     visualLane: 1,
+
+    laneProgress: 0,
 
     moveFromLane: 1,
 
     moveToLane: 1,
 
-    laneProgress: 1,
-
     isMoving: false,
+
+    moveSpeed: 0.22,
 
     tilt: 0
 
@@ -65,7 +69,7 @@ function movePlayer(direction) {
         player.lane + direction;
 
 
-    /* Keep player inside 3 lanes */
+    /* Outside road */
 
     if (
         newLane < 0 ||
@@ -77,40 +81,39 @@ function movePlayer(direction) {
     }
 
 
-    player.lane =
-        newLane;
+    /* Already moving */
 
+    if (player.isMoving) {
 
-    /*
-     * For now visual lane follows
-     * immediately.
-     *
-     * We will add smooth movement
-     * later after everything is stable.
-     */
+        return false;
 
-    player.visualLane =
-        newLane;
+    }
 
 
     player.moveFromLane =
-        newLane;
+        player.lane;
 
 
     player.moveToLane =
         newLane;
 
 
+    player.lane =
+        newLane;
+
+
     player.laneProgress =
-        1;
+        0;
 
 
     player.isMoving =
-        false;
+        true;
 
+
+    /* Lean into the turn */
 
     player.tilt =
-        0;
+        direction * 0.12;
 
 
     return true;
@@ -119,19 +122,78 @@ function movePlayer(direction) {
 
 
 /* ========================================
-   PLAYER MOVEMENT UPDATE
+   UPDATE PLAYER MOVEMENT
    ======================================== */
 
 function updatePlayerMovement() {
 
+    if (
+        !player.isMoving
+    ) {
+
+        /* Slowly return car upright */
+
+        player.tilt *= 0.8;
+
+        if (
+            Math.abs(player.tilt) < 0.001
+        ) {
+
+            player.tilt = 0;
+
+        }
+
+        return;
+
+    }
+
+
+    player.laneProgress +=
+        player.moveSpeed;
+
+
+    if (
+        player.laneProgress >= 1
+    ) {
+
+        player.laneProgress = 1;
+
+        player.visualLane =
+            player.moveToLane;
+
+        player.isMoving =
+            false;
+
+        player.tilt =
+            0;
+
+        return;
+
+    }
+
+
     /*
-     * Movement is currently instant.
-     *
-     * This function exists because
-     * game.js expects it.
-     *
-     * We will upgrade this later.
+     * Smoothstep easing.
+
+     * Instead of moving at constant speed,
+     * the taxi accelerates and decelerates.
      */
+
+    const t =
+        player.laneProgress;
+
+
+    const smoothT =
+        t * t * (3 - 2 * t);
+
+
+    player.visualLane =
+        player.moveFromLane +
+        (
+            player.moveToLane -
+            player.moveFromLane
+        ) *
+        smoothT;
 
 }
 
@@ -160,10 +222,12 @@ function createParticles(
             y: y,
 
             vx:
-                (Math.random() - 0.5) * 6,
+                (Math.random() - 0.5) *
+                6,
 
             vy:
-                (Math.random() - 0.5) * 6,
+                (Math.random() - 0.5) *
+                6,
 
             radius:
                 Math.random() * 3 + 1,
@@ -198,7 +262,6 @@ function updateParticles() {
         particle.x +=
             particle.vx;
 
-
         particle.y +=
             particle.vy;
 
@@ -224,7 +287,7 @@ function updateParticles() {
 
 
 /* ========================================
-   RESET
+   RESET ENTITIES
    ======================================== */
 
 function resetEntities() {
@@ -244,7 +307,7 @@ function resetEntities() {
 
     player.moveToLane = 1;
 
-    player.laneProgress = 1;
+    player.laneProgress = 0;
 
     player.isMoving = false;
 
