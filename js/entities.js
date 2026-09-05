@@ -2,13 +2,7 @@
    CYBER TAXI — ENTITIES
    ======================================== */
 
-
-/* ========================================
-   PLAYER
-   ======================================== */
-
 const player = {
-
     width: 44,
     height: 84,
 
@@ -16,25 +10,16 @@ const player = {
 
     shields: 0,
 
-    /* Target lane */
     lane: 1,
 
-    /* Visual / movement lane */
-
+    // Visual movement
     visualLane: 1,
-
+    moveFromLane: 1,
+    moveToLane: 1,
     laneProgress: 0,
 
-    moveFromLane: 1,
-
-    moveToLane: 1,
-
     isMoving: false,
-
-    moveSpeed: 0.22,
-
     tilt: 0
-
 };
 
 
@@ -60,7 +45,7 @@ const particles = [];
 
 
 /* ========================================
-   MOVE PLAYER
+   PLAYER MOVEMENT
    ======================================== */
 
 function movePlayer(direction) {
@@ -68,133 +53,76 @@ function movePlayer(direction) {
     const newLane =
         player.lane + direction;
 
-
-    /* Outside road */
-
-    if (
-        newLane < 0 ||
-        newLane > 2
-    ) {
-
+    // Only allow lanes 0, 1, 2
+    if (newLane < 0 || newLane > 2) {
         return false;
-
     }
 
-
-    /* Already moving */
-
+    // Don't start another movement
+    // while already moving.
     if (player.isMoving) {
-
         return false;
-
     }
 
+    player.moveFromLane = player.lane;
+    player.moveToLane = newLane;
 
-    player.moveFromLane =
-        player.lane;
+    player.lane = newLane;
 
-
-    player.moveToLane =
-        newLane;
-
-
-    player.lane =
-        newLane;
-
-
-    player.laneProgress =
-        0;
-
-
-    player.isMoving =
-        true;
-
-
-    /* Lean into the turn */
-
-    player.tilt =
-        direction * 0.12;
-
+    player.laneProgress = 0;
+    player.isMoving = true;
 
     return true;
-
 }
 
 
 /* ========================================
-   UPDATE PLAYER MOVEMENT
+   SMOOTH PLAYER MOVEMENT
    ======================================== */
 
 function updatePlayerMovement() {
 
-    if (
-        !player.isMoving
-    ) {
-
-        /* Slowly return car upright */
-
-        player.tilt *= 0.8;
-
-        if (
-            Math.abs(player.tilt) < 0.001
-        ) {
-
-            player.tilt = 0;
-
-        }
-
+    if (!player.isMoving) {
+        player.visualLane = player.lane;
+        player.tilt = 0;
         return;
-
     }
 
+    player.laneProgress += 0.18;
 
-    player.laneProgress +=
-        player.moveSpeed;
-
-
-    if (
-        player.laneProgress >= 1
-    ) {
+    if (player.laneProgress >= 1) {
 
         player.laneProgress = 1;
 
         player.visualLane =
             player.moveToLane;
 
-        player.isMoving =
-            false;
+        player.isMoving = false;
 
-        player.tilt =
-            0;
+        player.tilt = 0;
 
         return;
-
     }
 
-
-    /*
-     * Smoothstep easing.
-
-     * Instead of moving at constant speed,
-     * the taxi accelerates and decelerates.
-     */
-
-    const t =
-        player.laneProgress;
-
-
-    const smoothT =
-        t * t * (3 - 2 * t);
-
+    // Smooth interpolation
+    const t = player.laneProgress;
 
     player.visualLane =
         player.moveFromLane +
         (
             player.moveToLane -
             player.moveFromLane
-        ) *
-        smoothT;
+        ) * t;
 
+    // Small visual tilt while changing lane
+    const direction =
+        player.moveToLane -
+        player.moveFromLane;
+
+    player.tilt =
+        direction *
+        0.08 *
+        Math.sin(t * Math.PI);
 }
 
 
@@ -209,11 +137,7 @@ function createParticles(
     count
 ) {
 
-    for (
-        let i = 0;
-        i < count;
-        i++
-    ) {
+    for (let i = 0; i < count; i++) {
 
         particles.push({
 
@@ -222,12 +146,10 @@ function createParticles(
             y: y,
 
             vx:
-                (Math.random() - 0.5) *
-                6,
+                (Math.random() - 0.5) * 6,
 
             vy:
-                (Math.random() - 0.5) *
-                6,
+                (Math.random() - 0.5) * 6,
 
             radius:
                 Math.random() * 3 + 1,
@@ -239,7 +161,6 @@ function createParticles(
         });
 
     }
-
 }
 
 
@@ -258,31 +179,23 @@ function updateParticles() {
         const particle =
             particles[i];
 
-
         particle.x +=
             particle.vx;
 
         particle.y +=
             particle.vy;
 
-
-        particle.alpha -=
-            0.05;
-
+        particle.alpha -= 0.05;
 
         if (
             particle.alpha <= 0
         ) {
 
-            particles.splice(
-                i,
-                1
-            );
+            particles.splice(i, 1);
 
         }
 
     }
-
 }
 
 
@@ -297,7 +210,6 @@ function resetEntities() {
     powerups.length = 0;
 
     particles.length = 0;
-
 
     player.lane = 1;
 
@@ -316,7 +228,6 @@ function resetEntities() {
     player.shields = 0;
 
     player.y = 0;
-
 }
 
 
