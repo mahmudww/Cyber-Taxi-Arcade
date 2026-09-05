@@ -218,6 +218,11 @@ function startGame() {
 
     player.y =
         canvas.height - 110;
+   player.x =
+    getLanes()[player.lane];
+
+player.targetX =
+    player.x;
 
 
     document
@@ -356,7 +361,15 @@ function spawnEntity() {
 
 function update() {
 
-    /* Player movement */
+    /* ==================================
+       PLAYER MOVEMENT
+       ================================== */
+
+    const lanes =
+        getLanes();
+
+    player.targetX =
+        lanes[player.lane];
 
     updatePlayerMovement();
 
@@ -425,8 +438,6 @@ function update() {
     spawnEntity();
 
 
-    const lanes =
-        getLanes();
 
 
     /* ==================================
@@ -1156,7 +1167,7 @@ const playerX =
             : lanes[2];
 
 drawCar(
-    playerX,
+    player.x,
     player.y,
     player.width,
     player.height,
@@ -1164,6 +1175,7 @@ drawCar(
     true,
     player.tilt
 );
+
 
 
 
