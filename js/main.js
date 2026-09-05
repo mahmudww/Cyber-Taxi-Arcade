@@ -6,43 +6,101 @@ import {
 
 
 /* ========================================
-   MAKE FUNCTIONS AVAILABLE TO HTML
+   GET BUTTONS
    ======================================== */
 
-window.startGame = startGame;
-window.movePlayer = movePlayer;
+const startButton =
+    document.getElementById("startButton");
+
+const restartButton =
+    document.getElementById("restartButton");
+
+const leftButton =
+    document.getElementById("leftButton");
+
+const rightButton =
+    document.getElementById("rightButton");
 
 
 /* ========================================
-   INITIALIZE
+   START / RESTART
    ======================================== */
 
-resizeCanvas();
+if (startButton) {
+    startButton.addEventListener(
+        "click",
+        startGame
+    );
+}
+
+
+if (restartButton) {
+    restartButton.addEventListener(
+        "click",
+        startGame
+    );
+}
 
 
 /* ========================================
-   KEYBOARD
+   MOBILE CONTROLS
    ======================================== */
 
-window.addEventListener("keydown", (event) => {
+if (leftButton) {
+    leftButton.addEventListener(
+        "click",
+        () => movePlayer(-1)
+    );
+}
 
-    const key = event.key.toLowerCase();
 
-    if (key === "arrowleft" || key === "a") {
-        movePlayer(-1);
+if (rightButton) {
+    rightButton.addEventListener(
+        "click",
+        () => movePlayer(1)
+    );
+}
+
+
+/* ========================================
+   KEYBOARD CONTROLS
+   ======================================== */
+
+window.addEventListener(
+    "keydown",
+    (event) => {
+
+        const key =
+            event.key.toLowerCase();
+
+
+        if (
+            key === "arrowleft" ||
+            key === "a"
+        ) {
+            movePlayer(-1);
+        }
+
+
+        if (
+            key === "arrowright" ||
+            key === "d"
+        ) {
+            movePlayer(1);
+        }
+
     }
-
-    if (key === "arrowright" || key === "d") {
-        movePlayer(1);
-    }
-
-});
+);
 
 
 /* ========================================
    RESIZE
    ======================================== */
 
-window.addEventListener("resize", () => {
-    resizeCanvas();
-});
+resizeCanvas();
+
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
