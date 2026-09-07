@@ -1,25 +1,30 @@
 /* =========================================================
 CYBER TAXI
 RENDERER
-Renderer bertanggung jawab untuk:
 
-background
-road
-lane markings
-roadside neon
-traffic
-player
-power-ups
-shield
-particles / effects
-speed lines
-screen flash
-HUD visual canvas
+Tanggung jawab:
+
+Background
+Neon city
+Road
+Lane markings
+Roadside
+Traffic
+Power-ups
+Player
+Shield
+Particles / effects
+Screen overlay
+Screen flash
+Renderer HANYA menggambar.
+
 Renderer TIDAK mengubah gameplay state.
 
-Prinsip:
+FLOW:
 
 GAME STATE
+↓
+GAME UPDATE
 ↓
 RENDERER
 ↓
@@ -39,11 +44,9 @@ roadOffset: 0,
 
 skylineOffset: 0,
 
-pulse:
-    0,
+pulse: 0,
 
-vignette:
-    true
+vignette: true
 
 };
 
@@ -55,6 +58,12 @@ const COLORS = {
 
 background:
     "#030305",
+
+skyTop:
+    "#050313",
+
+skyBottom:
+    "#0b1118",
 
 road:
     "#0b0f16",
@@ -76,6 +85,9 @@ neonBlue:
 
 neonOrange:
     "#ffb86c",
+
+yellow:
+    "#fff36b",
 
 white:
     "#ffffff",
@@ -100,7 +112,54 @@ if (!ctx || !canvas) {
 
 }
 
+
+/*
+ * Logical canvas size.
+ *
+ * main.js menyimpan ukuran CSS
+ * di gameWidth / gameHeight.
+ */
+
+const width =
+    canvas.gameWidth ||
+    canvas.clientWidth ||
+    canvas.width;
+
+
+const height =
+    canvas.gameHeight ||
+    canvas.clientHeight ||
+    canvas.height;
+
+
+if (
+    width <= 0 ||
+    height <= 0
+) {
+
+    return;
+
+}
+
+
 renderState.time++;
+
+
+/*
+ * Road movement.
+ */
+
+if (
+    typeof gameState !==
+    "undefined"
+) {
+
+    renderState.roadOffset =
+        gameState.roadOffset ||
+        0;
+
+}
+
 
 /*
  * Screen shake.
@@ -117,74 +176,80 @@ const shake =
             y: 0
         };
 
+
 ctx.save();
 
+
 ctx.translate(
-    shake.x,
-    shake.y
+    shake.x || 0,
+    shake.y || 0
 );
 
+
 /*
- * Base clear.
+ * Clear screen.
  */
 
 ctx.fillStyle =
     COLORS.background;
 
 ctx.fillRect(
-
-    -20,
-
-    -20,
-
-    canvas.width + 40,
-
-    canvas.height + 40
-
+    0,
+    0,
+    width,
+    height
 );
 
-/*
- * World.
- */
+
+/* =====================================================
+   WORLD
+   ===================================================== */
 
 drawBackground(
     ctx,
     canvas
 );
 
+
 drawRoad(
     ctx,
     canvas
 );
+
 
 drawRoadside(
     ctx,
     canvas
 );
 
+
 drawLaneMarkings(
     ctx,
     canvas
 );
+
 
 drawTraffic(
     ctx,
     canvas
 );
 
+
 drawPowerups(
     ctx,
     canvas
 );
+
 
 drawPlayer(
     ctx,
     canvas
 );
 
-/*
- * Effects.
- */
+
+/* =====================================================
+   EFFECTS
+   ===================================================== */
 
 if (
     typeof drawEffects ===
@@ -198,15 +263,19 @@ if (
 
 }
 
+
 drawScreenOverlay(
     ctx,
     canvas
 );
 
+
 ctx.restore();
 
+
 /*
- * Screen flash berada paling atas.
+ * Screen flash harus berada
+ * di paling atas.
  */
 
 if (
@@ -232,8 +301,20 @@ ctx,
 canvas
 ) {
 
+const width =
+    canvas.gameWidth ||
+    canvas.clientWidth ||
+    canvas.width;
+
+
+const height =
+    canvas.gameHeight ||
+    canvas.clientHeight ||
+    canvas.height;
+
+
 /*
- * Gradient langit.
+ * Night sky gradient.
  */
 
 const gradient =
@@ -243,90 +324,96 @@ const gradient =
         0,
 
         0,
-        canvas.height
+        height
 
     );
 
+
 gradient.addColorStop(
     0,
-    "#050313"
+    COLORS.skyTop
 );
+
 
 gradient.addColorStop(
     0.45,
     "#090d18"
 );
 
+
 gradient.addColorStop(
     1,
-    "#0b1118"
+    COLORS.skyBottom
 );
+
 
 ctx.fillStyle =
     gradient;
 
+
 ctx.fillRect(
-
     0,
     0,
-
-    canvas.width,
-    canvas.height
-
+    width,
+    height
 );
 
-/*
- * Neon skyline.
- */
-
-drawSkyline(
-    ctx,
-    canvas
-);
 
 /*
- * Ambient glow.
+ * Moon / ambient city glow.
  */
 
 const glow =
     ctx.createRadialGradient(
 
-        canvas.width * 0.5,
-        canvas.height * 0.35,
-        10,
+        width * 0.5,
+        height * 0.28,
+        5,
 
-        canvas.width * 0.5,
-        canvas.height * 0.35,
-        canvas.width * 0.7
+        width * 0.5,
+        height * 0.28,
+        width * 0.65
 
     );
+
 
 glow.addColorStop(
     0,
     "rgba(0,255,204,0.08)"
 );
 
+
 glow.addColorStop(
-    0.5,
+    0.45,
     "rgba(255,0,127,0.035)"
 );
+
 
 glow.addColorStop(
     1,
     "rgba(0,0,0,0)"
 );
 
+
 ctx.fillStyle =
     glow;
 
+
 ctx.fillRect(
-
     0,
     0,
+    width,
+    height
+);
 
-    canvas.width,
-    canvas.height
 
+/*
+ * Skyline.
+ */
+
+drawSkyline(
+    ctx,
+    canvas
 );
 
 }
@@ -340,20 +427,41 @@ ctx,
 canvas
 ) {
 
+const width =
+    canvas.gameWidth ||
+    canvas.clientWidth ||
+    canvas.width;
+
+
+const height =
+    canvas.gameHeight ||
+    canvas.clientHeight ||
+    canvas.height;
+
+
 const horizon =
     Math.floor(
-        canvas.height *
-        0.28
+        height * 0.28
     );
 
+
 const buildingWidth =
-    28;
+    Math.max(
+        22,
+        Math.min(
+            36,
+            width * 0.055
+        )
+    );
+
 
 const offset =
     renderState.skylineOffset %
     buildingWidth;
 
+
 ctx.save();
+
 
 for (
     let x =
@@ -361,20 +469,29 @@ for (
         offset;
 
     x <
-        canvas.width +
+        width +
         buildingWidth;
 
     x += buildingWidth
 ) {
 
-    const seed =
-        Math.abs(
-            Math.floor(
-                x / buildingWidth
-            )
+    const index =
+        Math.floor(
+            (
+                x +
+                offset
+            ) /
+            buildingWidth
         );
 
-    const height =
+
+    const seed =
+        Math.abs(
+            index
+        );
+
+
+    const buildingHeight =
         25 +
         (
             seed *
@@ -382,9 +499,15 @@ for (
         ) %
         95;
 
+
     const y =
         horizon -
-        height;
+        buildingHeight;
+
+
+    /*
+     * Building body.
+     */
 
     ctx.fillStyle =
         seed % 3 === 0
@@ -392,6 +515,7 @@ for (
             ? "#0b1020"
 
             : "#080c16";
+
 
     ctx.fillRect(
 
@@ -401,12 +525,40 @@ for (
 
         buildingWidth - 3,
 
-        height
+        buildingHeight
 
     );
 
+
     /*
-     * Building antennas.
+     * Building roof light.
+     */
+
+    if (
+        seed % 4 === 0
+    ) {
+
+        ctx.fillStyle =
+            "rgba(0,255,204,0.4)";
+
+
+        ctx.fillRect(
+
+            x,
+
+            y,
+
+            buildingWidth - 3,
+
+            2
+
+        );
+
+    }
+
+
+    /*
+     * Antenna.
      */
 
     if (
@@ -416,10 +568,13 @@ for (
         ctx.strokeStyle =
             "rgba(0,255,204,0.35)";
 
+
         ctx.lineWidth =
             1;
 
+
         ctx.beginPath();
+
 
         ctx.moveTo(
 
@@ -430,6 +585,7 @@ for (
 
         );
 
+
         ctx.lineTo(
 
             x +
@@ -439,9 +595,11 @@ for (
 
         );
 
+
         ctx.stroke();
 
     }
+
 
     /*
      * Windows.
@@ -449,8 +607,10 @@ for (
 
     const rows =
         Math.floor(
-            height / 12
+            buildingHeight /
+            12
         );
+
 
     for (
         let r = 0;
@@ -471,7 +631,8 @@ for (
 
         }
 
-        ctx.fillStyle =
+
+        const windowColor =
             (
                 seed +
                 r
@@ -479,9 +640,14 @@ for (
             2 ===
             0
 
-                ? "rgba(0,255,204,0.35)"
+                ? "rgba(0,255,204,0.38)"
 
-                : "rgba(255,0,127,0.3)";
+                : "rgba(255,0,127,0.32)";
+
+
+        ctx.fillStyle =
+            windowColor;
+
 
         ctx.fillRect(
 
@@ -501,8 +667,9 @@ for (
 
 }
 
+
 /*
- * Horizon glow line.
+ * Horizon glow.
  */
 
 const horizonGradient =
@@ -511,28 +678,33 @@ const horizonGradient =
         0,
         horizon - 3,
 
-        canvas.width,
+        width,
         horizon + 8
 
     );
+
 
 horizonGradient.addColorStop(
     0,
     "rgba(0,255,204,0)"
 );
 
+
 horizonGradient.addColorStop(
     0.5,
     "rgba(0,255,204,0.35)"
 );
+
 
 horizonGradient.addColorStop(
     1,
     "rgba(0,255,204,0)"
 );
 
+
 ctx.fillStyle =
     horizonGradient;
+
 
 ctx.fillRect(
 
@@ -540,13 +712,19 @@ ctx.fillRect(
 
     horizon - 2,
 
-    canvas.width,
+    width,
 
     8
 
 );
 
+
 ctx.restore();
+
+
+/*
+ * Skyline bergerak sangat pelan.
+ */
 
 renderState.skylineOffset +=
     0.15;
@@ -562,11 +740,25 @@ ctx,
 canvas
 ) {
 
+const width =
+    canvas.gameWidth ||
+    canvas.clientWidth ||
+    canvas.width;
+
+
+const height =
+    canvas.gameHeight ||
+    canvas.clientHeight ||
+    canvas.height;
+
+
 const roadLeft =
     getRoadLeft(canvas);
 
+
 const roadRight =
     getRoadRight(canvas);
+
 
 /*
  * Road base.
@@ -574,6 +766,7 @@ const roadRight =
 
 ctx.fillStyle =
     COLORS.road;
+
 
 ctx.fillRect(
 
@@ -584,12 +777,13 @@ ctx.fillRect(
     roadRight -
     roadLeft,
 
-    canvas.height
+    height
 
 );
 
+
 /*
- * Road center glow.
+ * Road center gradient.
  */
 
 const gradient =
@@ -603,23 +797,28 @@ const gradient =
 
     );
 
+
 gradient.addColorStop(
     0,
     "rgba(0,255,204,0.015)"
 );
 
+
 gradient.addColorStop(
     0.5,
-    "rgba(0,255,204,0.035)"
+    "rgba(0,255,204,0.04)"
 );
+
 
 gradient.addColorStop(
     1,
     "rgba(255,0,127,0.015)"
 );
 
+
 ctx.fillStyle =
     gradient;
+
 
 ctx.fillRect(
 
@@ -630,20 +829,27 @@ ctx.fillRect(
     roadRight -
     roadLeft,
 
-    canvas.height
+    height
 
 );
 
+
 /*
- * Subtle road texture.
+ * Road texture.
  */
 
 drawRoadTexture(
+
     ctx,
+
     canvas,
+
     roadLeft,
+
     roadRight
+
 );
+
 
 /*
  * Neon road edges.
@@ -651,51 +857,66 @@ drawRoadTexture(
 
 ctx.save();
 
+
 ctx.shadowBlur =
     10;
+
 
 ctx.shadowColor =
     COLORS.lane;
 
+
 ctx.strokeStyle =
     COLORS.lane;
+
 
 ctx.lineWidth =
     2;
 
+
 ctx.beginPath();
+
 
 ctx.moveTo(
     roadLeft,
     0
 );
 
+
 ctx.lineTo(
     roadLeft,
-    canvas.height
+    height
 );
 
+
 ctx.stroke();
+
 
 ctx.strokeStyle =
     COLORS.neonPink;
 
+
 ctx.shadowColor =
     COLORS.neonPink;
 
+
 ctx.beginPath();
+
 
 ctx.moveTo(
     roadRight,
     0
 );
 
+
 ctx.lineTo(
     roadRight,
-    canvas.height
+    height
 );
 
+
 ctx.stroke();
+
 
 ctx.restore();
 
@@ -712,25 +933,31 @@ left,
 right
 ) {
 
-/*
- * Texture sangat ringan agar mobile
- * tidak terlalu terbebani.
- */
+const height =
+    canvas.gameHeight ||
+    canvas.clientHeight ||
+    canvas.height;
+
 
 const offset =
     renderState.roadOffset %
     60;
 
+
 ctx.save();
+
 
 ctx.globalAlpha =
     0.08;
 
+
 ctx.strokeStyle =
     "#ffffff";
 
+
 ctx.lineWidth =
     1;
+
 
 for (
     let y =
@@ -738,7 +965,7 @@ for (
         offset;
 
     y <
-        canvas.height +
+        height +
         60;
 
     y += 60
@@ -746,19 +973,23 @@ for (
 
     ctx.beginPath();
 
+
     ctx.moveTo(
         left + 20,
         y
     );
+
 
     ctx.lineTo(
         right - 20,
         y
     );
 
+
     ctx.stroke();
 
 }
+
 
 ctx.restore();
 
@@ -773,11 +1004,25 @@ ctx,
 canvas
 ) {
 
+const width =
+    canvas.gameWidth ||
+    canvas.clientWidth ||
+    canvas.width;
+
+
+const height =
+    canvas.gameHeight ||
+    canvas.clientHeight ||
+    canvas.height;
+
+
 const left =
     getRoadLeft(canvas);
 
+
 const right =
     getRoadRight(canvas);
+
 
 /*
  * Sidewalk.
@@ -786,27 +1031,30 @@ const right =
 ctx.fillStyle =
     COLORS.sidewalk;
 
+
 ctx.fillRect(
 
     0,
     0,
 
     left,
-    canvas.height
+    height
 
 );
+
 
 ctx.fillRect(
 
     right,
     0,
 
-    canvas.width -
+    width -
     right,
 
-    canvas.height
+    height
 
 );
+
 
 /*
  * Neon side blocks.
@@ -816,13 +1064,14 @@ const offset =
     renderState.roadOffset %
     80;
 
+
 for (
     let y =
         -80 +
         offset;
 
     y <
-        canvas.height +
+        height +
         80;
 
     y += 80
@@ -838,9 +1087,10 @@ for (
 
         left,
 
-        "#00ffcc"
+        COLORS.lane
 
     );
+
 
     drawNeonSideBlock(
 
@@ -848,17 +1098,17 @@ for (
 
         right +
         (
-            canvas.width -
+            width -
             right
         ) *
         0.5,
 
         y + 40,
 
-        canvas.width -
+        width -
         right,
 
-        "#ff007f"
+        COLORS.neonPink
 
     );
 
@@ -867,7 +1117,7 @@ for (
 }
 
 /* =========================================================
-SIDE BLOCK
+NEON SIDE BLOCK
 ========================================================= */
 
 function drawNeonSideBlock(
@@ -884,19 +1134,25 @@ const blockWidth =
         12
     );
 
+
 ctx.save();
+
 
 ctx.fillStyle =
     color;
 
+
 ctx.shadowBlur =
     10;
+
 
 ctx.shadowColor =
     color;
 
+
 ctx.globalAlpha =
     0.55;
+
 
 ctx.fillRect(
 
@@ -911,6 +1167,7 @@ ctx.fillRect(
 
 );
 
+
 ctx.restore();
 
 }
@@ -924,32 +1181,44 @@ ctx,
 canvas
 ) {
 
+const height =
+    canvas.gameHeight ||
+    canvas.clientHeight ||
+    canvas.height;
+
+
 const lanes =
-    getLanePositions(
-        canvas
-    );
+    getLanePositions(canvas);
+
 
 const offset =
     renderState.roadOffset %
     50;
 
+
 ctx.save();
+
 
 ctx.setLineDash([
     18,
     22
 ]);
 
+
 ctx.lineDashOffset =
     offset;
+
 
 ctx.lineWidth =
     2;
 
+
 for (
     let i = 0;
+
     i <
     lanes.length - 1;
+
     i++
 ) {
 
@@ -960,32 +1229,41 @@ for (
         ) /
         2;
 
+
     ctx.strokeStyle =
         "rgba(0,255,204,0.7)";
+
 
     ctx.shadowBlur =
         8;
 
+
     ctx.shadowColor =
-        "#00ffcc";
+        COLORS.lane;
+
 
     ctx.beginPath();
+
 
     ctx.moveTo(
         x,
         0
     );
 
+
     ctx.lineTo(
         x,
-        canvas.height
+        height
     );
+
 
     ctx.stroke();
 
 }
 
+
 ctx.setLineDash([]);
+
 
 ctx.restore();
 
@@ -1009,14 +1287,41 @@ if (
 
 }
 
-for (
-    const vehicle of
-    entities.traffic
+
+/*
+ * Traffic disimpan sebagai
+ * obstacles di state.js.
+ */
+
+if (
+    !Array.isArray(
+        entities.obstacles
+    )
 ) {
 
+    return;
+
+}
+
+
+for (
+    const vehicle of
+    entities.obstacles
+) {
+
+    if (!vehicle) {
+
+        continue;
+
+    }
+
+
     drawTrafficVehicle(
+
         ctx,
+
         vehicle
+
     );
 
 }
@@ -1032,17 +1337,50 @@ ctx,
 vehicle
 ) {
 
-const x =
-    getLaneX(
+const lane =
+    Number.isFinite(
         vehicle.lane
-    );
+    )
 
-vehicle.x =
-    x;
+        ? vehicle.lane
+
+        : 0;
+
+
+const x =
+    Number.isFinite(
+        vehicle.x
+    )
+
+        ? vehicle.x
+
+        : getLaneX(lane);
+
+
+const y =
+    Number.isFinite(
+        vehicle.y
+    )
+
+        ? vehicle.y
+
+        : -100;
+
+
+const width =
+    vehicle.width ||
+    42;
+
+
+const height =
+    vehicle.height ||
+    76;
+
 
 const color =
     vehicle.color ||
     COLORS.neonPink;
+
 
 drawCar(
 
@@ -1050,11 +1388,11 @@ drawCar(
 
     x,
 
-    vehicle.y,
+    y,
 
-    vehicle.width,
+    width,
 
-    vehicle.height,
+    height,
 
     color,
 
@@ -1063,6 +1401,268 @@ drawCar(
     vehicle.type
 
 );
+
+}
+
+/* =========================================================
+POWERUPS
+========================================================= */
+
+function drawPowerups(
+ctx,
+canvas
+) {
+
+if (
+    typeof entities ===
+    "undefined"
+) {
+
+    return;
+
+}
+
+
+if (
+    !Array.isArray(
+        entities.powerups
+    )
+) {
+
+    return;
+
+}
+
+
+for (
+    const powerup of
+    entities.powerups
+) {
+
+    if (!powerup) {
+
+        continue;
+
+    }
+
+
+    drawPowerup(
+
+        ctx,
+
+        powerup
+
+    );
+
+}
+
+}
+
+/* =========================================================
+POWERUP DRAWING
+========================================================= */
+
+function drawPowerup(
+ctx,
+powerup
+) {
+
+const lane =
+    Number.isFinite(
+        powerup.lane
+    )
+
+        ? powerup.lane
+
+        : 0;
+
+
+const x =
+    Number.isFinite(
+        powerup.x
+    )
+
+        ? powerup.x
+
+        : getLaneX(lane);
+
+
+const y =
+    Number.isFinite(
+        powerup.y
+    )
+
+        ? powerup.y
+
+        : 0;
+
+
+const type =
+    powerup.type ||
+    "shield";
+
+
+const pulse =
+    Math.sin(
+        renderState.time *
+        0.12
+    );
+
+
+const radius =
+    13 +
+    pulse * 2;
+
+
+const color =
+    type === "turbo"
+
+        ? COLORS.neonPink
+
+        : COLORS.lane;
+
+
+ctx.save();
+
+
+/*
+ * Glow.
+ */
+
+ctx.shadowBlur =
+    18;
+
+
+ctx.shadowColor =
+    color;
+
+
+ctx.fillStyle =
+    color;
+
+
+ctx.globalAlpha =
+    0.2;
+
+
+ctx.beginPath();
+
+
+ctx.arc(
+
+    x,
+    y,
+
+    radius + 5,
+
+    0,
+
+    Math.PI * 2
+
+);
+
+
+ctx.fill();
+
+
+/*
+ * Main orb.
+ */
+
+ctx.globalAlpha =
+    0.9;
+
+
+ctx.fillStyle =
+    color;
+
+
+ctx.beginPath();
+
+
+ctx.arc(
+
+    x,
+    y,
+
+    radius,
+
+    0,
+
+    Math.PI * 2
+
+);
+
+
+ctx.fill();
+
+
+/*
+ * Inner core.
+ */
+
+ctx.shadowBlur =
+    0;
+
+
+ctx.fillStyle =
+    COLORS.dark;
+
+
+ctx.beginPath();
+
+
+ctx.arc(
+
+    x,
+    y,
+
+    radius * 0.55,
+
+    0,
+
+    Math.PI * 2
+
+);
+
+
+ctx.fill();
+
+
+/*
+ * Symbol.
+ */
+
+ctx.fillStyle =
+    COLORS.white;
+
+
+ctx.font =
+    "bold 13px monospace";
+
+
+ctx.textAlign =
+    "center";
+
+
+ctx.textBaseline =
+    "middle";
+
+
+ctx.fillText(
+
+    type === "turbo"
+        ? "T"
+        : "S",
+
+    x,
+
+    y + 1
+
+);
+
+
+ctx.restore();
 
 }
 
@@ -1076,6 +1676,16 @@ canvas
 ) {
 
 if (
+    typeof gameState ===
+    "undefined"
+) {
+
+    return;
+
+}
+
+
+if (
     !gameState.player
 ) {
 
@@ -1083,23 +1693,100 @@ if (
 
 }
 
+
 const player =
     gameState.player;
 
-const x =
-    getLaneX(
-        player.targetLane
-    );
 
 /*
- * Update visual X.
-
- * Gameplay tetap mengontrol lane,
- * renderer hanya mengikuti.
+ * IMPORTANT:
+ *
+ * Player.js sekarang mengontrol
+ * posisi smooth player.x.
+ *
+ * Renderer TIDAK mengubah player.x.
  */
 
-player.x =
-    x;
+let x =
+    Number.isFinite(
+        player.x
+    )
+
+        ? player.x
+
+        : getLaneX(
+            player.targetLane
+        );
+
+
+let y =
+    Number.isFinite(
+        player.y
+    )
+
+        ? player.y
+
+        : 0;
+
+
+let lean =
+    0;
+
+
+/*
+ * Ambil visual position
+ * dari player.js.
+ */
+
+if (
+    typeof getPlayerDrawPosition ===
+    "function"
+) {
+
+    const drawPosition =
+        getPlayerDrawPosition();
+
+
+    if (
+        drawPosition &&
+        Number.isFinite(
+            drawPosition.x
+        )
+    ) {
+
+        x =
+            drawPosition.x;
+
+    }
+
+
+    if (
+        drawPosition &&
+        Number.isFinite(
+            drawPosition.y
+        )
+    ) {
+
+        y =
+            drawPosition.y;
+
+    }
+
+
+    if (
+        drawPosition &&
+        Number.isFinite(
+            drawPosition.lean
+        )
+    ) {
+
+        lean =
+            drawPosition.lean;
+
+    }
+
+}
+
 
 /*
  * Shadow.
@@ -1107,16 +1794,19 @@ player.x =
 
 ctx.save();
 
+
 ctx.fillStyle =
     "rgba(0,0,0,0.45)";
 
+
 ctx.beginPath();
+
 
 ctx.ellipse(
 
     x,
 
-    player.y +
+    y +
     player.height -
     3,
 
@@ -1133,9 +1823,12 @@ ctx.ellipse(
 
 );
 
+
 ctx.fill();
 
+
 ctx.restore();
+
 
 /*
  * Turbo trail.
@@ -1151,12 +1844,13 @@ if (
 
         x,
 
-        player.y +
+        y +
         player.height
 
     );
 
 }
+
 
 /*
  * Taxi.
@@ -1168,19 +1862,22 @@ drawCar(
 
     x,
 
-    player.y,
+    y,
 
     player.width,
 
     player.height,
 
-    "#00ffcc",
+    COLORS.lane,
 
     true,
 
-    "taxi"
+    "taxi",
+
+    lean
 
 );
+
 
 /*
  * Shield.
@@ -1197,9 +1894,8 @@ if (
 
         x,
 
-        player.y +
-        player.height /
-        2,
+        y +
+        player.height / 2,
 
         player.shields
 
@@ -1221,49 +1917,49 @@ width,
 height,
 primaryColor,
 isPlayer,
-type
+type,
+tilt = 0
 ) {
 
 ctx.save();
 
+
 /*
- * Tiny visual tilt.
-
- * Player sedikit miring ketika pindah lane.
+ * Position.
  */
-
-let tilt =
-    0;
-
-if (
-    isPlayer &&
-    typeof playerState !==
-    "undefined"
-) {
-
-    tilt =
-        playerState.visualTilt ||
-        0;
-
-}
 
 ctx.translate(
     x,
     y
 );
 
-ctx.rotate(
-    tilt
-);
+
+/*
+ * Tilt hanya visual.
+ */
+
+if (
+    isPlayer
+) {
+
+    ctx.rotate(
+        tilt
+    );
+
+}
+
 
 const w =
     width;
 
+
 const h =
     height;
 
+
 const left =
     -w / 2;
+
 
 /*
  * Shadow.
@@ -1271,6 +1967,7 @@ const left =
 
 ctx.fillStyle =
     "rgba(0,0,0,0.55)";
+
 
 ctx.fillRect(
 
@@ -1280,12 +1977,16 @@ ctx.fillRect(
 
     w + 10,
 
-    h - 10
+    Math.max(
+        10,
+        h - 10
+    )
 
 );
 
+
 /*
- * Tires.
+ * Wheels.
  */
 
 drawWheel(
@@ -1294,11 +1995,13 @@ drawWheel(
     17
 );
 
+
 drawWheel(
     ctx,
     w / 2 + 5,
     17
 );
+
 
 drawWheel(
     ctx,
@@ -1306,11 +2009,13 @@ drawWheel(
     h - 35
 );
 
+
 drawWheel(
     ctx,
     w / 2 + 5,
     h - 35
 );
+
 
 /*
  * Main body.
@@ -1319,17 +2024,27 @@ drawWheel(
 ctx.fillStyle =
     primaryColor;
 
+
 ctx.beginPath();
 
+
 ctx.moveTo(
+
     left + 8,
+
     2
+
 );
 
+
 ctx.lineTo(
+
     w / 2 - 8,
+
     2
+
 );
+
 
 ctx.quadraticCurveTo(
 
@@ -1343,10 +2058,15 @@ ctx.quadraticCurveTo(
 
 );
 
+
 ctx.lineTo(
+
     w / 2 - 3,
+
     h - 8
+
 );
+
 
 ctx.quadraticCurveTo(
 
@@ -1360,10 +2080,15 @@ ctx.quadraticCurveTo(
 
 );
 
+
 ctx.lineTo(
+
     left,
+
     25
+
 );
+
 
 ctx.quadraticCurveTo(
 
@@ -1377,9 +2102,12 @@ ctx.quadraticCurveTo(
 
 );
 
+
 ctx.closePath();
 
+
 ctx.fill();
+
 
 /*
  * Neon outline.
@@ -1387,23 +2115,34 @@ ctx.fill();
 
 ctx.strokeStyle =
     isPlayer
-        ? "#ffffff"
+
+        ? COLORS.white
+
         : primaryColor;
+
 
 ctx.lineWidth =
     isPlayer
+
         ? 1.8
+
         : 1.3;
+
 
 ctx.shadowBlur =
     isPlayer
+
         ? 10
+
         : 6;
+
 
 ctx.shadowColor =
     primaryColor;
 
+
 ctx.stroke();
+
 
 /*
  * Hood.
@@ -1412,13 +2151,17 @@ ctx.stroke();
 ctx.shadowBlur =
     0;
 
+
 ctx.fillStyle =
     isPlayer
+
         ? "#00b38f"
+
         : darkenColor(
             primaryColor,
             0.45
         );
+
 
 ctx.fillRect(
 
@@ -1432,6 +2175,7 @@ ctx.fillRect(
 
 );
 
+
 /*
  * Windshield.
  */
@@ -1439,31 +2183,51 @@ ctx.fillRect(
 ctx.fillStyle =
     "#05070c";
 
+
 ctx.beginPath();
 
+
 ctx.moveTo(
+
     left + 6,
+
     23
+
 );
 
+
 ctx.lineTo(
+
     w / 2 - 6,
+
     23
+
 );
 
+
 ctx.lineTo(
+
     w / 2 - 4,
+
     42
+
 );
 
+
 ctx.lineTo(
+
     left + 4,
+
     42
+
 );
+
 
 ctx.closePath();
 
+
 ctx.fill();
+
 
 /*
  * Windshield highlight.
@@ -1472,22 +2236,34 @@ ctx.fill();
 ctx.strokeStyle =
     "rgba(255,255,255,0.18)";
 
+
 ctx.lineWidth =
     1;
 
+
 ctx.beginPath();
 
+
 ctx.moveTo(
+
     left + 8,
+
     25
+
 );
+
 
 ctx.lineTo(
+
     w / 2 - 8,
+
     25
+
 );
 
+
 ctx.stroke();
+
 
 /*
  * Cabin.
@@ -1496,8 +2272,10 @@ ctx.stroke();
 ctx.fillStyle =
     primaryColor;
 
+
 ctx.globalAlpha =
     0.85;
+
 
 ctx.fillRect(
 
@@ -1511,8 +2289,10 @@ ctx.fillRect(
 
 );
 
+
 ctx.globalAlpha =
     1;
+
 
 /*
  * Rear window.
@@ -1520,6 +2300,7 @@ ctx.globalAlpha =
 
 ctx.fillStyle =
     "#05070c";
+
 
 ctx.fillRect(
 
@@ -1533,6 +2314,7 @@ ctx.fillRect(
 
 );
 
+
 /*
  * Taxi roof sign.
  */
@@ -1542,13 +2324,16 @@ if (
 ) {
 
     ctx.fillStyle =
-        "#ff007f";
+        COLORS.neonPink;
+
 
     ctx.shadowBlur =
         10;
 
+
     ctx.shadowColor =
-        "#ff007f";
+        COLORS.neonPink;
+
 
     ctx.fillRect(
 
@@ -1562,20 +2347,26 @@ if (
 
     );
 
+
     ctx.shadowBlur =
         0;
 
+
     ctx.fillStyle =
-        "#ffffff";
+        COLORS.white;
+
 
     ctx.font =
-        "bold 9px 'VT323', monospace";
+        "bold 9px monospace";
+
 
     ctx.textAlign =
         "center";
 
+
     ctx.textBaseline =
         "middle";
+
 
     ctx.fillText(
 
@@ -1589,22 +2380,30 @@ if (
 
 }
 
+
 /*
- * Headlights / rear lights.
+ * Lights.
  */
 
 if (
     isPlayer
 ) {
 
+    /*
+     * Headlights.
+     */
+
     ctx.fillStyle =
-        "#fff36b";
+        COLORS.yellow;
+
 
     ctx.shadowBlur =
         8;
 
+
     ctx.shadowColor =
         "#ffff00";
+
 
     ctx.fillRect(
 
@@ -1617,6 +2416,7 @@ if (
         5
 
     );
+
 
     ctx.fillRect(
 
@@ -1632,14 +2432,21 @@ if (
 
 } else {
 
+    /*
+     * Rear lights.
+     */
+
     ctx.fillStyle =
         "#ff3030";
+
 
     ctx.shadowBlur =
         8;
 
+
     ctx.shadowColor =
         "#ff0000";
+
 
     ctx.fillRect(
 
@@ -1652,6 +2459,7 @@ if (
         5
 
     );
+
 
     ctx.fillRect(
 
@@ -1666,6 +2474,90 @@ if (
     );
 
 }
+
+
+/*
+ * Traffic type detail.
+ */
+
+if (
+    !isPlayer &&
+    type === "police"
+) {
+
+    drawPoliceLight(
+        ctx,
+        w,
+        h
+    );
+
+}
+
+
+ctx.restore();
+
+}
+
+/* =========================================================
+POLICE LIGHT
+========================================================= */
+
+function drawPoliceLight(
+ctx,
+width,
+height
+) {
+
+const pulse =
+    Math.floor(
+        renderState.time /
+        8
+    ) %
+    2;
+
+
+ctx.save();
+
+
+ctx.shadowBlur =
+    8;
+
+
+if (
+    pulse === 0
+) {
+
+    ctx.fillStyle =
+        COLORS.neonBlue;
+
+
+    ctx.shadowColor =
+        COLORS.neonBlue;
+
+} else {
+
+    ctx.fillStyle =
+        COLORS.neonPink;
+
+
+    ctx.shadowColor =
+        COLORS.neonPink;
+
+}
+
+
+ctx.fillRect(
+
+    -8,
+
+    height * 0.48,
+
+    16,
+
+    4
+
+);
+
 
 ctx.restore();
 
@@ -1683,8 +2575,10 @@ y
 
 ctx.save();
 
+
 ctx.fillStyle =
     "#020204";
+
 
 ctx.fillRect(
 
@@ -1698,8 +2592,10 @@ ctx.fillRect(
 
 );
 
+
 ctx.fillStyle =
     "#687386";
+
 
 ctx.fillRect(
 
@@ -1712,6 +2608,7 @@ ctx.fillRect(
     9
 
 );
+
 
 ctx.restore();
 
@@ -1733,90 +2630,121 @@ const pulse =
         0.25
     );
 
+
 ctx.save();
+
 
 ctx.translate(
     x,
     y
 );
 
+
 /*
  * Outer flame.
  */
 
 ctx.fillStyle =
-    "#ff007f";
+    COLORS.neonPink;
+
 
 ctx.shadowBlur =
     18;
 
+
 ctx.shadowColor =
-    "#ff007f";
+    COLORS.neonPink;
+
 
 ctx.beginPath();
+
 
 ctx.moveTo(
     -10,
     0
 );
 
+
 ctx.lineTo(
     10,
     0
 );
 
+
 ctx.lineTo(
+
     6,
+
     24 +
     pulse * 5
+
 );
+
 
 ctx.lineTo(
     0,
     17
 );
 
+
 ctx.lineTo(
+
     -6,
+
     24 +
     pulse * 5
+
 );
+
 
 ctx.closePath();
 
+
 ctx.fill();
+
 
 /*
  * Inner flame.
  */
 
 ctx.fillStyle =
-    "#ffb86c";
+    COLORS.neonOrange;
+
 
 ctx.shadowColor =
-    "#ffb86c";
+    COLORS.neonOrange;
+
 
 ctx.beginPath();
+
 
 ctx.moveTo(
     -5,
     0
 );
 
+
 ctx.lineTo(
     5,
     0
 );
 
+
 ctx.lineTo(
+
     0,
+
     20 +
     pulse * 4
+
 );
+
 
 ctx.closePath();
 
+
 ctx.fill();
+
 
 ctx.restore();
 
@@ -1839,28 +2767,37 @@ const pulse =
         0.08
     );
 
+
 const radius =
     45 +
     pulse * 2;
 
+
 ctx.save();
+
 
 ctx.globalAlpha =
     0.45;
 
+
 ctx.strokeStyle =
-    "#00ffcc";
+    COLORS.lane;
+
 
 ctx.lineWidth =
     2.5;
 
+
 ctx.shadowBlur =
     15;
 
+
 ctx.shadowColor =
-    "#00ffcc";
+    COLORS.lane;
+
 
 ctx.beginPath();
+
 
 ctx.arc(
 
@@ -1876,15 +2813,20 @@ ctx.arc(
 
 );
 
+
 ctx.stroke();
 
+
 /*
- * Small shield nodes.
+ * Shield nodes.
  */
 
 for (
     let i = 0;
-    i < shields;
+
+    i <
+    shields;
+
     i++
 ) {
 
@@ -1903,23 +2845,29 @@ for (
             )
         );
 
+
     const nodeX =
         x +
         Math.cos(angle) *
         radius;
+
 
     const nodeY =
         y +
         Math.sin(angle) *
         radius;
 
+
     ctx.globalAlpha =
         0.9;
 
+
     ctx.fillStyle =
-        "#00ffcc";
+        COLORS.lane;
+
 
     ctx.beginPath();
+
 
     ctx.arc(
 
@@ -1935,9 +2883,11 @@ for (
 
     );
 
+
     ctx.fill();
 
 }
+
 
 ctx.restore();
 
@@ -1952,6 +2902,18 @@ ctx,
 canvas
 ) {
 
+const width =
+    canvas.gameWidth ||
+    canvas.clientWidth ||
+    canvas.width;
+
+
+const height =
+    canvas.gameHeight ||
+    canvas.clientHeight ||
+    canvas.height;
+
+
 /*
  * Vignette.
  */
@@ -1963,45 +2925,51 @@ if (
     const vignette =
         ctx.createRadialGradient(
 
-            canvas.width / 2,
-            canvas.height / 2,
-            canvas.height * 0.2,
+            width / 2,
+            height / 2,
+            height * 0.2,
 
-            canvas.width / 2,
-            canvas.height / 2,
-            canvas.height * 0.8
+            width / 2,
+            height / 2,
+            height * 0.8
 
         );
+
 
     vignette.addColorStop(
         0,
         "rgba(0,0,0,0)"
     );
 
+
     vignette.addColorStop(
         0.75,
         "rgba(0,0,0,0.08)"
     );
+
 
     vignette.addColorStop(
         1,
         "rgba(0,0,0,0.5)"
     );
 
+
     ctx.fillStyle =
         vignette;
+
 
     ctx.fillRect(
 
         0,
         0,
 
-        canvas.width,
-        canvas.height
+        width,
+        height
 
     );
 
 }
+
 
 /*
  * CRT scanlines.
@@ -2009,15 +2977,21 @@ if (
 
 ctx.save();
 
+
 ctx.globalAlpha =
     0.08;
+
 
 ctx.fillStyle =
     "#000000";
 
+
 for (
     let y = 0;
-    y < canvas.height;
+
+    y <
+    height;
+
     y += 4
 ) {
 
@@ -2027,13 +3001,14 @@ for (
 
         y,
 
-        canvas.width,
+        width,
 
         1
 
     );
 
 }
+
 
 ctx.restore();
 
@@ -2047,11 +3022,17 @@ function getRoadLeft(
 canvas
 ) {
 
+const width =
+    canvas.gameWidth ||
+    canvas.clientWidth ||
+    canvas.width;
+
+
 return Math.max(
 
     18,
 
-    canvas.width *
+    width *
     0.09
 
 );
@@ -2062,11 +3043,17 @@ function getRoadRight(
 canvas
 ) {
 
+const width =
+    canvas.gameWidth ||
+    canvas.clientWidth ||
+    canvas.width;
+
+
 return Math.min(
 
-    canvas.width - 18,
+    width - 18,
 
-    canvas.width *
+    width *
     0.91
 
 );
@@ -2084,21 +3071,38 @@ canvas
 const left =
     getRoadLeft(canvas);
 
+
 const right =
     getRoadRight(canvas);
 
+
 const laneCount =
-    GAME_CONFIG.ROAD.laneCount;
+    (
+        typeof GAME_CONFIG !==
+        "undefined" &&
+        GAME_CONFIG.ROAD &&
+        GAME_CONFIG.ROAD.laneCount
+    )
+
+        ? GAME_CONFIG.ROAD.laneCount
+
+        : 3;
+
 
 const width =
     right -
     left;
 
+
 const lanes = [];
+
 
 for (
     let i = 0;
-    i < laneCount;
+
+    i <
+    laneCount;
+
     i++
 ) {
 
@@ -2116,6 +3120,7 @@ for (
 
 }
 
+
 return lanes;
 
 }
@@ -2128,14 +3133,11 @@ function getLaneX(
 lane
 ) {
 
-/*
- * Canvas global tersedia dari game.
- */
-
 const canvas =
     document.getElementById(
         "gameCanvas"
     );
+
 
 if (!canvas) {
 
@@ -2143,10 +3145,21 @@ if (!canvas) {
 
 }
 
+
 const lanes =
     getLanePositions(
         canvas
     );
+
+
+if (
+    lanes.length === 0
+) {
+
+    return 0;
+
+}
+
 
 const safeLane =
     Math.max(
@@ -2157,11 +3170,14 @@ const safeLane =
 
             lanes.length - 1,
 
-            lane
+            Number.isFinite(lane)
+                ? lane
+                : 0
 
         )
 
     );
+
 
 return lanes[
     safeLane
@@ -2179,7 +3195,7 @@ amount
 ) {
 
 /*
- * Support warna HEX sederhana.
+ * Support HEX sederhana.
  */
 
 if (
@@ -2191,8 +3207,10 @@ if (
 
 }
 
+
 const hex =
     color.substring(1);
+
 
 if (
     hex.length !== 6
@@ -2202,52 +3220,89 @@ if (
 
 }
 
+
 const r =
     parseInt(
-        hex.substring(0, 2),
+
+        hex.substring(
+            0,
+            2
+        ),
+
         16
+
     );
+
 
 const g =
     parseInt(
-        hex.substring(2, 4),
+
+        hex.substring(
+            2,
+            4
+        ),
+
         16
+
     );
+
 
 const b =
     parseInt(
-        hex.substring(4, 6),
+
+        hex.substring(
+            4,
+            6
+        ),
+
         16
+
     );
+
+
+const factor =
+    Math.max(
+
+        0,
+
+        Math.min(
+
+            1,
+
+            1 -
+            amount
+
+        )
+
+    );
+
 
 const nr =
     Math.floor(
         r *
-        (
-            1 -
-            amount
-        )
+        factor
     );
+
 
 const ng =
     Math.floor(
         g *
-        (
-            1 -
-            amount
-        )
+        factor
     );
+
 
 const nb =
     Math.floor(
         b *
-        (
-            1 -
-            amount
-        )
+        factor
     );
 
-return `rgb(${nr}, ${ng}, ${nb})`;
+
+return (
+
+    `rgb(${nr}, ${ng}, ${nb})`
+
+);
 
 }
 
@@ -2265,12 +3320,12 @@ if (!canvas) {
 
 }
 
-/*
- * Semua posisi dihitung relatif terhadap
- * ukuran canvas.
 
- * Jadi renderer otomatis responsif
- * untuk HP maupun laptop.
+/*
+ * Renderer menggunakan ukuran canvas
+ * secara dinamis.
+
+ * Tidak perlu mengubah state di sini.
  */
 
 }
@@ -2288,12 +3343,18 @@ return {
 
     roadOffset:
         Number(
-            renderState.roadOffset.toFixed(2)
+
+            renderState.roadOffset
+                .toFixed(2)
+
         ),
 
     skylineOffset:
         Number(
-            renderState.skylineOffset.toFixed(2)
+
+            renderState.skylineOffset
+                .toFixed(2)
+
         )
 
 };
