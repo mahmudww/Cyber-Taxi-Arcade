@@ -178,6 +178,8 @@ const entities = {
 
 obstacles: [],
 
+traffic: [],
+
 powerups: [],
 
 particles: [],
@@ -187,6 +189,7 @@ floatingTexts: [],
 roadEffects: []
 
 };
+
 
 /* =========================================================
 RESET GAME STATE
@@ -200,7 +203,8 @@ Posisi dan ukuran player ditangani oleh player.js.
 ========================================================= */
 
 function resetGameState() {
-
+entities.traffic.length = 0;
+   
 /* =====================================================
    FLOW
    ===================================================== */
@@ -341,6 +345,8 @@ gameState.fps = 60;
    ===================================================== */
 
 entities.obstacles.length = 0;
+
+entities.traffic.length = 0;
 
 entities.powerups.length = 0;
 
