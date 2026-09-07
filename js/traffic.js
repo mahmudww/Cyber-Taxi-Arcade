@@ -613,7 +613,7 @@ const vehicle = {
         typeName,
 
     x:
-        0,
+    getLaneX(lane),
 
     y:
         y,
