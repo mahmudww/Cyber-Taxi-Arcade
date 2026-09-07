@@ -1,17 +1,22 @@
 /* =========================================================
 CYBER TAXI
 GAME STATE
+
 File ini menyimpan SEMUA kondisi game.
 
-Jangan taruh:
+State = "game sedang dalam kondisi apa?"
+
+State TIDAK bertanggung jawab terhadap:
 
 rendering
 collision logic
 audio
-input logic
-di sini.
-
-State = "game sedang dalam kondisi apa?"
+input
+spawning
+Player movement → player.js
+Traffic → traffic.js
+Powerups → powerups.js
+Effects → effects.js
 ========================================================= */
 
 /* =========================================================
@@ -37,11 +42,13 @@ isInitialized: false,
    SCORE
    ===================================================== */
 
-score: GAME_CONFIG.SCORE.startingScore,
+score:
+    GAME_CONFIG.SCORE.startingScore,
 
 highScore: 0,
 
-combo: GAME_CONFIG.COMBO.startingCombo,
+combo:
+    GAME_CONFIG.COMBO.startingCombo,
 
 comboTimer: 0,
 
@@ -54,9 +61,11 @@ lastScoreMilestone: 0,
 
 player: {
 
-    lane: GAME_CONFIG.PLAYER.startingLane,
+    lane:
+        GAME_CONFIG.PLAYER.startingLane,
 
-    targetLane: GAME_CONFIG.PLAYER.startingLane,
+    targetLane:
+        GAME_CONFIG.PLAYER.startingLane,
 
     x: 0,
 
@@ -64,9 +73,11 @@ player: {
 
     y: 0,
 
-    width: GAME_CONFIG.ROAD.playerWidth,
+    width:
+        GAME_CONFIG.ROAD.playerWidth,
 
-    height: GAME_CONFIG.ROAD.playerHeight,
+    height:
+        GAME_CONFIG.ROAD.playerHeight,
 
     shields: 0,
 
@@ -81,9 +92,11 @@ player: {
    SPEED
    ===================================================== */
 
-speed: GAME_CONFIG.SPEED.startingSpeed,
+speed:
+    GAME_CONFIG.SPEED.startingSpeed,
 
-currentSpeed: GAME_CONFIG.SPEED.startingSpeed,
+currentSpeed:
+    GAME_CONFIG.SPEED.startingSpeed,
 
 turboActive: false,
 
@@ -103,7 +116,8 @@ roadOffset: 0,
 
 spawnTimer: 0,
 
-powerupSpawnTimer: 0,
+powerupSpawnTimer:
+    GAME_CONFIG.POWERUPS.startingDelay,
 
 trafficCount: 0,
 
@@ -153,8 +167,11 @@ fps: 60
 
 /* =========================================================
 ENTITY ARRAYS
+
 Entity yang bergerak di dunia game disimpan terpisah
-dari gameState utama supaya mudah dikelola.
+dari gameState utama.
+
+Ini membuat state lebih mudah dikelola.
 ========================================================= */
 
 const entities = {
@@ -173,10 +190,20 @@ roadEffects: []
 
 /* =========================================================
 RESET GAME STATE
-Dipanggil setiap kali pemain menekan PLAY AGAIN.
+
+Dipanggil setiap kali pemain memulai game baru.
+
+IMPORTANT:
+Fungsi ini TIDAK membutuhkan canvas.
+
+Posisi dan ukuran player ditangani oleh player.js.
 ========================================================= */
 
-function resetGameState(canvas) {
+function resetGameState() {
+
+/* =====================================================
+   FLOW
+   ===================================================== */
 
 gameState.isPlaying = false;
 
@@ -184,10 +211,12 @@ gameState.isPaused = false;
 
 gameState.isGameOver = false;
 
+gameState.isInitialized = false;
 
-/* -----------------------------------------------------
+
+/* =====================================================
    SCORE
-   ----------------------------------------------------- */
+   ===================================================== */
 
 gameState.score =
     GAME_CONFIG.SCORE.startingScore;
@@ -200,9 +229,9 @@ gameState.comboTimer = 0;
 gameState.lastScoreMilestone = 0;
 
 
-/* -----------------------------------------------------
+/* =====================================================
    PLAYER
-   ----------------------------------------------------- */
+   ===================================================== */
 
 gameState.player.lane =
     GAME_CONFIG.PLAYER.startingLane;
@@ -214,8 +243,7 @@ gameState.player.x = 0;
 
 gameState.player.targetX = 0;
 
-gameState.player.y =
-    getPlayerY(canvas.height);
+gameState.player.y = 0;
 
 gameState.player.width =
     GAME_CONFIG.ROAD.playerWidth;
@@ -230,9 +258,9 @@ gameState.player.isInvulnerable = false;
 gameState.player.invulnerabilityTimer = 0;
 
 
-/* -----------------------------------------------------
+/* =====================================================
    SPEED
-   ----------------------------------------------------- */
+   ===================================================== */
 
 gameState.speed =
     GAME_CONFIG.SPEED.startingSpeed;
@@ -245,16 +273,16 @@ gameState.turboActive = false;
 gameState.turboTimer = 0;
 
 
-/* -----------------------------------------------------
+/* =====================================================
    ROAD
-   ----------------------------------------------------- */
+   ===================================================== */
 
 gameState.roadOffset = 0;
 
 
-/* -----------------------------------------------------
+/* =====================================================
    SPAWNING
-   ----------------------------------------------------- */
+   ===================================================== */
 
 gameState.spawnTimer = 0;
 
@@ -264,18 +292,18 @@ gameState.powerupSpawnTimer =
 gameState.trafficCount = 0;
 
 
-/* -----------------------------------------------------
+/* =====================================================
    TIME
-   ----------------------------------------------------- */
+   ===================================================== */
 
 gameState.elapsedFrames = 0;
 
 gameState.elapsedSeconds = 0;
 
 
-/* -----------------------------------------------------
+/* =====================================================
    EFFECTS
-   ----------------------------------------------------- */
+   ===================================================== */
 
 gameState.screenShakeTimer = 0;
 
@@ -286,18 +314,20 @@ gameState.flashTimer = 0;
 gameState.flashColor = "#ffffff";
 
 
-/* -----------------------------------------------------
+/* =====================================================
    POWERUP DISPLAY
-   ----------------------------------------------------- */
+   ===================================================== */
 
-gameState.activePowerupName = "READY";
+gameState.activePowerupName =
+    "READY";
 
-gameState.activePowerupType = null;
+gameState.activePowerupType =
+    null;
 
 
-/* -----------------------------------------------------
+/* =====================================================
    PERFORMANCE
-   ----------------------------------------------------- */
+   ===================================================== */
 
 gameState.lastFrameTime = 0;
 
@@ -306,9 +336,9 @@ gameState.deltaTime = 0;
 gameState.fps = 60;
 
 
-/* -----------------------------------------------------
+/* =====================================================
    CLEAR ENTITIES
-   ----------------------------------------------------- */
+   ===================================================== */
 
 entities.obstacles.length = 0;
 
@@ -321,28 +351,21 @@ entities.floatingTexts.length = 0;
 entities.roadEffects.length = 0;
 
 
-/* -----------------------------------------------------
-   UPDATE INITIAL PLAYER POSITION
-   ----------------------------------------------------- */
-
-updatePlayerPosition(canvas);
-
-
-/* -----------------------------------------------------
+/* =====================================================
    LOAD HIGH SCORE
-   ----------------------------------------------------- */
+   ===================================================== */
 
 loadHighScore();
 
 }
 
 /* =========================================================
-START GAME
+START GAME STATE
 ========================================================= */
 
-function startGameState(canvas) {
+function startGameState() {
 
-resetGameState(canvas);
+resetGameState();
 
 gameState.isPlaying = true;
 
@@ -360,7 +383,9 @@ PAUSE GAME
 
 function pauseGameState() {
 
-if (!gameState.isPlaying) return;
+if (!gameState.isPlaying) {
+    return;
+}
 
 gameState.isPaused = true;
 
@@ -372,7 +397,9 @@ RESUME GAME
 
 function resumeGameState() {
 
-if (!gameState.isPlaying) return;
+if (!gameState.isPlaying) {
+    return;
+}
 
 gameState.isPaused = false;
 
@@ -384,7 +411,9 @@ TOGGLE PAUSE
 
 function togglePauseState() {
 
-if (!gameState.isPlaying) return;
+if (!gameState.isPlaying) {
+    return;
+}
 
 gameState.isPaused =
     !gameState.isPaused;
@@ -404,16 +433,23 @@ gameState.isPaused = false;
 gameState.isGameOver = true;
 
 
-/* -----------------------------------------------------
+/* =====================================================
    HIGH SCORE
-   ----------------------------------------------------- */
+   ===================================================== */
 
 const finalScore =
-    Math.floor(gameState.score);
+    Math.floor(
+        gameState.score
+    );
 
-if (finalScore > gameState.highScore) {
 
-    gameState.highScore = finalScore;
+if (
+    finalScore >
+    gameState.highScore
+) {
+
+    gameState.highScore =
+        finalScore;
 
     saveHighScore();
 
@@ -422,54 +458,24 @@ if (finalScore > gameState.highScore) {
 }
 
 /* =========================================================
-PLAYER POSITION
+MOVE PLAYER STATE
+
+Player.js bertanggung jawab terhadap smoothing.
+State hanya menyimpan target lane.
 ========================================================= */
 
-function updatePlayerPosition(canvas) {
+function setPlayerLane(
+lane,
+canvas
+) {
 
-const lanes =
-    getLanePositions(canvas.width);
-
-const lane =
-    clamp(
-        gameState.player.targetLane,
-        0,
-        GAME_CONFIG.ROAD.laneCount - 1
-    );
-
-
-gameState.player.targetX =
-    lanes[lane];
-
-
-/*
- * Untuk sekarang posisi player langsung mengikuti lane.
- *
- * Nanti player.js akan menambahkan smoothing,
- * sehingga perpindahan lane terasa lebih polished.
- */
-
-gameState.player.x =
-    gameState.player.targetX;
-
-gameState.player.lane =
-    lane;
-
-
-gameState.player.y =
-    getPlayerY(canvas.height);
-
+if (!gameState.isPlaying) {
+    return;
 }
 
-/* =========================================================
-MOVE PLAYER STATE
-========================================================= */
-
-function setPlayerLane(lane, canvas) {
-
-if (!gameState.isPlaying) return;
-
-if (gameState.isPaused) return;
+if (gameState.isPaused) {
+    return;
+}
 
 
 const maxLane =
@@ -498,12 +504,29 @@ gameState.player.targetLane =
     newLane;
 
 
-const lanes =
-    getLanePositions(canvas.width);
+/*
+ * Canvas tetap diterima untuk kompatibilitas
+ * dengan input.js versi sekarang.
+ *
+ * Player.js akan menghitung posisi aktual.
+ */
+
+if (canvas) {
+
+    const lanes =
+        getLanePositions(
+            canvas.width
+        );
 
 
-gameState.player.targetX =
-    lanes[newLane];
+    if (lanes[newLane] !== undefined) {
+
+        gameState.player.targetX =
+            lanes[newLane];
+
+    }
+
+}
 
 }
 
@@ -511,11 +534,18 @@ gameState.player.targetX =
 MOVE PLAYER RELATIVE
 ========================================================= */
 
-function movePlayerState(direction, canvas) {
+function movePlayerState(
+direction,
+canvas
+) {
 
-if (!gameState.isPlaying) return;
+if (!gameState.isPlaying) {
+    return;
+}
 
-if (gameState.isPaused) return;
+if (gameState.isPaused) {
+    return;
+}
 
 
 const newLane =
@@ -536,17 +566,20 @@ ADD SCORE
 
 function addScore(amount) {
 
-if (!gameState.isPlaying) return;
+if (!gameState.isPlaying) {
+    return;
+}
 
-if (amount <= 0) return;
+if (amount <= 0) {
+    return;
+}
 
 
 gameState.score += amount;
 
 
 /*
- * Jangan biarkan score menjadi negatif
- * karena sistem bonus atau penalty di masa depan.
+ * Score tidak boleh negatif.
  */
 
 if (gameState.score < 0) {
@@ -561,16 +594,28 @@ if (gameState.score < 0) {
 COMBO
 ========================================================= */
 
-function increaseCombo(amount = 1) {
+function increaseCombo(
+amount = 1
+) {
 
-if (!GAME_CONFIG.COMBO.enabled) return;
+if (
+    !GAME_CONFIG.COMBO.enabled
+) {
+
+    return;
+
+}
 
 
 gameState.combo =
     clamp(
+
         gameState.combo + amount,
+
         0,
+
         GAME_CONFIG.COMBO.maximumCombo
+
     );
 
 
@@ -578,6 +623,10 @@ gameState.comboTimer =
     GAME_CONFIG.COMBO.comboTimeout;
 
 }
+
+/* =========================================================
+RESET COMBO
+========================================================= */
 
 function resetCombo() {
 
@@ -594,19 +643,36 @@ COMBO UPDATE
 
 function updateComboTimer() {
 
-if (!GAME_CONFIG.COMBO.enabled) return;
+if (
+    !GAME_CONFIG.COMBO.enabled
+) {
 
-if (gameState.combo <= 0) return;
+    return;
+
+}
 
 
-if (gameState.comboTimer > 0) {
+if (
+    gameState.combo <= 0
+) {
+
+    return;
+
+}
+
+
+if (
+    gameState.comboTimer > 0
+) {
 
     gameState.comboTimer--;
 
 }
 
 
-if (gameState.comboTimer <= 0) {
+if (
+    gameState.comboTimer <= 0
+) {
 
     resetCombo();
 
@@ -620,26 +686,36 @@ TURBO
 
 function activateTurbo() {
 
-gameState.turboActive = true;
+gameState.turboActive =
+    true;
+
 
 gameState.turboTimer =
     GAME_CONFIG.POWERUPS.turboDuration;
 
+
 gameState.activePowerupType =
     "turbo";
+
 
 gameState.activePowerupName =
     "TURBO BOOST!";
 
 }
 
+/* =========================================================
+DEACTIVATE TURBO
+========================================================= */
+
 function deactivateTurbo() {
 
-gameState.turboActive = false;
+gameState.turboActive =
+    false;
 
 gameState.turboTimer = 0;
 
-gameState.activePowerupType = null;
+gameState.activePowerupType =
+    null;
 
 gameState.activePowerupName =
     "NORMAL";
@@ -652,17 +728,27 @@ TURBO TIMER
 
 function updateTurboTimer() {
 
-if (!gameState.turboActive) return;
+if (
+    !gameState.turboActive
+) {
+
+    return;
+
+}
 
 
-if (gameState.turboTimer > 0) {
+if (
+    gameState.turboTimer > 0
+) {
 
     gameState.turboTimer--;
 
 }
 
 
-if (gameState.turboTimer <= 0) {
+if (
+    gameState.turboTimer <= 0
+) {
 
     deactivateTurbo();
 
@@ -674,27 +760,40 @@ if (gameState.turboTimer <= 0) {
 SHIELD
 ========================================================= */
 
-function addShield(amount = 1) {
+function addShield(
+amount = 1
+) {
 
 gameState.player.shields =
     clamp(
+
         gameState.player.shields + amount,
+
         0,
+
         GAME_CONFIG.POWERUPS.maximumShields
+
     );
 
 
 gameState.activePowerupType =
     "shield";
 
+
 gameState.activePowerupName =
     `SHIELD +${amount}`;
 
 }
 
+/* =========================================================
+REMOVE SHIELD
+========================================================= */
+
 function removeShield() {
 
-if (gameState.player.shields <= 0) {
+if (
+    gameState.player.shields <= 0
+) {
 
     return false;
 
@@ -711,19 +810,28 @@ return true;
 INVULNERABILITY
 ========================================================= */
 
-function activateInvulnerability(frames = 45) {
+function activateInvulnerability(
+frames = 45
+) {
 
 gameState.player.isInvulnerable =
     true;
+
 
 gameState.player.invulnerabilityTimer =
     frames;
 
 }
 
+/* =========================================================
+UPDATE INVULNERABILITY
+========================================================= */
+
 function updateInvulnerability() {
 
-if (!gameState.player.isInvulnerable) {
+if (
+    !gameState.player.isInvulnerable
+) {
 
     return;
 
@@ -761,15 +869,21 @@ intensity
 
 gameState.screenShakeTimer =
     Math.max(
+
         gameState.screenShakeTimer,
+
         duration
+
     );
 
 
 gameState.screenShakeIntensity =
     Math.max(
+
         gameState.screenShakeIntensity,
+
         intensity
+
     );
 
 }
@@ -811,6 +925,7 @@ duration = 8
 gameState.flashColor =
     color;
 
+
 gameState.flashTimer =
     duration;
 
@@ -822,7 +937,9 @@ UPDATE FLASH
 
 function updateFlash() {
 
-if (gameState.flashTimer > 0) {
+if (
+    gameState.flashTimer > 0
+) {
 
     gameState.flashTimer--;
 
@@ -836,9 +953,22 @@ GAME TIME
 
 function updateGameTime() {
 
-if (!gameState.isPlaying) return;
+if (
+    !gameState.isPlaying
+) {
 
-if (gameState.isPaused) return;
+    return;
+
+}
+
+
+if (
+    gameState.isPaused
+) {
+
+    return;
+
+}
 
 
 gameState.elapsedFrames++;
@@ -855,7 +985,9 @@ HIGH SCORE
 
 function loadHighScore() {
 
-if (!GAME_CONFIG.GAME.enableHighScore) {
+if (
+    !GAME_CONFIG.GAME.enableHighScore
+) {
 
     gameState.highScore = 0;
 
@@ -868,12 +1000,16 @@ try {
 
     const saved =
         localStorage.getItem(
+
             GAME_CONFIG.GAME.highScoreStorageKey
+
         );
 
 
     gameState.highScore =
-        saved ? Number(saved) : 0;
+        saved
+            ? Number(saved)
+            : 0;
 
 
     if (
@@ -893,6 +1029,7 @@ try {
         error
     );
 
+
     gameState.highScore = 0;
 
 }
@@ -905,7 +1042,9 @@ SAVE HIGH SCORE
 
 function saveHighScore() {
 
-if (!GAME_CONFIG.GAME.enableHighScore) {
+if (
+    !GAME_CONFIG.GAME.enableHighScore
+) {
 
     return;
 
@@ -919,9 +1058,11 @@ try {
         GAME_CONFIG.GAME.highScoreStorageKey,
 
         String(
+
             Math.floor(
                 gameState.highScore
             )
+
         )
 
     );
@@ -944,28 +1085,37 @@ CHECK NEW HIGH SCORE
 function isNewHighScore() {
 
 return (
-    Math.floor(gameState.score) >
+
+    Math.floor(
+        gameState.score
+    ) >
+
     gameState.highScore
+
 );
 
 }
 
 /* =========================================================
 RESET HIGH SCORE
+
 Tidak dipanggil oleh game normal.
 
-Bisa dipakai nanti kalau kita membuat
-Settings > Reset High Score.
+Bisa digunakan nanti untuk:
+Settings > Reset High Score
 ========================================================= */
 
 function resetHighScore() {
 
 gameState.highScore = 0;
 
+
 try {
 
     localStorage.removeItem(
+
         GAME_CONFIG.GAME.highScoreStorageKey
+
     );
 
 } catch (error) {
