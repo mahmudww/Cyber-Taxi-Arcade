@@ -143,6 +143,24 @@ if (
 
 
 renderState.time++;
+if (
+    typeof gameState !== "undefined" &&
+    gameState.isPlaying &&
+    !gameState.isPaused
+) {
+
+    const worldSpeed =
+        typeof getWorldSpeed === "function"
+            ? getWorldSpeed()
+            : (
+                gameState.speed ||
+                0
+            );
+
+    renderState.roadOffset +=
+        worldSpeed;
+
+}
 
 
 /*
