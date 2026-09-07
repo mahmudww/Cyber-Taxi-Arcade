@@ -115,15 +115,34 @@ UPDATE PLAYER DIMENSIONS
 
 function updatePlayerDimensions(canvas) {
 
-gameState.player.width =
-    GAME_CONFIG.ROAD.playerWidth;
+    /*
+     * Fallback ke canvas utama.
+     */
 
-gameState.player.height =
-    GAME_CONFIG.ROAD.playerHeight;
+    if (!canvas) {
+        canvas = document.getElementById("gameCanvas");
+    }
 
-gameState.player.y =
-    getPlayerY(canvas.height);
+    /*
+     * Safety check.
+     */
 
+    if (!canvas) {
+        console.error(
+            "[Cyber Taxi] Cannot update player dimensions: canvas not found."
+        );
+        return;
+    }
+
+
+    gameState.player.width =
+        GAME_CONFIG.ROAD.playerWidth;
+
+    gameState.player.height =
+        GAME_CONFIG.ROAD.playerHeight;
+
+    gameState.player.y =
+        getPlayerY(canvas.height);
 
 }
 
@@ -758,8 +777,27 @@ PLAYER RESET
 
 function resetPlayer(canvas) {
 
-initPlayer(canvas);
+    /*
+     * Jika canvas tidak diberikan oleh game.js,
+     * ambil canvas utama secara otomatis.
+     */
 
+    if (!canvas) {
+        canvas = document.getElementById("gameCanvas");
+    }
+
+    /*
+     * Safety check.
+     */
+
+    if (!canvas) {
+        console.error(
+            "[Cyber Taxi] Cannot reset player: game canvas not found."
+        );
+        return;
+    }
+
+    initPlayer(canvas);
 
 }
 
