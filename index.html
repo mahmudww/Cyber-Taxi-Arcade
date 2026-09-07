@@ -2,5213 +2,736 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0,
-        maximum-scale=1.0, user-scalable=no">
-
-    <title>CYBER TAXI // NEON RUN</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cyber Taxi Arcade</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-        :root {
-            --cyan: #00ffcc;
-            --cyan-soft: #00c9a7;
-            --pink: #ff007f;
-            --pink-hot: #ff2a9d;
-            --orange: #ffb86c;
-            --red: #ff3355;
-            --yellow: #fff000;
-            --bg: #030305;
-            --panel: rgba(7, 10, 16, .92);
-            --line: #1c2638;
-            --text: #d8fff7;
-        }
-
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
             user-select: none;
             -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
         }
-
-        html,
-        body {
+        body, html {
+            margin: 0;
+            padding: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden;
-            background: var(--bg);
-        }
-
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text);
+            background-color: #030305;
             font-family: 'VT323', monospace;
+            color: #00ffcc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
-
-        /* =========================
-           GAME SHELL
-        ========================== */
-
         #game-container {
             position: relative;
-            width: min(100vw, 430px);
-            height: 100dvh;
-            max-height: 900px;
-            overflow: hidden;
-
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            max-height: 100vh;
+            background: #090a0f;
             display: flex;
             flex-direction: column;
-
-            background:
-                radial-gradient(
-                    circle at 50% 35%,
-                    rgba(0,255,204,.045),
-                    transparent 42%
-                ),
-                #080b11;
-
-            border: 1px solid #253149;
-
-            box-shadow:
-                0 0 25px rgba(0,255,204,.12),
-                0 0 80px rgba(255,0,127,.05),
-                inset 0 0 30px rgba(0,0,0,.7);
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.25);
+            overflow: hidden;
+            border: 2px solid #1f293d;
         }
-
-        #game-container::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 20;
-
-            background:
-                linear-gradient(
-                    rgba(255,255,255,.015) 50%,
-                    transparent 50%
-                );
-
-            background-size: 100% 4px;
-            mix-blend-mode: overlay;
-        }
-
-        #game-container::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            z-index: 21;
-
-            box-shadow:
-                inset 0 0 80px rgba(0,0,0,.75),
-                inset 0 0 8px rgba(0,255,204,.12);
-        }
-
-        /* =========================
-           CANVAS
-        ========================== */
-
-        #gameCanvas {
+        canvas {
             display: block;
             width: 100%;
-            flex: 1;
-            min-height: 0;
-
-            background: #080c12;
-
-            image-rendering: auto;
+            flex-grow: 1;
+            background: #0d1117;
         }
-
-        /* =========================
-           HUD
-        ========================== */
-
         .ui-layer {
             position: absolute;
-            inset: 0 0 auto 0;
-
-            padding:
-                calc(10px + env(safe-area-inset-top))
-                12px
-                0;
-
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 12px 15px;
             display: flex;
             flex-direction: column;
-            gap: 7px;
-
+            gap: 6px;
             pointer-events: none;
-            z-index: 10;
+            z-index: 5;
         }
-
         .header-hud {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-
-            font-size: 25px;
-            line-height: 1;
-
-            letter-spacing: 2px;
+            font-size: 24px;
             font-weight: bold;
-
-            color: var(--cyan);
-
-            text-shadow:
-                0 0 5px rgba(0,255,204,.8),
-                0 0 14px rgba(0,255,204,.3);
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px rgba(0, 255, 204, 0.6);
         }
-
-        #speedDisplay {
-            color: var(--pink);
-            text-shadow:
-                0 0 6px rgba(255,0,127,.9),
-                0 0 15px rgba(255,0,127,.35);
-        }
-
         .status-hud {
-            min-height: 30px;
-
             display: flex;
-            align-items: center;
             justify-content: space-between;
-
-            padding: 5px 9px;
-
-            background:
-                linear-gradient(
-                    90deg,
-                    rgba(8,14,22,.94),
-                    rgba(13,18,28,.84)
-                );
-
-            border: 1px solid #253149;
-            border-left: 2px solid var(--cyan);
-
-            border-radius: 3px;
-
-            font-size: 17px;
-            letter-spacing: 1px;
-
-            box-shadow:
-                0 4px 15px rgba(0,0,0,.25),
-                inset 0 0 12px rgba(0,255,204,.025);
+            align-items: center;
+            font-size: 18px;
+            background: rgba(13, 17, 23, 0.85);
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid #1f293d;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
         }
-
-        #activePowerup {
-            color: var(--orange);
-            text-shadow: 0 0 6px rgba(255,184,108,.5);
-        }
-
-        /* =========================
-           MOBILE CONTROLS
-        ========================== */
-
         .mobile-controls {
-            position: relative;
-
             display: flex;
-            flex-shrink: 0;
-
             width: 100%;
-            height: 86px;
-
-            padding-bottom: env(safe-area-inset-bottom);
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #080b11,
-                    #030305
-                );
-
-            border-top: 2px solid #202b3d;
-
-            z-index: 15;
+            height: 90px;
+            background: #030305;
+            border-top: 2px solid #1f293d;
+            flex-shrink: 0;
         }
-
-        .mobile-controls::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 20%;
-            right: 20%;
-            height: 1px;
-
-            background: var(--cyan);
-            opacity: .25;
-
-            box-shadow: 0 0 10px var(--cyan);
-        }
-
         .control-btn {
             flex: 1;
-
-            border: 0;
-            outline: 0;
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #0c121b,
-                    #080b11
-                );
-
-            color: var(--cyan);
-
+            background: #0d1117;
+            border: none;
+            color: #00ffcc;
             font-family: 'VT323', monospace;
-            font-size: 29px;
+            font-size: 32px;
             letter-spacing: 2px;
-
-            text-shadow: 0 0 7px rgba(0,255,204,.5);
-
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-
-            transition:
-                background .08s ease,
-                color .08s ease,
-                transform .08s ease;
+            transition: background 0.1s;
         }
-
-        .control-btn + .control-btn {
-            border-left: 1px solid #202b3d;
-        }
-
         .control-btn:active {
-            color: #fff;
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #162532,
-                    #0b151c
-                );
-
-            box-shadow:
-                inset 0 0 20px rgba(0,255,204,.2),
-                0 0 12px rgba(0,255,204,.1);
-
-            transform: scale(.985);
+            background: #1f293d;
+            color: #ffffff;
+            box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.5);
         }
-
-        /* =========================
-           SCREENS
-        ========================== */
-
+        .control-btn:first-child {
+            border-right: 2px solid #1f293d;
+        }
         .screen {
             position: absolute;
-            inset: 0;
-
-            z-index: 30;
-
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 3, 5, 0.95);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-
-            padding: 24px;
-
             text-align: center;
-
-            background:
-                radial-gradient(
-                    circle at 50% 45%,
-                    rgba(255,0,127,.09),
-                    transparent 35%
-                ),
-                rgba(2,3,6,.96);
-
-            backdrop-filter: blur(2px);
+            padding: 20px;
+            z-index: 10;
         }
-
-        .screen.hidden {
-            display: none !important;
+        h1 {
+            font-size: 56px;
+            margin-bottom: 5px;
+            color: #ff007f;
+            text-shadow: 0 0 20px rgba(255, 0, 127, 0.7);
+            letter-spacing: 3px;
         }
-
-        .screen h1 {
-            margin: 0 0 4px;
-
-            color: var(--pink);
-
-            font-size: clamp(48px, 14vw, 66px);
-            line-height: .9;
-
-            letter-spacing: 4px;
-
-            text-shadow:
-                0 0 7px rgba(255,0,127,.95),
-                0 0 22px rgba(255,0,127,.65),
-                0 0 50px rgba(255,0,127,.25);
-        }
-
-        .screen p {
-            max-width: 330px;
-
-            margin: 16px 0 30px;
-
-            color: var(--cyan);
-
-            font-size: 21px;
-            line-height: 1.05;
+        p {
+            color: #00ffcc;
+            font-size: 22px;
+            margin-bottom: 35px;
             letter-spacing: 1px;
-
-            text-shadow:
-                0 0 7px rgba(0,255,204,.5);
+            text-shadow: 0 0 6px rgba(0, 255, 204, 0.4);
         }
-
         .btn {
-            position: relative;
-
-            min-width: 190px;
-
-            padding: 10px 28px;
-
-            border: 1px solid var(--cyan);
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #00ffcc,
-                    #00cfa9
-                );
-
-            color: #020405;
-
+            background: #00ffcc;
+            color: #030305;
+            border: none;
+            padding: 10px 35px;
             font-family: 'VT323', monospace;
             font-size: 28px;
             font-weight: bold;
-
             letter-spacing: 2px;
-
             cursor: pointer;
-
-            box-shadow:
-                0 0 10px rgba(0,255,204,.4),
-                0 0 30px rgba(0,255,204,.12);
-
-            transition:
-                transform .1s ease,
-                filter .1s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+            transition: all 0.1s;
         }
-
-        .btn::before {
-            content: "";
-            position: absolute;
-            inset: 3px;
-
-            border: 1px solid rgba(0,0,0,.18);
-
-            pointer-events: none;
-        }
-
         .btn:active {
-            transform: scale(.94);
-            filter: brightness(1.3);
+            transform: scale(0.95);
+            background: #ffffff;
         }
-
-                /* =========================
-           SCREEN DECORATION
-        ========================== */
-
-        .screen::before,
-        .screen::after {
-            content: "";
-            position: absolute;
-            pointer-events: none;
+        .hidden {
+            display: none !important;
         }
+    </style>
+</head>
+<body>
 
-        .screen::before {
-            width: 180px;
-            height: 180px;
+    <div id="game-container">
+        <!-- Canvas Game -->
+        <canvas id="gameCanvas"></canvas>
 
-            border: 1px solid rgba(0,255,204,.08);
-            border-radius: 50%;
+        <!-- HUD Layer -->
+        <div class="ui-layer">
+            <div class="header-hud">
+                <span id="scoreDisplay">SCORE: 0000</span>
+                <span id="speedDisplay" style="color: #ff007f;">1.0X</span>
+            </div>
+            <div class="status-hud">
+                <span id="shieldStatus">SHIELD: 0 🛡️</span>
+                <span id="activePowerup" style="color: #ffb86c;">READY</span>
+            </div>
+        </div>
 
-            box-shadow:
-                0 0 0 25px rgba(0,255,204,.02),
-                0 0 0 50px rgba(0,255,204,.015);
-        }
+        <!-- Mobile Controls -->
+        <div class="mobile-controls">
+            <button class="control-btn" onclick="movePlayer(-1)">&lt; LEFT</button>
+            <button class="control-btn" onclick="movePlayer(1)">RIGHT &gt;</button>
+        </div>
 
-        .screen::after {
-            width: 100%;
-            height: 1px;
+        <!-- Start Screen -->
+        <div id="startScreen" class="screen">
+            <h1>CYBER TAXI</h1>
+            <p>Dodge the Grid. Own the Neon Night.</p>
+            <button class="btn" onclick="startGame()">INSERT COIN</button>
+        </div>
 
-            left: 0;
-            top: 50%;
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" class="screen hidden">
+            <h1 style="color: #ff3333; text-shadow: 0 0 15px rgba(255,51,51,0.7);">GAME OVER</h1>
+            <p id="finalScoreText" style="color: #8b949e;">FINAL SCORE: 0</p>
+            <button class="btn" onclick="startGame()">PLAY AGAIN</button>
+        </div>
+    </div>
 
-            background:
-                linear-gradient(
-                    90deg,
-                    transparent,
-                    rgba(0,255,204,.12),
-                    transparent
-                );
-        }
-
-        /* =========================
-           GAME DATA
-        ========================== */
-
+    <script>
         const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d", {
-            alpha: false
-        });
-
-        const container =
-            document.getElementById("game-container");
-
-        const controls =
-            document.querySelector(".mobile-controls");
-
-        let audioCtx = null;
-        let masterGain = null;
-        let engineOsc = null;
-        let engineGain = null;
-        let engineFilter = null;
-        let bgmTimer = null;
-
-        let animationId = null;
-
-        let isPlaying = false;
-        let isPaused = false;
-
-        let score = 0;
-        let highScore =
-            Number(localStorage.getItem("cyberTaxiHighScore")) || 0;
-
-        let gameTime = 0;
-        let gameSpeed = 4.5;
-        let roadOffset = 0;
-
-        let spawnTimer = 0;
-        let powerupSpawnTimer = 0;
-
-        let screenShake = 0;
-        let flashTimer = 0;
-
-        /* =========================
-           PLAYER
-        ========================== */
-
-        const player = {
-            lane: 1,
-
-            width: 44,
-            height: 84,
-
-            x: 0,
-            targetX: 0,
-            y: 0,
-
-            shields: 0,
-
-            turbo: 0,
-
-            moveCooldown: 0
-        };
-
-        /* =========================
-           ENTITIES
-        ========================== */
-
-        const obstacles = [];
-        const powerups = [];
-        const particles = [];
-        const floatingTexts = [];
-
-        /* =========================
-           GAME CONSTANTS
-        ========================== */
-
-        const COLORS = {
-            cyan: "#00ffcc",
-            pink: "#ff007f",
-            orange: "#ffb86c",
-            red: "#ff3355",
-            yellow: "#fff000",
-            white: "#ffffff",
-            road: "#0d1117",
-            sidewalk: "#161b22"
-        };
-
-        const LANES = 3;
-
-        const BASE_SPEED = 4.5;
-        const MAX_SPEED = 12;
-
-        const TURBO_DURATION = 180;
-
-        /* =========================
-           CANVAS RESIZE
-        ========================== */
+        const ctx = canvas.getContext("2d");
 
         function resizeCanvas() {
-            const rect =
-                container.getBoundingClientRect();
-
-            const controlsHeight =
-                controls.offsetHeight;
-
-            const width =
-                Math.max(1, Math.floor(rect.width));
-
-            const height =
-                Math.max(
-                    1,
-                    Math.floor(rect.height - controlsHeight)
-                );
-
-            const dpr =
-                Math.min(window.devicePixelRatio || 1, 2);
-
-            canvas.width = width * dpr;
-            canvas.height = height * dpr;
-
-            canvas.style.width = `${width}px`;
-            canvas.style.height = `${height}px`;
-
-            ctx.setTransform(
-                dpr,
-                0,
-                0,
-                dpr,
-                0,
-                0
-            );
-
-            player.y = height - 112;
-
-            updateLanePositions(true);
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight - document.querySelector('.mobile-controls').offsetHeight;
         }
 
-        window.addEventListener(
-            "resize",
-            resizeCanvas
-        );
+        const container = document.getElementById("game-container");
+        resizeCanvas();
 
-        window.addEventListener(
-            "orientationchange",
-            () => {
-                setTimeout(resizeCanvas, 100);
-            }
-        );
-
-        /* =========================
-           DIMENSIONS
-        ========================== */
-
-        function gameWidth() {
-            return canvas.clientWidth;
-        }
-
-        function gameHeight() {
-            return canvas.clientHeight;
-        }
-
-        function getLanes() {
-            const center =
-                gameWidth() / 2;
-
-            const spacing =
-                Math.min(75, gameWidth() * 0.19);
-
-            return [
-                center - spacing,
-                center,
-                center + spacing
-            ];
-        }
-
-        function updateLanePositions(immediate = false) {
-            const lanes = getLanes();
-
-            player.targetX =
-                lanes[player.lane];
-
-            if (immediate) {
-                player.x = player.targetX;
-            }
-        }
-
-        /* =========================
-           AUDIO ENGINE
-        ========================== */
+        let audioCtx = null;
+        let engineOsc = null;
+        let engineGain = null;
+        let bgmInterval = null;
+        let screenShakeTimer = 0;
 
         function initAudio() {
             if (!audioCtx) {
-                const AudioContext =
-                    window.AudioContext ||
-                    window.webkitAudioContext;
-
-                if (!AudioContext) return;
-
-                audioCtx =
-                    new AudioContext();
-
-                masterGain =
-                    audioCtx.createGain();
-
-                masterGain.gain.value = 0.32;
-
-                masterGain.connect(
-                    audioCtx.destination
-                );
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-
-            if (audioCtx.state === "suspended") {
+            if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
-
             startEngineSound();
             startBGM();
         }
 
-        function createTone(
-            frequency,
-            duration,
-            type = "sine",
-            volume = 0.08,
-            endFrequency = null
-        ) {
-            if (!audioCtx || !masterGain) return;
-
-            try {
-                const osc =
-                    audioCtx.createOscillator();
-
-                const gain =
-                    audioCtx.createGain();
-
-                osc.type = type;
-
-                const now =
-                    audioCtx.currentTime;
-
-                osc.frequency.setValueAtTime(
-                    frequency,
-                    now
-                );
-
-                if (endFrequency) {
-                    osc.frequency.linearRampToValueAtTime(
-                        endFrequency,
-                        now + duration
-                    );
-                }
-
-                gain.gain.setValueAtTime(
-                    volume,
-                    now
-                );
-
-                gain.gain.exponentialRampToValueAtTime(
-                    0.001,
-                    now + duration
-                );
-
-                osc.connect(gain);
-                gain.connect(masterGain);
-
-                osc.start(now);
-                osc.stop(now + duration);
-            } catch (error) {
-                console.warn(
-                    "Audio error:",
-                    error
-                );
-            }
-        }
-
         function startEngineSound() {
-            if (
-                engineOsc ||
-                !audioCtx ||
-                !masterGain
-            ) return;
-
+            if (engineOsc) return;
             try {
-                engineOsc =
-                    audioCtx.createOscillator();
-
-                engineGain =
-                    audioCtx.createGain();
-
-                engineFilter =
-                    audioCtx.createBiquadFilter();
-
+                engineOsc = audioCtx.createOscillator();
+                engineGain = audioCtx.createGain();
+                
                 engineOsc.type = "sawtooth";
+                engineOsc.frequency.setValueAtTime(55, audioCtx.currentTime);
+                
+                let filter = audioCtx.createBiquadFilter();
+                filter.type = "lowpass";
+                filter.frequency.setValueAtTime(150, audioCtx.currentTime);
 
-                engineOsc.frequency.value = 55;
+                engineGain.gain.setValueAtTime(0.015, audioCtx.currentTime);
 
-                engineFilter.type = "lowpass";
-                engineFilter.frequency.value = 170;
-
-                engineGain.gain.value = 0.018;
-
-                engineOsc
-                    .connect(engineFilter);
-
-                engineFilter
-                    .connect(engineGain);
-
-                engineGain
-                    .connect(masterGain);
-
+                engineOsc.connect(filter);
+                filter.connect(engineGain);
+                engineGain.connect(audioCtx.destination);
+                
                 engineOsc.start();
-            } catch (error) {
-                console.warn(
-                    "Engine audio error:",
-                    error
-                );
-
-                engineOsc = null;
+            } catch (e) {
+                console.log(e);
             }
         }
 
-        function updateEngineSound() {
-            if (
-                !engineOsc ||
-                !audioCtx
-            ) return;
-
-            const speedRatio =
-                Math.min(
-                    gameSpeed / MAX_SPEED,
-                    1
-                );
-
-            const frequency =
-                52 + speedRatio * 70;
-
-            engineOsc.frequency.setTargetAtTime(
-                frequency,
-                audioCtx.currentTime,
-                0.04
-            );
-
-            if (engineGain) {
-                engineGain.gain.setTargetAtTime(
-                    0.014 + speedRatio * 0.014,
-                    audioCtx.currentTime,
-                    0.05
-                );
-            }
-        }
-
-        function startBGM() {
-            if (bgmTimer || !audioCtx) return;
-
-            const notes = [
-                110,
-                130.81,
-                146.83,
-                164.81,
-                196,
-                174.61,
-                146.83,
-                130.81
-            ];
-
-            let step = 0;
-
-            bgmTimer = setInterval(() => {
-                if (
-                    !isPlaying ||
-                    isPaused ||
-                    !audioCtx
-                ) return;
-
-                createTone(
-                    notes[step % notes.length],
-                    0.16,
-                    "triangle",
-                    0.018
-                );
-
-                step++;
-            }, 220);
-        }
-
-        function stopAudio() {
-            if (bgmTimer) {
-                clearInterval(bgmTimer);
-                bgmTimer = null;
-            }
-
+        function stopEngineSound() {
             if (engineOsc) {
                 try {
                     engineOsc.stop();
                     engineOsc.disconnect();
-                } catch (_) {}
-
+                } catch(e) {}
                 engineOsc = null;
             }
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
 
-            engineGain = null;
-            engineFilter = null;
+        function startBGM() {
+            if (bgmInterval) return;
+            const notes = [110, 130.81, 146.83, 164.81, 196, 220];
+            let step = 0;
+            
+            bgmInterval = setInterval(() => {
+                if (!isPlaying || !audioCtx) return;
+                try {
+                    let osc = audioCtx.createOscillator();
+                    let gain = audioCtx.createGain();
+                    osc.type = "triangle";
+                    osc.frequency.setValueAtTime(notes[step % notes.length], audioCtx.currentTime);
+                    
+                    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.2);
+                    step++;
+                } catch(e) {}
+            }, 250);
         }
 
         function playSound(type) {
             if (!audioCtx) return;
+            try {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                let now = audioCtx.currentTime;
 
-            switch (type) {
-                case "move":
-                    createTone(
-                        260,
-                        0.07,
-                        "sine",
-                        0.07,
-                        500
-                    );
-                    break;
-
-                case "pickup":
-                    createTone(
-                        360,
-                        0.14,
-                        "triangle",
-                        0.11,
-                        920
-                    );
-                    break;
-
-                case "shield":
-                    createTone(
-                        190,
-                        0.22,
-                        "square",
-                        0.09,
-                        560
-                    );
-                    break;
-
-                case "hit":
-                    screenShake = 14;
-                    flashTimer = 8;
-
-                    createTone(
-                        180,
-                        0.28,
-                        "sawtooth",
-                        0.13,
-                        55
-                    );
-                    break;
-
-                case "gameover":
-                    screenShake = 28;
-                    flashTimer = 14;
-
-                    createTone(
-                        150,
-                        0.55,
-                        "sawtooth",
-                        0.16,
-                        28
-                    );
-                    break;
+                if (type === "move") {
+                    osc.type = "sine";
+                    osc.frequency.setValueAtTime(240, now);
+                    osc.frequency.exponentialRampToValueAtTime(480, now + 0.08);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === "powerup") {
+                    osc.type = "triangle";
+                    osc.frequency.setValueAtTime(350, now);
+                    osc.frequency.exponentialRampToValueAtTime(950, now + 0.15);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === "shield_break") {
+                    screenShakeTimer = 15; // Efek getar layar
+                    osc.type = "sawtooth";
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.linearRampToValueAtTime(60, now + 0.3);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === "gameover") {
+                    screenShakeTimer = 30; // Efek getar layar kuat
+                    osc.type = "sawtooth";
+                    osc.frequency.setValueAtTime(140, now);
+                    osc.frequency.linearRampToValueAtTime(25, now + 0.6);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                    osc.start(now);
+                    osc.stop(now + 0.6);
+                }
+            } catch (e) {
+                console.log(e);
             }
         }
 
-        /* =========================
-           INPUT
-        ========================== */
+        let isPlaying = false;
+        let score = 0;
+        let gameSpeed = 4;
+        let roadOffset = 0;
+        
+        const getLanes = () => [canvas.width / 2 - 75, canvas.width / 2, canvas.width / 2 + 75];
+        let playerLane = 1;
+
+        let player = {
+            width: 44,
+            height: 84,
+            y: 0,
+            shields: 0
+        };
+
+        let obstacles = [];
+        let powerups = [];
+        let particles = [];
+        let activePowerupName = "READY";
+        let powerupTimer = 0;
+        let turboActive = false;
+        let spawnTimer = 0;
 
         function movePlayer(direction) {
-            if (
-                !isPlaying ||
-                isPaused ||
-                player.moveCooldown > 0
-            ) return;
-
-            const nextLane =
-                player.lane + direction;
-
-            if (
-                nextLane < 0 ||
-                nextLane >= LANES
-            ) {
-                playSound("move");
-                return;
-            }
-
-            player.lane = nextLane;
-
-            updateLanePositions();
-
-            player.moveCooldown = 5;
-
-            createParticles(
-                player.x,
-                player.y + player.height * 0.72,
-                COLORS.cyan,
-                7
-            );
-
-            playSound("move");
-        }
-
-        window.addEventListener(
-            "keydown",
-            event => {
-                if (
-                    event.key === "ArrowLeft" ||
-                    event.key.toLowerCase() === "a"
-                ) {
-                    event.preventDefault();
-                    movePlayer(-1);
-                }
-
-                if (
-                    event.key === "ArrowRight" ||
-                    event.key.toLowerCase() === "d"
-                ) {
-                    event.preventDefault();
-                    movePlayer(1);
-                }
-
-                if (
-                    event.key === " " ||
-                    event.key.toLowerCase() === "p"
-                ) {
-                    event.preventDefault();
-
-                    if (isPlaying) {
-                        togglePause();
-                    }
-                }
-            }
-        );
-
-        /* =========================
-           TOUCH SWIPE
-        ========================== */
-
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        canvas.addEventListener(
-            "touchstart",
-            event => {
-                const touch =
-                    event.changedTouches[0];
-
-                touchStartX =
-                    touch.clientX;
-
-                touchStartY =
-                    touch.clientY;
-            },
-            { passive: true }
-        );
-
-        canvas.addEventListener(
-            "touchend",
-            event => {
-                const touch =
-                    event.changedTouches[0];
-
-                const dx =
-                    touch.clientX -
-                    touchStartX;
-
-                const dy =
-                    touch.clientY -
-                    touchStartY;
-
-                if (
-                    Math.abs(dx) > 35 &&
-                    Math.abs(dx) > Math.abs(dy)
-                ) {
-                    movePlayer(
-                        dx > 0 ? 1 : -1
-                    );
-                }
-            },
-            { passive: true }
-        );
-
-        /* =========================
-           PAUSE
-        ========================== */
-
-        function togglePause() {
             if (!isPlaying) return;
-
-            isPaused = !isPaused;
-
-            if (!isPaused) {
-                requestAnimationFrame(loop);
+            let lanes = getLanes();
+            let newLane = playerLane + direction;
+            if (newLane >= 0 && newLane < lanes.length) {
+                playerLane = newLane;
+                playSound("move");
+                createParticles(lanes[playerLane], player.y + 42, "#00ffcc", 6);
             }
         }
 
-        /* =========================
-           PARTICLES
-        ========================== */
+        window.addEventListener("keydown", (e) => {
+            if (!isPlaying) return;
+            if (e.key === "ArrowLeft" || e.key === "a") movePlayer(-1);
+            if (e.key === "ArrowRight" || e.key === "d") movePlayer(1);
+        });
 
-        function createParticles(
-            x,
-            y,
-            color,
-            count = 8
-        ) {
-            for (
-                let i = 0;
-                i < count;
-                i++
-            ) {
+        function createParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
                 particles.push({
-                    x,
-                    y,
-
-                    vx:
-                        (Math.random() - 0.5) *
-                        5,
-
-                    vy:
-                        (Math.random() - 0.5) *
-                        5,
-
-                    radius:
-                        Math.random() * 2.5 +
-                        0.8,
-
-                    life: 1,
-
-                    decay:
-                        Math.random() * 0.035 +
-                        0.035,
-
-                    color
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    radius: Math.random() * 3 + 1,
+                    color: color,
+                    alpha: 1
                 });
             }
         }
-
-        /* =========================
-           FLOATING TEXT
-        ========================== */
-
-        function addFloatingText(
-            text,
-            x,
-            y,
-            color = COLORS.cyan
-        ) {
-            floatingTexts.push({
-                text,
-                x,
-                y,
-                color,
-                life: 1,
-                vy: -0.7
-            });
-        }
-        /* =========================
-           WORLD OBJECTS
-        ========================== */
-
-        const cityLights = [];
-        const roadMarks = [];
-
-        function initializeWorld() {
-            cityLights.length = 0;
-            roadMarks.length = 0;
-
-            for (let i = 0; i < 38; i++) {
-                cityLights.push({
-                    side: Math.random() < 0.5 ? -1 : 1,
-                    y: Math.random() * gameHeight(),
-                    width: 18 + Math.random() * 34,
-                    height: 30 + Math.random() * 100,
-                    color:
-                        Math.random() < 0.5
-                            ? COLORS.cyan
-                            : COLORS.pink,
-                    seed: Math.random() * 1000
-                });
-            }
-
-            for (let i = 0; i < 18; i++) {
-                roadMarks.push({
-                    y: i * 55
-                });
-            }
-        }
-
-        /* =========================
-           RANDOM HELPERS
-        ========================== */
-
-        function random(min, max) {
-            return min +
-                Math.random() *
-                (max - min);
-        }
-
-        function clamp(value, min, max) {
-            return Math.max(
-                min,
-                Math.min(max, value)
-            );
-        }
-
-        /* =========================
-           ROAD BACKGROUND
-        ========================== */
-
-        function drawRoad() {
-            const w = gameWidth();
-            const h = gameHeight();
-
-            ctx.fillStyle = COLORS.road;
-            ctx.fillRect(0, 0, w, h);
-
-            /* horizon glow */
-            const horizon =
-                ctx.createLinearGradient(
-                    0,
-                    0,
-                    0,
-                    h * 0.48
-                );
-
-            horizon.addColorStop(
-                0,
-                "#111a2a"
-            );
-
-            horizon.addColorStop(
-                1,
-                "#0d1117"
-            );
-
-            ctx.fillStyle = horizon;
-            ctx.fillRect(0, 0, w, h * 0.48);
-
-            /* road center atmosphere */
-            const glow =
-                ctx.createRadialGradient(
-                    w / 2,
-                    h * 0.35,
-                    20,
-                    w / 2,
-                    h * 0.35,
-                    w * 0.7
-                );
-
-            glow.addColorStop(
-                0,
-                "rgba(0,255,204,.055)"
-            );
-
-            glow.addColorStop(
-                1,
-                "rgba(0,0,0,0)"
-            );
-
-            ctx.fillStyle = glow;
-            ctx.fillRect(0, 0, w, h);
-
-            /* sidewalks */
-            ctx.fillStyle =
-                COLORS.sidewalk;
-
-            ctx.fillRect(
-                0,
-                0,
-                19,
-                h
-            );
-
-            ctx.fillRect(
-                w - 19,
-                0,
-                19,
-                h
-            );
-
-            /* sidewalk neon edges */
-            ctx.fillStyle =
-                "rgba(255,0,127,.16)";
-
-            ctx.fillRect(
-                18,
-                0,
-                2,
-                h
-            );
-
-            ctx.fillRect(
-                w - 20,
-                0,
-                2,
-                h
-            );
-        }
-
-        /* =========================
-           CITY BACKGROUND
-        ========================== */
-
-        function drawCity() {
-            const w = gameWidth();
-            const h = gameHeight();
-
-            const lanes = getLanes();
-
-            for (const building of cityLights) {
-                building.y += gameSpeed * 0.22;
-
-                if (
-                    building.y >
-                    h + building.height
-                ) {
-                    building.y =
-                        -building.height -
-                        random(20, 180);
-
-                    building.width =
-                        random(18, 52);
-
-                    building.height =
-                        random(35, 125);
-                }
-
-                const side =
-                    building.side;
-
-                const baseX =
-                    side < 0
-                        ? random(-5, 15)
-                        : w - random(15, 5);
-
-                const x =
-                    side < 0
-                        ? baseX
-                        : baseX -
-                          building.width;
-
-                /* building silhouette */
-                ctx.fillStyle =
-                    "rgba(8,12,20,.95)";
-
-                ctx.fillRect(
-                    x,
-                    building.y,
-                    building.width,
-                    building.height
-                );
-
-                /* roof glow */
-                ctx.fillStyle =
-                    building.color;
-
-                ctx.globalAlpha = .12;
-
-                ctx.fillRect(
-                    x,
-                    building.y,
-                    building.width,
-                    2
-                );
-
-                ctx.globalAlpha = 1;
-
-                /* windows */
-                const rows =
-                    Math.floor(
-                        building.height / 14
-                    );
-
-                const cols =
-                    Math.max(
-                        1,
-                        Math.floor(
-                            building.width / 10
-                        )
-                    );
-
-                for (
-                    let row = 0;
-                    row < rows;
-                    row++
-                ) {
-                    for (
-                        let col = 0;
-                        col < cols;
-                        col++
-                    ) {
-                        const lit =
-                            Math.sin(
-                                building.seed +
-                                row * 7.3 +
-                                col * 3.1
-                            ) > .15;
-
-                        if (!lit) continue;
-
-                        ctx.fillStyle =
-                            building.color;
-
-                        ctx.globalAlpha =
-                            .16 +
-                            Math.random() * .18;
-
-                        ctx.fillRect(
-                            x + 4 + col * 10,
-                            building.y +
-                                7 +
-                                row * 14,
-                            3,
-                            5
-                        );
-                    }
-                }
-
-                ctx.globalAlpha = 1;
-            }
-
-            /* distant horizon */
-            ctx.strokeStyle =
-                "rgba(0,255,204,.12)";
-
-            ctx.lineWidth = 1;
-
-            ctx.beginPath();
-
-            ctx.moveTo(20, h * .23);
-            ctx.lineTo(
-                lanes[0] - 45,
-                h * .23
-            );
-
-            ctx.moveTo(
-                lanes[2] + 45,
-                h * .23
-            );
-
-            ctx.lineTo(
-                w - 20,
-                h * .23
-            );
-
-            ctx.stroke();
-        }
-
-        /* =========================
-           ROAD LANE MARKINGS
-        ========================== */
-
-        function drawLaneLines() {
-            const h = gameHeight();
-            const lanes = getLanes();
-
-            const leftLine =
-                (lanes[0] + lanes[1]) / 2;
-
-            const rightLine =
-                (lanes[1] + lanes[2]) / 2;
-
-            ctx.save();
-
-            ctx.strokeStyle =
-                "rgba(0,255,204,.75)";
-
-            ctx.lineWidth = 2;
-
-            ctx.shadowColor =
-                COLORS.cyan;
-
-            ctx.shadowBlur = 7;
-
-            ctx.setLineDash([
-                22,
-                28
-            ]);
-
-            ctx.lineDashOffset =
-                -roadOffset;
-
-            ctx.beginPath();
-
-            ctx.moveTo(
-                leftLine,
-                0
-            );
-
-            ctx.lineTo(
-                leftLine,
-                h
-            );
-
-            ctx.moveTo(
-                rightLine,
-                0
-            );
-
-            ctx.lineTo(
-                rightLine,
-                h
-            );
-
-            ctx.stroke();
-
-            ctx.restore();
-        }
-
-        /* =========================
-           ROAD DETAIL
-        ========================== */
-
-        function drawRoadDetails() {
-            const w = gameWidth();
-            const h = gameHeight();
-
-            ctx.save();
-
-            for (
-                let i = 0;
-                i < roadMarks.length;
-                i++
-            ) {
-                const mark =
-                    roadMarks[i];
-
-                mark.y += gameSpeed;
-
-                if (
-                    mark.y >
-                    h + 30
-                ) {
-                    mark.y = -30;
-                }
-
-                const alpha =
-                    .04 +
-                    (mark.y / h) * .08;
-
-                ctx.fillStyle =
-                    `rgba(255,255,255,${alpha})`;
-
-                ctx.fillRect(
-                    w / 2 - 1,
-                    mark.y,
-                    2,
-                    8
-                );
-            }
-
-            ctx.restore();
-        }
-
-        /* =========================
-           NEON SIDE POSTS
-        ========================== */
-
-        function drawSidePosts() {
-            const w = gameWidth();
-            const h = gameHeight();
-
-            ctx.save();
-
-            const spacing = 70;
-
-            for (
-                let y = -spacing;
-                y < h + spacing;
-                y += spacing
-            ) {
-                const py =
-                    (y + roadOffset * 1.3) %
-                    (h + spacing);
-
-                drawNeonPost(
-                    11,
-                    py,
-                    COLORS.pink
-                );
-
-                drawNeonPost(
-                    w - 11,
-                    py,
-                    COLORS.cyan
-                );
-            }
-
-            ctx.restore();
-        }
-
-        function drawNeonPost(
-            x,
-            y,
-            color
-        ) {
-            ctx.fillStyle = color;
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 9;
-
-            ctx.fillRect(
-                x - 2,
-                y,
-                4,
-                14
-            );
-
-            ctx.shadowBlur = 0;
-        }
-
-        /* =========================
-           CAR SHAPE
-        ========================== */
-
-        function drawCar(
-            x,
-            y,
-            w,
-            h,
-            color,
-            playerCar = false,
-            variant = 0
-        ) {
-            ctx.save();
-
-            const left =
-                x - w / 2;
-
-            /* motion shadow */
-            ctx.fillStyle =
-                "rgba(0,0,0,.45)";
-
-            ctx.fillRect(
-                left - 5,
-                y + 10,
-                w + 10,
-                h - 8
-            );
-
-            /* neon underglow */
-            ctx.globalAlpha =
-                playerCar ? .38 : .18;
-
-            ctx.fillStyle = color;
-
-            ctx.shadowColor = color;
-            ctx.shadowBlur =
-                playerCar ? 18 : 10;
-
-            ctx.fillRect(
-                left + 5,
-                y + h - 8,
-                w - 10,
-                6
-            );
-
-            ctx.shadowBlur = 0;
-            ctx.globalAlpha = 1;
-
-            /* tires */
-            ctx.fillStyle = "#020204";
-
-            ctx.fillRect(
-                left - 6,
-                y + 19,
-                7,
-                23
-            );
-
-            ctx.fillRect(
-                left + w - 1,
-                y + 19,
-                7,
-                23
-            );
-
-            ctx.fillRect(
-                left - 6,
-                y + h - 34,
-                7,
-                23
-            );
-
-            ctx.fillRect(
-                left + w - 1,
-                y + h - 34,
-                7,
-                23
-            );
-
-            /* rim */
-            ctx.fillStyle = "#7b8798";
-
-            ctx.fillRect(
-                left - 5,
-                y + 25,
-                4,
-                10
-            );
-
-            ctx.fillRect(
-                left + w + 1,
-                y + 25,
-                4,
-                10
-            );
-
-            ctx.fillRect(
-                left - 5,
-                y + h - 28,
-                4,
-                10
-            );
-
-            ctx.fillRect(
-                left + w + 1,
-                y + h - 28,
-                4,
-                10
-            );
-
-            /* main body */
-            const body =
-                ctx.createLinearGradient(
-                    left,
-                    y,
-                    left + w,
-                    y + h
-                );
-
-            body.addColorStop(
-                0,
-                color
-            );
-
-            body.addColorStop(
-                .48,
-                playerCar
-                    ? "#00c9a7"
-                    : "#c80055"
-            );
-
-            body.addColorStop(
-                1,
-                playerCar
-                    ? "#006f65"
-                    : "#65002e"
-            );
-
-            ctx.fillStyle = body;
-
-            ctx.beginPath();
-
-            ctx.moveTo(
-                left + 9,
-                y + 2
-            );
-
-            ctx.lineTo(
-                left + w - 9,
-                y + 2
-            );
-
-            ctx.quadraticCurveTo(
-                left + w - 1,
-                y + 13,
-                left + w,
-                y + 28
-            );
-
-            ctx.lineTo(
-                left + w - 3,
-                y + h - 7
-            );
-
-            ctx.quadraticCurveTo(
-                left + w / 2,
-                y + h + 2,
-                left + 3,
-                y + h - 7
-            );
-
-            ctx.lineTo(
-                left,
-                y + 28
-            );
-
-            ctx.quadraticCurveTo(
-                left + 1,
-                y + 13,
-                left + 9,
-                y + 2
-            );
-
-            ctx.closePath();
-            ctx.fill();
-
-            /* body outline */
-            ctx.strokeStyle =
-                playerCar
-                    ? "#dffff9"
-                    : "#ff4b9b";
-
-            ctx.lineWidth = 1.5;
-
-            ctx.stroke();
-
-            /* hood */
-            ctx.fillStyle =
-                playerCar
-                    ? "#00a88e"
-                    : "#a80049";
-
-            ctx.fillRect(
-                left + 8,
-                y + 7,
-                w - 16,
-                11
-            );
-
-            /* windshield */
-            ctx.fillStyle =
-                "#05070b";
-
-            ctx.beginPath();
-
-            ctx.moveTo(
-                left + 7,
-                y + 22
-            );
-
-            ctx.lineTo(
-                left + w - 7,
-                y + 22
-            );
-
-            ctx.lineTo(
-                left + w - 4,
-                y + 42
-            );
-
-            ctx.lineTo(
-                left + 4,
-                y + 42
-            );
-
-            ctx.closePath();
-            ctx.fill();
-
-            /* windshield reflection */
-            ctx.fillStyle =
-                playerCar
-                    ? "rgba(0,255,204,.13)"
-                    : "rgba(255,0,127,.10)";
-
-            ctx.fillRect(
-                left + 8,
-                y + 24,
-                w - 16,
-                3
-            );
-
-            /* cabin */
-            ctx.fillStyle =
-                color;
-
-            ctx.fillRect(
-                left + 6,
-                y + 44,
-                w - 12,
-                20
-            );
-
-            ctx.strokeStyle =
-                playerCar
-                    ? "#bffff4"
-                    : "#ff4b9b";
-
-            ctx.strokeRect(
-                left + 6,
-                y + 44,
-                w - 12,
-                20
-            );
-
-            /* rear glass */
-            ctx.fillStyle =
-                "#04060a";
-
-            ctx.fillRect(
-                left + 7,
-                y + 66,
-                w - 14,
-                8
-            );
-
-            /* headlights */
-            ctx.shadowBlur = 8;
-
-            ctx.fillStyle =
-                playerCar
-                    ? COLORS.yellow
-                    : "#ffffff";
-
-            ctx.shadowColor =
-                playerCar
-                    ? COLORS.yellow
-                    : "#ffffff";
-
-            ctx.fillRect(
-                left + 2,
-                y + 1,
-                7,
-                5
-            );
-
-            ctx.fillRect(
-                left + w - 9,
-                y + 1,
-                7,
-                5
-            );
-
-            ctx.shadowBlur = 0;
-
-            /* rear lights */
-            ctx.fillStyle =
-                COLORS.red;
-
-            ctx.fillRect(
-                left + 3,
-                y + h - 6,
-                8,
-                5
-            );
-
-            ctx.fillRect(
-                left + w - 11,
-                y + h - 6,
-                8,
-                5
-            );
-
-            /* taxi roof sign */
-            if (playerCar) {
-                ctx.fillStyle =
-                    COLORS.pink;
-
-                ctx.shadowColor =
-                    COLORS.pink;
-
-                ctx.shadowBlur = 9;
-
-                ctx.fillRect(
-                    left + 10,
-                    y + 49,
-                    w - 20,
-                    8
-                );
-
-                ctx.shadowBlur = 0;
-
-                ctx.fillStyle =
-                    "#ffffff";
-
-                ctx.font =
-                    "bold 9px VT323";
-
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-
-                ctx.fillText(
-                    "TAXI",
-                    x,
-                    y + 53
-                );
-            }
-
-            /* sport stripe variants */
-            if (!playerCar && variant > 0) {
-                ctx.fillStyle =
-                    variant === 1
-                        ? "rgba(255,255,255,.18)"
-                        : "rgba(0,255,204,.15)";
-
-                ctx.fillRect(
-                    x - 2,
-                    y + 45,
-                    4,
-                    28
-                );
-            }
-
-            ctx.restore();
-        }
-
-        /* =========================
-           POWER-UP
-        ========================== */
-
-        function drawPowerup(
-            powerup
-        ) {
-            const lanes =
-                getLanes();
-
-            const x =
-                lanes[powerup.lane];
-
-            const y =
-                powerup.y +
-                powerup.size / 2;
-
-            const color =
-                powerup.type === "shield"
-                    ? COLORS.cyan
-                    : COLORS.orange;
-
-            const pulse =
-                Math.sin(
-                    gameTime * .12 +
-                    powerup.seed
-                ) * 3;
-
-            ctx.save();
-
-            ctx.globalAlpha = .22;
-
-            ctx.fillStyle = color;
-            ctx.shadowColor = color;
-            ctx.shadowBlur = 24;
-
-            ctx.beginPath();
-
-            ctx.arc(
-                x,
-                y,
-                powerup.size / 2 +
-                    7 +
-                    pulse,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.fill();
-
-            ctx.globalAlpha = 1;
-
-            ctx.fillStyle = color;
-
-            ctx.shadowBlur = 14;
-
-            ctx.beginPath();
-
-            ctx.arc(
-                x,
-                y,
-                powerup.size / 2,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.fill();
-
-            ctx.shadowBlur = 0;
-
-            ctx.strokeStyle =
-                "#061016";
-
-            ctx.lineWidth = 3;
-
-            ctx.stroke();
-
-            ctx.fillStyle =
-                "#061016";
-
-            ctx.font =
-                "bold 19px VT323";
-
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-
-            ctx.fillText(
-                powerup.type === "shield"
-                    ? "S"
-                    : "T",
-                x,
-                y + 1
-            );
-
-            ctx.restore();
-        }
-        /* =========================
-           SPAWN SYSTEM
-        ========================== */
-
-        function spawnObstacle() {
-            const lanes = [0, 1, 2];
-
-            /*
-             * Hindari membuat dua mobil terlalu dekat
-             * secara vertikal sehingga game terasa unfair.
-             */
-            const blockedLanes = obstacles
-                .filter(car => car.y < 145)
-                .map(car => car.lane);
-
-            const available =
-                lanes.filter(
-                    lane =>
-                        !blockedLanes.includes(lane)
-                );
-
-            if (!available.length) return;
-
-            /*
-             * Sedikit bias ke lane yang tidak sedang
-             * ditempati player agar reaction time tetap fair.
-             */
-            const safeFromPlayer =
-                available.filter(
-                    lane =>
-                        Math.abs(
-                            lane - player.lane
-                        ) > 0
-                );
-
-            const pool =
-                safeFromPlayer.length &&
-                Math.random() < .65
-                    ? safeFromPlayer
-                    : available;
-
-            const lane =
-                pool[
-                    Math.floor(
-                        Math.random() *
-                        pool.length
-                    )
-                ];
-
-            const variant =
-                Math.floor(
-                    Math.random() * 3
-                );
-
-            obstacles.push({
-                lane,
-                y: -105,
-
-                width: 44,
-                height: 84,
-
-                variant,
-
-                speedMultiplier:
-                    random(.94, 1.08),
-
-                passed: false
-            });
-        }
-
-        function spawnPowerup() {
-            const lanes = [0, 1, 2];
-
-            const occupied =
-                obstacles
-                    .filter(
-                        car =>
-                            car.y < 80
-                    )
-                    .map(
-                        car => car.lane
-                    );
-
-            const available =
-                lanes.filter(
-                    lane =>
-                        !occupied.includes(lane)
-                );
-
-            if (!available.length) return;
-
-            const lane =
-                available[
-                    Math.floor(
-                        Math.random() *
-                        available.length
-                    )
-                ];
-
-            /*
-             * Shield lebih sering muncul daripada turbo
-             * karena turbo memberi keuntungan besar.
-             */
-            const type =
-                Math.random() < .58
-                    ? "shield"
-                    : "turbo";
-
-            powerups.push({
-                lane,
-                y: -55,
-
-                size: 34,
-
-                type,
-
-                seed:
-                    Math.random() * 1000
-            });
-        }
-
-        function updateSpawner() {
-            spawnTimer++;
-
-            /*
-             * Interval semakin cepat seiring score.
-             * Minimum 24 frame agar masih playable.
-             */
-            const difficulty =
-                Math.min(
-                    Math.floor(score / 180),
-                    14
-                );
-
-            const interval =
-                Math.max(
-                    24,
-                    54 - difficulty * 2
-                );
-
-            if (
-                spawnTimer %
-                interval === 0
-            ) {
-                spawnObstacle();
-            }
-
-            powerupSpawnTimer++;
-
-            /*
-             * Power-up tidak terlalu sering muncul.
-             */
-            if (
-                powerupSpawnTimer >= 190
-            ) {
-                powerupSpawnTimer = 0;
-
-                if (
-                    Math.random() < .78
-                ) {
-                    spawnPowerup();
-                }
-            }
-        }
-
-        /* =========================
-           COLLISION
-        ========================== */
-
-        function getPlayerHitbox() {
-            /*
-             * Hitbox sedikit diperkecil dari sprite.
-             * Ini membuat collision terasa adil.
-             */
-            return {
-                x:
-                    player.x -
-                    player.width * .34,
-
-                y:
-                    player.y +
-                    player.height * .12,
-
-                width:
-                    player.width * .68,
-
-                height:
-                    player.height * .76
-            };
-        }
-
-        function getObstacleHitbox(car) {
-            const lanes =
-                getLanes();
-
-            const x =
-                lanes[car.lane];
-
-            return {
-                x:
-                    x -
-                    car.width * .34,
-
-                y:
-                    car.y +
-                    car.height * .12,
-
-                width:
-                    car.width * .68,
-
-                height:
-                    car.height * .76
-            };
-        }
-
-        function rectanglesOverlap(a, b) {
-            return (
-                a.x < b.x + b.width &&
-                a.x + a.width > b.x &&
-                a.y < b.y + b.height &&
-                a.y + a.height > b.y
-            );
-        }
-
-        /* =========================
-           PLAYER MOVEMENT
-        ========================== */
-
-        function updatePlayer() {
-            if (
-                player.moveCooldown > 0
-            ) {
-                player.moveCooldown--;
-            }
-
-            /*
-             * Smooth lane transition.
-             */
-            const difference =
-                player.targetX -
-                player.x;
-
-            player.x +=
-                difference * .24;
-
-            if (
-                Math.abs(difference) <
-                .25
-            ) {
-                player.x =
-                    player.targetX;
-            }
-        }
-
-        /* =========================
-           OBSTACLE UPDATE
-        ========================== */
-
-        function updateObstacles(
-            currentSpeed
-        ) {
-            const playerBox =
-                getPlayerHitbox();
-
-            for (
-                let i =
-                    obstacles.length - 1;
-                i >= 0;
-                i--
-            ) {
-                const car =
-                    obstacles[i];
-
-                car.y +=
-                    currentSpeed *
-                    car.speedMultiplier;
-
-                const carBox =
-                    getObstacleHitbox(
-                        car
-                    );
-
-                if (
-                    rectanglesOverlap(
-                        playerBox,
-                        carBox
-                    )
-                ) {
-                    handleCollision(
-                        car,
-                        i
-                    );
-
-                    if (!isPlaying) {
-                        return true;
-                    }
-                }
-
-                /*
-                 * Mobil berhasil dilewati.
-                 */
-                if (
-                    !car.passed &&
-                    car.y >
-                        player.y +
-                        player.height
-                ) {
-                    car.passed = true;
-
-                    score += 8;
-
-                    addFloatingText(
-                        "+8",
-                        getLanes()[car.lane],
-                        player.y - 8,
-                        COLORS.cyan
-                    );
-
-                    createParticles(
-                        getLanes()[car.lane],
-                        player.y +
-                            player.height,
-                        COLORS.pink,
-                        3
-                    );
-                }
-
-                if (
-                    car.y >
-                    gameHeight() + 120
-                ) {
-                    obstacles.splice(
-                        i,
-                        1
-                    );
-                }
-            }
-
-            return false;
-        }
-
-        /* =========================
-           COLLISION RESPONSE
-        ========================== */
-
-        function handleCollision(
-            car,
-            index
-        ) {
-            const lanes =
-                getLanes();
-
-            const hitX =
-                lanes[car.lane];
-
-            const hitY =
-                Math.max(
-                    player.y,
-                    car.y
-                );
-
-            if (
-                player.shields > 0
-            ) {
-                player.shields--;
-
-                obstacles.splice(
-                    index,
-                    1
-                );
-
-                screenShake = 16;
-                flashTimer = 7;
-
-                playSound("shield");
-
-                createParticles(
-                    hitX,
-                    hitY + 30,
-                    COLORS.cyan,
-                    24
-                );
-
-                addFloatingText(
-                    "SHIELD BLOCK!",
-                    player.x,
-                    player.y - 12,
-                    COLORS.cyan
-                );
-
-                /*
-                 * Temporary invulnerability
-                 * setelah shield pecah.
-                 */
-                player.hitCooldown = 22;
-
-                score += 15;
-
-                return;
-            }
-
-            createParticles(
-                hitX,
-                hitY + 30,
-                COLORS.red,
-                32
-            );
-
-            addFloatingText(
-                "CRASH!",
-                player.x,
-                player.y - 10,
-                COLORS.red
-            );
-
-            gameOver();
-        }
-
-        /* =========================
-           POWER-UP UPDATE
-        ========================== */
-
-        function updatePowerups(
-            currentSpeed
-        ) {
-            const playerBox =
-                getPlayerHitbox();
-
-            for (
-                let i =
-                    powerups.length - 1;
-                i >= 0;
-                i--
-            ) {
-                const powerup =
-                    powerups[i];
-
-                powerup.y +=
-                    currentSpeed;
-
-                const lanes =
-                    getLanes();
-
-                const box = {
-                    x:
-                        lanes[powerup.lane] -
-                        powerup.size / 2,
-
-                    y:
-                        powerup.y,
-
-                    width:
-                        powerup.size,
-
-                    height:
-                        powerup.size
-                };
-
-                if (
-                    rectanglesOverlap(
-                        playerBox,
-                        box
-                    )
-                ) {
-                    collectPowerup(
-                        powerup
-                    );
-
-                    powerups.splice(
-                        i,
-                        1
-                    );
-
-                    continue;
-                }
-
-                if (
-                    powerup.y >
-                    gameHeight() + 80
-                ) {
-                    powerups.splice(
-                        i,
-                        1
-                    );
-                }
-            }
-        }
-
-        /* =========================
-           POWER-UP EFFECTS
-        ========================== */
-
-        let activePowerupName =
-            "READY";
-
-        let turboTimer = 0;
-
-        function collectPowerup(
-            powerup
-        ) {
-            playSound("pickup");
-
-            const lanes =
-                getLanes();
-
-            const x =
-                lanes[powerup.lane];
-
-            createParticles(
-                x,
-                powerup.y,
-                powerup.type === "shield"
-                    ? COLORS.cyan
-                    : COLORS.orange,
-                22
-            );
-
-            score += 25;
-
-            if (
-                powerup.type === "shield"
-            ) {
-                player.shields =
-                    Math.min(
-                        player.shields + 1,
-                        3
-                    );
-
-                activePowerupName =
-                    "SHIELD +1";
-
-                addFloatingText(
-                    "SHIELD +1",
-                    x,
-                    powerup.y,
-                    COLORS.cyan
-                );
-
-                /*
-                 * Status kembali normal
-                 * setelah beberapa detik.
-                 */
-                setPowerupMessage(
-                    "SHIELD +1",
-                    90
-                );
-            }
-
-            if (
-                powerup.type === "turbo"
-            ) {
-                turboTimer =
-                    TURBO_DURATION;
-
-                activePowerupName =
-                    "TURBO!";
-
-                addFloatingText(
-                    "TURBO!",
-                    x,
-                    powerup.y,
-                    COLORS.orange
-                );
-
-                setPowerupMessage(
-                    "TURBO!",
-                    TURBO_DURATION
-                );
-            }
-        }
-
-        let powerupMessageTimer = 0;
-
-        function setPowerupMessage(
-            message,
-            duration
-        ) {
-            activePowerupName =
-                message;
-
-            powerupMessageTimer =
-                duration;
-        }
-
-        function updatePowerupStatus() {
-            if (
-                powerupMessageTimer > 0
-            ) {
-                powerupMessageTimer--;
-
-                if (
-                    powerupMessageTimer <=
-                    0
-                ) {
-                    activePowerupName =
-                        turboTimer > 0
-                            ? "TURBO!"
-                            : "NORMAL";
-                }
-            }
-
-            if (
-                turboTimer > 0
-            ) {
-                turboTimer--;
-
-                if (
-                    turboTimer <= 0
-                ) {
-                    activePowerupName =
-                        "NORMAL";
-                }
-            }
-        }
-
-        /* =========================
-           PARTICLE UPDATE
-        ========================== */
-
-        function updateParticles() {
-            for (
-                let i =
-                    particles.length - 1;
-                i >= 0;
-                i--
-            ) {
-                const p =
-                    particles[i];
-
-                p.x += p.vx;
-                p.y += p.vy;
-
-                p.vx *= .97;
-                p.vy *= .97;
-
-                p.life -= p.decay;
-
-                p.radius *= .975;
-
-                if (
-                    p.life <= 0 ||
-                    p.radius < .2
-                ) {
-                    particles.splice(
-                        i,
-                        1
-                    );
-                }
-            }
-        }
-
-        /* =========================
-           FLOATING TEXT UPDATE
-        ========================== */
-
-        function updateFloatingTexts() {
-            for (
-                let i =
-                    floatingTexts.length - 1;
-                i >= 0;
-                i--
-            ) {
-                const text =
-                    floatingTexts[i];
-
-                text.y += text.vy;
-
-                text.life -= .025;
-
-                if (
-                    text.life <= 0
-                ) {
-                    floatingTexts.splice(
-                        i,
-                        1
-                    );
-                }
-            }
-        }
-
-        /* =========================
-           PARTICLE RENDER
-        ========================== */
-
-        function drawParticles() {
-            ctx.save();
-
-            for (
-                const p of particles
-            ) {
-                ctx.globalAlpha =
-                    p.life;
-
-                ctx.fillStyle =
-                    p.color;
-
-                ctx.shadowColor =
-                    p.color;
-
-                ctx.shadowBlur = 6;
-
-                ctx.beginPath();
-
-                ctx.arc(
-                    p.x,
-                    p.y,
-                    Math.max(
-                        .4,
-                        p.radius
-                    ),
-                    0,
-                    Math.PI * 2
-                );
-
-                ctx.fill();
-            }
-
-            ctx.restore();
-        }
-
-        /* =========================
-           FLOATING TEXT RENDER
-        ========================== */
-
-        function drawFloatingTexts() {
-            ctx.save();
-
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-
-            for (
-                const item of floatingTexts
-            ) {
-                ctx.globalAlpha =
-                    item.life;
-
-                ctx.fillStyle =
-                    item.color;
-
-                ctx.font =
-                    "bold 20px VT323";
-
-                ctx.shadowColor =
-                    item.color;
-
-                ctx.shadowBlur = 8;
-
-                ctx.fillText(
-                    item.text,
-                    item.x,
-                    item.y
-                );
-            }
-
-            ctx.restore();
-        }
-        /* =========================
-           SCORE / DIFFICULTY
-        ========================== */
-
-        function updateDifficulty() {
-            /*
-             * Speed meningkat perlahan berdasarkan score.
-             * Dibatasi agar game tidak menjadi mustahil.
-             */
-            const scoreSpeed =
-                score / 180;
-
-            gameSpeed =
-                clamp(
-                    BASE_SPEED +
-                    scoreSpeed,
-                    BASE_SPEED,
-                    MAX_SPEED
-                );
-
-            if (turboTimer > 0) {
-                gameSpeed =
-                    clamp(
-                        gameSpeed * 1.65,
-                        BASE_SPEED,
-                        MAX_SPEED * 1.35
-                    );
-            }
-        }
-
-        function updateScore() {
-            /*
-             * Score berjalan terus.
-             * Turbo memberikan bonus tambahan.
-             */
-            score +=
-                turboTimer > 0
-                    ? 0.72
-                    : 0.32;
-
-            /*
-             * High score realtime.
-             */
-            if (
-                score > highScore
-            ) {
-                highScore =
-                    Math.floor(score);
-
-                localStorage.setItem(
-                    "cyberTaxiHighScore",
-                    highScore
-                );
-            }
-        }
-
-        /* =========================
-           HUD
-        ========================== */
-
-        function updateHUD() {
-            const scoreElement =
-                document.getElementById(
-                    "scoreDisplay"
-                );
-
-            const speedElement =
-                document.getElementById(
-                    "speedDisplay"
-                );
-
-            const shieldElement =
-                document.getElementById(
-                    "shieldStatus"
-                );
-
-            const powerupElement =
-                document.getElementById(
-                    "activePowerup"
-                );
-
-            scoreElement.innerText =
-                `SCORE: ${
-                    Math.floor(score)
-                        .toString()
-                        .padStart(5, "0")
-                }`;
-
-            const displaySpeed =
-                turboTimer > 0
-                    ? gameSpeed
-                    : gameSpeed;
-
-            speedElement.innerText =
-                `${displaySpeed.toFixed(1)}X`;
-
-            shieldElement.innerText =
-                `SHIELD: ${player.shields} 🛡️`;
-
-            powerupElement.innerText =
-                activePowerupName;
-
-            /*
-             * HUD color feedback.
-             */
-            if (
-                turboTimer > 0
-            ) {
-                speedElement.style.color =
-                    COLORS.orange;
-
-                speedElement.style.textShadow =
-                    "0 0 8px rgba(255,184,108,.9)";
-            } else {
-                speedElement.style.color =
-                    COLORS.pink;
-
-                speedElement.style.textShadow =
-                    "0 0 8px rgba(255,0,127,.65)";
-            }
-
-            if (
-                player.shields > 0
-            ) {
-                shieldElement.style.color =
-                    COLORS.cyan;
-
-                shieldElement.style.textShadow =
-                    "0 0 7px rgba(0,255,204,.65)";
-            } else {
-                shieldElement.style.color =
-                    "#718096";
-
-                shieldElement.style.textShadow =
-                    "none";
-            }
-
-            /*
-             * Power-up aktif dibuat berkedip
-             * saat hampir habis.
-             */
-            if (
-                turboTimer > 0 &&
-                turboTimer < 55
-            ) {
-                powerupElement.style.opacity =
-                    Math.sin(
-                        gameTime * .35
-                    ) > 0
-                        ? "1"
-                        : ".35";
-            } else {
-                powerupElement.style.opacity =
-                    "1";
-            }
-        }
-
-        /* =========================
-           ROAD MOTION
-        ========================== */
-
-        function updateRoad() {
-            roadOffset +=
-                turboTimer > 0
-                    ? gameSpeed * 1.35
-                    : gameSpeed;
-
-            if (
-                roadOffset > 10000
-            ) {
-                roadOffset = 0;
-            }
-        }
-
-        /* =========================
-           SCREEN EFFECTS
-        ========================== */
-
-        function updateScreenEffects() {
-            if (
-                screenShake > 0
-            ) {
-                screenShake *= .82;
-
-                if (
-                    screenShake < .15
-                ) {
-                    screenShake = 0;
-                }
-            }
-
-            if (
-                flashTimer > 0
-            ) {
-                flashTimer--;
-            }
-        }
-
-        /* =========================
-           TURBO TRAIL
-        ========================== */
-
-        function createTurboTrail() {
-            if (
-                turboTimer <= 0 ||
-                Math.random() > .65
-            ) {
-                return;
-            }
-
-            const lanes =
-                getLanes();
-
-            particles.push({
-                x:
-                    player.x +
-                    random(-8, 8),
-
-                y:
-                    player.y +
-                    player.height -
-
-                    random(2, 10),
-
-                vx:
-                    random(-.7, .7),
-
-                vy:
-                    random(2.5, 4.5),
-
-                radius:
-                    random(1.5, 3.5),
-
-                life: 1,
-
-                decay:
-                    random(.045, .075),
-
-                color:
-                    Math.random() < .5
-                        ? COLORS.orange
-                        : COLORS.cyan
-            });
-        }
-
-        /* =========================
-           SHIELD VISUAL
-        ========================== */
-
-        function drawShieldAura() {
-            if (
-                player.shields <= 0
-            ) {
-                return;
-            }
-
-            const pulse =
-                Math.sin(
-                    gameTime * .12
-                ) * 3;
-
-            const radius =
-                48 + pulse;
-
-            ctx.save();
-
-            ctx.globalAlpha =
-                .13 +
-                player.shields * .035;
-
-            ctx.fillStyle =
-                COLORS.cyan;
-
-            ctx.shadowColor =
-                COLORS.cyan;
-
-            ctx.shadowBlur = 22;
-
-            ctx.beginPath();
-
-            ctx.arc(
-                player.x,
-                player.y +
-                    player.height / 2,
-                radius,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.fill();
-
-            ctx.globalAlpha = 1;
-
-            ctx.strokeStyle =
-                COLORS.cyan;
-
-            ctx.lineWidth = 2;
-
-            ctx.shadowBlur = 10;
-
-            ctx.setLineDash([
-                7,
-                7
-            ]);
-
-            ctx.lineDashOffset =
-                -gameTime * .4;
-
-            ctx.beginPath();
-
-            ctx.arc(
-                player.x,
-                player.y +
-                    player.height / 2,
-                radius + 3,
-                0,
-                Math.PI * 2
-            );
-
-            ctx.stroke();
-
-            ctx.restore();
-        }
-
-        /* =========================
-           TURBO VISUAL
-        ========================== */
-
-        function drawTurboEffect() {
-            if (
-                turboTimer <= 0
-            ) {
-                return;
-            }
-
-            const w = gameWidth();
-            const h = gameHeight();
-
-            ctx.save();
-
-            /*
-             * Speed lines di sisi layar.
-             */
-            const intensity =
-                Math.min(
-                    1,
-                    turboTimer / 35
-                );
-
-            ctx.globalAlpha =
-                .16 * intensity;
-
-            ctx.strokeStyle =
-                COLORS.orange;
-
-            ctx.lineWidth = 2;
-
-            for (
-                let i = 0;
-                i < 10;
-                i++
-            ) {
-                const x =
-                    i % 2 === 0
-                        ? random(20, w * .28)
-                        : random(w * .72, w - 20);
-
-                const y =
-                    random(0, h);
-
-                const length =
-                    random(12, 35);
-
-                ctx.beginPath();
-
-                ctx.moveTo(
-                    x,
-                    y
-                );
-
-                ctx.lineTo(
-                    x,
-                    y + length
-                );
-
-                ctx.stroke();
-            }
-
-            /*
-             * Orange vignette.
-             */
-            const gradient =
-                ctx.createRadialGradient(
-                    w / 2,
-                    h * .55,
-                    h * .18,
-                    w / 2,
-                    h * .55,
-                    h * .7
-                );
-
-            gradient.addColorStop(
-                0,
-                "rgba(255,184,108,0)"
-            );
-
-            gradient.addColorStop(
-                1,
-                `rgba(255,184,108,${
-                    .10 * intensity
-                })`
-            );
-
-            ctx.fillStyle =
-                gradient;
-
-            ctx.fillRect(
-                0,
-                0,
-                w,
-                h
-            );
-
-            ctx.restore();
-        }
-
-        /* =========================
-           CAR RENDERING
-        ========================== */
-
-        function drawEntities() {
-            const lanes =
-                getLanes();
-
-            /*
-             * Obstacle jauh digambar lebih dulu.
-             */
-            const sortedObstacles =
-                [...obstacles].sort(
-                    (a, b) =>
-                        a.y - b.y
-                );
-
-            for (
-                const car of
-                sortedObstacles
-            ) {
-                drawCar(
-                    lanes[car.lane],
-                    car.y,
-                    car.width,
-                    car.height,
-                    "#ff0066",
-                    false,
-                    car.variant
-                );
-            }
-
-            /*
-             * Power-up di atas obstacle.
-             */
-            for (
-                const powerup of
-                powerups
-            ) {
-                drawPowerup(
-                    powerup
-                );
-            }
-
-            /*
-             * Player paling depan.
-             */
-            drawCar(
-                player.x,
-                player.y,
-                player.width,
-                player.height,
-                COLORS.cyan,
-                true
-            );
-
-            drawShieldAura();
-        }
-
-        /* =========================
-           CRT OVERLAY
-        ========================== */
-
-        function drawCRT() {
-            const w = gameWidth();
-            const h = gameHeight();
-
-            ctx.save();
-
-            /*
-             * Scanlines.
-             */
-            ctx.fillStyle =
-                "rgba(0,0,0,.13)";
-
-            for (
-                let y = 0;
-                y < h;
-                y += 4
-            ) {
-                ctx.fillRect(
-                    0,
-                    y,
-                    w,
-                    1
-                );
-            }
-
-            /*
-             * Subtle color vignette.
-             */
-            const vignette =
-                ctx.createRadialGradient(
-                    w / 2,
-                    h / 2,
-                    h * .15,
-                    w / 2,
-                    h / 2,
-                    h * .75
-                );
-
-            vignette.addColorStop(
-                0,
-                "rgba(0,0,0,0)"
-            );
-
-            vignette.addColorStop(
-                1,
-                "rgba(0,0,0,.48)"
-            );
-
-            ctx.fillStyle =
-                vignette;
-
-            ctx.fillRect(
-                0,
-                0,
-                w,
-                h
-            );
-
-            /*
-             * Damage flash.
-             */
-            if (
-                flashTimer > 0
-            ) {
-                ctx.globalAlpha =
-                    flashTimer / 28;
-
-                ctx.fillStyle =
-                    COLORS.red;
-
-                ctx.fillRect(
-                    0,
-                    0,
-                    w,
-                    h
-                );
-            }
-
-            ctx.restore();
-        }
-
-        /* =========================
-           MAIN RENDER
-        ========================== */
-
-        function draw() {
-            const w = gameWidth();
-            const h = gameHeight();
-
-            ctx.save();
-
-            /*
-             * Screen shake.
-             */
-            if (
-                screenShake > .1
-            ) {
-                ctx.translate(
-                    random(
-                        -screenShake,
-                        screenShake
-                    ),
-                    random(
-                        -screenShake,
-                        screenShake
-                    )
-                );
-            }
-
-            ctx.clearRect(
-                0,
-                0,
-                w,
-                h
-            );
-
-            /* background */
-            drawRoad();
-
-            /* city */
-            drawCity();
-
-            /* roadside details */
-            drawSidePosts();
-
-            /* lane system */
-            drawLaneLines();
-
-            drawRoadDetails();
-
-            /* turbo */
-            drawTurboEffect();
-
-            /* particles behind cars */
-            drawParticles();
-
-            /* entities */
-            drawEntities();
-
-            /* floating score */
-            drawFloatingTexts();
-
-            /* CRT */
-            drawCRT();
-
-            ctx.restore();
-
-            updateHUD();
-        }
-
-        /* =========================
-           GAME UPDATE
-        ========================== */
-
-        function update() {
-            if (
-                !isPlaying ||
-                isPaused
-            ) {
-                return;
-            }
-
-            gameTime++;
-
-            updateDifficulty();
-
-            updatePlayer();
-
-            updateScore();
-
-            updateRoad();
-
-            updateSpawner();
-
-            updatePowerupStatus();
-
-            updateScreenEffects();
-
-            updateEngineSound();
-
-            createTurboTrail();
-
-            updateParticles();
-
-            updateFloatingTexts();
-
-            const currentSpeed =
-                turboTimer > 0
-                    ? gameSpeed * 1.18
-                    : gameSpeed;
-
-            if (
-                updateObstacles(
-                    currentSpeed
-                )
-            ) {
-                return;
-            }
-
-            updatePowerups(
-                currentSpeed
-            );
-        }
-
-        /* =========================
-           GAME LOOP
-        ========================== */
-
-        function loop() {
-            if (!isPlaying) {
-                return;
-            }
-
-            if (!isPaused) {
-                update();
-                draw();
-            }
-
-            animationId =
-                requestAnimationFrame(
-                    loop
-                );
-        }
-
-        /* =========================
-           GAME START
-        ========================== */
 
         function startGame() {
             initAudio();
-
             resizeCanvas();
+            player.y = canvas.height - 110;
 
-            initializeWorld();
-
-            isPlaying = true;
-            isPaused = false;
-
+            document.getElementById("startScreen").classList.add("hidden");
+            document.getElementById("gameOverScreen").classList.add("hidden");
+            
             score = 0;
-            gameTime = 0;
-
-            gameSpeed =
-                BASE_SPEED;
-
-            roadOffset = 0;
-
-            spawnTimer = 0;
-            powerupSpawnTimer = 80;
-
-            screenShake = 0;
-            flashTimer = 0;
-
-            obstacles.length = 0;
-            powerups.length = 0;
-            particles.length = 0;
-            floatingTexts.length = 0;
-
-            player.lane = 1;
+            gameSpeed = 4.5;
+            playerLane = 1;
+            obstacles = [];
+            powerups = [];
+            particles = [];
             player.shields = 0;
-            player.turbo = 0;
-            player.hitCooldown = 0;
-            player.moveCooldown = 0;
-
-            player.y =
-                gameHeight() - 112;
-
-            updateLanePositions(
-                true
-            );
-
-            activePowerupName =
-                "READY";
-
-            turboTimer = 0;
-            powerupMessageTimer = 0;
-
-            document
-                .getElementById(
-                    "startScreen"
-                )
-                .classList.add(
-                    "hidden"
-                );
-
-            document
-                .getElementById(
-                    "gameOverScreen"
-                )
-                .classList.add(
-                    "hidden"
-                );
-
-            if (animationId) {
-                cancelAnimationFrame(
-                    animationId
-                );
-            }
-
+            turboActive = false;
+            activePowerupName = "READY";
+            powerupTimer = 0;
+            spawnTimer = 0;
+            isPlaying = true;
+            
             loop();
         }
 
-        /* =========================
-           GAME OVER
-        ========================== */
-
         function gameOver() {
-            if (!isPlaying) {
-                return;
-            }
-
             isPlaying = false;
-            isPaused = false;
-
-            stopAudio();
-
+            stopEngineSound();
             playSound("gameover");
-
-            const scoreValue =
-                Math.floor(score);
-
-            if (
-                scoreValue >
-                highScore
-            ) {
-                highScore =
-                    scoreValue;
-
-                localStorage.setItem(
-                    "cyberTaxiHighScore",
-                    highScore
-                );
-            }
-
-            /*
-             * Explosion burst.
-             */
-            createParticles(
-                player.x,
-                player.y +
-                    player.height / 2,
-                COLORS.pink,
-                38
-            );
-
-            createParticles(
-                player.x,
-                player.y +
-                    player.height / 2,
-                COLORS.orange,
-                18
-            );
-
-            addFloatingText(
-                "GAME OVER",
-                player.x,
-                player.y - 16,
-                COLORS.red
-            );
-
-            document
-                .getElementById(
-                    "finalScoreText"
-                )
-                .innerText =
-                    `FINAL SCORE: ${
-                        scoreValue
-                    }`;
-
-            document
-                .getElementById(
-                    "gameOverScreen"
-                )
-                .classList.remove(
-                    "hidden"
-                );
+            let lanes = getLanes();
+            createParticles(lanes[playerLane], player.y, "#ff007f", 25);
+            document.getElementById("finalScoreText").innerText = `FINAL SCORE: ${Math.floor(score)}`;
+            document.getElementById("gameOverScreen").classList.remove("hidden");
         }
 
-        /* =========================
-           INITIALIZATION
-        ========================== */
+        function spawnEntity() {
+            spawnTimer++;
+            let lanes = getLanes();
+            
+            if (spawnTimer % Math.max(22, 45 - Math.floor(score / 150)) === 0) {
+                let availableLanes = [0, 1, 2];
+                let chosenLane = availableLanes[Math.floor(Math.random() * availableLanes.length)];
+                
+                obstacles.push({
+                    lane: chosenLane,
+                    y: -90,
+                    width: 44,
+                    height: 84
+                });
+            }
 
-        resizeCanvas();
-
-        initializeWorld();
-
-        /*
-         * Initial player placement.
-         */
-        player.y =
-            gameHeight() - 112;
-
-        updateLanePositions(
-            true
-        );
-
-        /*
-         * Initial render.
-         */
-        draw();
-        /* =========================
-           UI ENHANCEMENT
-        ========================== */
-
-        const uiLayer =
-            document.querySelector(".ui-layer");
-
-        /* =========================
-           PAUSE OVERLAY
-        ========================== */
-
-        const pauseScreen =
-            document.createElement("div");
-
-        pauseScreen.id =
-            "pauseScreen";
-
-        pauseScreen.className =
-            "screen hidden";
-
-        pauseScreen.innerHTML = `
-            <div style="
-                color:#00ffcc;
-                font-size:52px;
-                letter-spacing:4px;
-                text-shadow:
-                    0 0 10px rgba(0,255,204,.8),
-                    0 0 25px rgba(0,255,204,.3);
-            ">
-                PAUSED
-            </div>
-
-            <p style="
-                margin-top:14px;
-                margin-bottom:25px;
-                color:#8b949e;
-            ">
-                PRESS P OR SPACE
-            </p>
-
-            <button
-                class="btn"
-                id="resumeButton">
-                RESUME
-            </button>
-        `;
-
-        container.appendChild(
-            pauseScreen
-        );
-
-        document
-            .getElementById(
-                "resumeButton"
-            )
-            .addEventListener(
-                "click",
-                togglePause
-            );
-
-        /* =========================
-           PAUSE STATE FIX
-        ========================== */
-
-        function togglePause() {
-            if (!isPlaying) return;
-
-            isPaused =
-                !isPaused;
-
-            if (isPaused) {
-                pauseScreen
-                    .classList
-                    .remove("hidden");
-
-                /*
-                 * Engine tetap hidup secara
-                 * ringan, tetapi gameplay berhenti.
-                 */
-                if (
-                    audioCtx &&
-                    engineGain
-                ) {
-                    engineGain.gain
-                        .setTargetAtTime(
-                            .005,
-                            audioCtx.currentTime,
-                            .08
-                        );
-                }
-            } else {
-                pauseScreen
-                    .classList
-                    .add("hidden");
-
-                if (
-                    audioCtx &&
-                    engineGain
-                ) {
-                    engineGain.gain
-                        .setTargetAtTime(
-                            .018,
-                            audioCtx.currentTime,
-                            .08
-                        );
+            if (spawnTimer % 160 === 0) {
+                let obstacleLanes = obstacles.filter(o => o.y < 50).map(o => o.lane);
+                let safeLanes = [0, 1, 2].filter(l => !obstacleLanes.includes(l));
+                
+                if (safeLanes.length > 0) {
+                    let chosenLane = safeLanes[Math.floor(Math.random() * safeLanes.length)];
+                    let types = ["shield", "turbo"];
+                    let chosenType = types[Math.floor(Math.random() * types.length)];
+                    
+                    powerups.push({
+                        lane: chosenLane,
+                        y: -50,
+                        size: 34,
+                        type: chosenType
+                    });
                 }
             }
         }
 
-        /* =========================
-           EXTRA HUD
-        ========================== */
+        function update() {
+            gameSpeed = 4.5 + (score / 200);
+            let currentSpeed = turboActive ? gameSpeed * 1.8 : gameSpeed;
 
-        const comboHud =
-            document.createElement("div");
+            roadOffset += currentSpeed;
+            if (roadOffset > 40) roadOffset = 0;
 
-        comboHud.id =
-            "comboHud";
+            score += turboActive ? 0.8 : 0.3;
 
-        comboHud.style.cssText = `
-            position:absolute;
-            top:112px;
-            left:50%;
-            transform:translateX(-50%)
-                scale(.8);
-
-            opacity:0;
-
-            color:#ffb86c;
-            font-size:22px;
-            letter-spacing:2px;
-            white-space:nowrap;
-
-            text-shadow:
-                0 0 7px rgba(255,184,108,.8),
-                0 0 18px rgba(255,184,108,.3);
-
-            transition:
-                opacity .12s ease,
-                transform .12s ease;
-
-            pointer-events:none;
-            z-index:12;
-        `;
-
-        comboHud.innerText =
-            "COMBO x1";
-
-        container.appendChild(
-            comboHud
-        );
-
-        /* =========================
-           HIGH SCORE HUD
-        ========================== */
-
-        const bestHud =
-            document.createElement("div");
-
-        bestHud.id =
-            "bestHud";
-
-        bestHud.style.cssText = `
-            position:absolute;
-            top:66px;
-            left:14px;
-
-            color:#64748b;
-            font-size:15px;
-            letter-spacing:1px;
-
-            pointer-events:none;
-            z-index:10;
-        `;
-
-        bestHud.innerText =
-            `BEST: ${highScore}`;
-
-        container.appendChild(
-            bestHud
-        );
-
-        /* =========================
-           MUTE BUTTON
-        ========================== */
-
-        const muteButton =
-            document.createElement("button");
-
-        muteButton.id =
-            "muteButton";
-
-        muteButton.innerText =
-            "♪";
-
-        muteButton.setAttribute(
-            "aria-label",
-            "Mute audio"
-        );
-
-        muteButton.style.cssText = `
-            position:absolute;
-            top:12px;
-            right:12px;
-
-            width:34px;
-            height:30px;
-
-            border:1px solid #253149;
-            border-radius:3px;
-
-            background:rgba(3,5,8,.72);
-            color:#00ffcc;
-
-            font-family:VT323,monospace;
-            font-size:22px;
-
-            cursor:pointer;
-            z-index:40;
-
-            opacity:.75;
-
-            transition:
-                opacity .1s ease,
-                background .1s ease;
-        `;
-
-        container.appendChild(
-            muteButton
-        );
-
-        let audioMuted = false;
-
-        muteButton.addEventListener(
-            "click",
-            () => {
-                audioMuted =
-                    !audioMuted;
-
-                if (
-                    masterGain
-                ) {
-                    masterGain.gain.value =
-                        audioMuted
-                            ? 0
-                            : .32;
-                }
-
-                muteButton.innerText =
-                    audioMuted
-                        ? "×"
-                        : "♪";
-
-                muteButton.style.color =
-                    audioMuted
-                        ? "#718096"
-                        : COLORS.cyan;
-            }
-        );
-
-        /* =========================
-           COMBO SYSTEM
-        ========================== */
-
-        let combo = 0;
-        let comboTimer = 0;
-
-        const COMBO_TIMEOUT =
-            105;
-
-        function registerNearMiss() {
-            combo++;
-
-            comboTimer =
-                COMBO_TIMEOUT;
-
-            const multiplier =
-                Math.min(
-                    combo,
-                    9
-                );
-
-            const bonus =
-                5 * multiplier;
-
-            score += bonus;
-
-            comboHud.innerText =
-                `COMBO x${multiplier}  +${bonus}`;
-
-            comboHud.style.opacity =
-                "1";
-
-            comboHud.style.transform =
-                "translateX(-50%) scale(1.08)";
-
-            setTimeout(() => {
-                comboHud.style.transform =
-                    "translateX(-50%) scale(1)";
-            }, 80);
-
-            addFloatingText(
-                `+${bonus}`,
-                player.x,
-                player.y - 25,
-                COLORS.orange
-            );
-        }
-
-        function updateCombo() {
-            if (
-                comboTimer > 0
-            ) {
-                comboTimer--;
-
-                if (
-                    comboTimer <= 0
-                ) {
-                    combo = 0;
-
-                    comboHud.style.opacity =
-                        "0";
+            if (powerupTimer > 0) {
+                powerupTimer--;
+                if (powerupTimer <= 0) {
+                    turboActive = false;
+                    activePowerupName = "NORMAL";
                 }
             }
-        }
 
-        /* =========================
-           NEAR MISS DETECTION
-        ========================== */
+            spawnEntity();
+            let lanes = getLanes();
 
-        function checkNearMiss(car) {
-            if (
-                car.nearMissChecked
-            ) {
-                return;
-            }
-
-            /*
-             * Hanya cek ketika mobil sudah
-             * melewati area player.
-             */
-            if (
-                car.y <
-                player.y - 20
-            ) {
-                return;
-            }
-
-            if (
-                car.y >
-                player.y +
-                player.height +
-                30
-            ) {
-                return;
-            }
-
-            car.nearMissChecked =
-                true;
-
-            /*
-             * Jika obstacle berada di lane
-             * sebelah player dan sangat dekat,
-             * beri bonus.
-             */
-            const laneDistance =
-                Math.abs(
-                    car.lane -
-                    player.lane
-                );
-
-            if (
-                laneDistance === 1
-            ) {
-                registerNearMiss();
-            }
-        }
-
-        /* =========================
-           SPAWN SAFETY
-        ========================== */
-
-        function canSpawnObstacle(
-            lane
-        ) {
-            return !obstacles.some(
-                car =>
-                    car.lane === lane &&
-                    car.y < 155
-            );
-        }
-
-        /* =========================
-           COUNTDOWN
-        ========================== */
-
-        let countdownActive =
-            false;
-
-        let countdownValue =
-            0;
-
-        function startCountdown(
-            callback
-        ) {
-            countdownActive =
-                true;
-
-            countdownValue = 3;
-
-            const countdown =
-                document.createElement(
-                    "div"
-                );
-
-            countdown.id =
-                "countdown";
-
-            countdown.style.cssText = `
-                position:absolute;
-                inset:0;
-
-                display:flex;
-                align-items:center;
-                justify-content:center;
-
-                color:#fff;
-
-                font-family:
-                    VT323,monospace;
-
-                font-size:110px;
-                letter-spacing:5px;
-
-                text-shadow:
-                    0 0 10px #ff007f,
-                    0 0 35px #ff007f;
-
-                background:
-                    rgba(3,3,5,.28);
-
-                pointer-events:none;
-                z-index:35;
-            `;
-
-            countdown.innerText =
-                countdownValue;
-
-            container.appendChild(
-                countdown
-            );
-
-            const timer =
-                setInterval(() => {
-                    countdownValue--;
-
-                    if (
-                        countdownValue > 0
-                    ) {
-                        countdown.innerText =
-                            countdownValue;
-
-                        return;
-                    }
-
-                    if (
-                        countdownValue === 0
-                    ) {
-                        countdown.innerText =
-                            "GO!";
-
-                        countdown.style.color =
-                            COLORS.cyan;
-
-                        countdown.style.textShadow =
-                            `
-                            0 0 10px
-                                ${COLORS.cyan},
-                            0 0 35px
-                                ${COLORS.cyan}
-                            `;
-                    }
-
-                    setTimeout(() => {
-                        clearInterval(
-                            timer
-                        );
-
-                        countdown.remove();
-
-                        countdownActive =
-                            false;
-
-                        callback();
-                    }, 350);
-                }, 650);
-        }
-
-        /* =========================
-           GAME START OVERRIDE
-        ========================== */
-
-        const originalStartGame =
-            startGame;
-
-        startGame = function() {
-            originalStartGame();
-
-            combo = 0;
-            comboTimer = 0;
-
-            comboHud.style.opacity =
-                "0";
-
-            bestHud.innerText =
-                `BEST: ${highScore}`;
-
-            pauseScreen
-                .classList
-                .add("hidden");
-
-            /*
-             * Small start countdown.
-             */
-            isPaused = true;
-
-            startCountdown(() => {
-                isPaused = false;
-
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].y += currentSpeed;
                 if (
-                    audioCtx &&
-                    engineGain
+                    obstacles[i].lane === playerLane &&
+                    obstacles[i].y < player.y + player.height &&
+                    obstacles[i].y + obstacles[i].height > player.y
                 ) {
-                    engineGain.gain
-                        .setTargetAtTime(
-                            .018,
-                            audioCtx.currentTime,
-                            .08
-                        );
-                }
-            });
-        };
-
-        /* =========================
-           UPDATE PATCH
-        ========================== */
-
-        const previousUpdate =
-            update;
-
-        update = function() {
-            if (
-                !isPlaying ||
-                isPaused ||
-                countdownActive
-            ) {
-                return;
-            }
-
-            previousUpdate();
-
-            updateCombo();
-
-            /*
-             * Check near misses after
-             * normal obstacle movement.
-             */
-            for (
-                const car of obstacles
-            ) {
-                checkNearMiss(car);
-            }
-
-            bestHud.innerText =
-                `BEST: ${highScore}`;
-        };
-
-        /* =========================
-           GAME OVER UI POLISH
-        ========================== */
-
-        const gameOverTitle =
-            document.querySelector(
-                "#gameOverScreen h1"
-            );
-
-        if (gameOverTitle) {
-            gameOverTitle.style.fontSize =
-                "clamp(45px, 13vw, 64px)";
-        }
-
-        /* =========================
-           START SCREEN INFO
-        ========================== */
-
-        const startScreen =
-            document.getElementById(
-                "startScreen"
-            );
-
-        if (startScreen) {
-            const info =
-                document.createElement(
-                    "div"
-                );
-
-            info.style.cssText = `
-                margin-top:24px;
-
-                color:#526174;
-
-                font-size:16px;
-                letter-spacing:1px;
-
-                line-height:1.3;
-            `;
-
-            info.innerHTML =
-                `
-                ← → / A D &nbsp; MOVE<br>
-                SWIPE &nbsp; MOBILE<br>
-                SPACE / P &nbsp; PAUSE
-                `;
-
-            startScreen.appendChild(
-                info
-            );
-        }
-
-        /* =========================
-           FINAL RENDER PATCH
-        ========================== */
-
-        const previousDraw =
-            draw;
-
-        draw = function() {
-            previousDraw();
-
-            /*
-             * Small turbo HUD indicator.
-             */
-            if (
-                turboTimer > 0 &&
-                isPlaying
-            ) {
-                ctx.save();
-
-                const w =
-                    gameWidth();
-
-                const barWidth =
-                    Math.min(
-                        110,
-                        w * .32
-                    );
-
-                const progress =
-                    turboTimer /
-                    TURBO_DURATION;
-
-                const x =
-                    w / 2 -
-                    barWidth / 2;
-
-                const y =
-                    92;
-
-                ctx.fillStyle =
-                    "rgba(0,0,0,.55)";
-
-                ctx.fillRect(
-                    x,
-                    y,
-                    barWidth,
-                    4
-                );
-
-                ctx.fillStyle =
-                    COLORS.orange;
-
-                ctx.shadowColor =
-                    COLORS.orange;
-
-                ctx.shadowBlur = 8;
-
-                ctx.fillRect(
-                    x,
-                    y,
-                    barWidth *
-                    progress,
-                    4
-                );
-
-                ctx.restore();
-            }
-        };
-
-        /* =========================
-           START SCREEN RENDER
-        ========================== */
-
-        draw();
-
-        /* =========================
-           VISIBILITY HANDLING
-        ========================== */
-
-        document.addEventListener(
-            "visibilitychange",
-            () => {
-                if (
-                    document.hidden &&
-                    isPlaying &&
-                    !isPaused
-                ) {
-                    togglePause();
-                }
-            }
-        );
-
-        /* =========================
-           PREVENT DOUBLE TAP
-        ========================== */
-
-        let lastTap = 0;
-
-        document.addEventListener(
-            "touchend",
-            event => {
-                const now =
-                    Date.now();
-
-                if (
-                    now - lastTap <
-                    280
-                ) {
-                    event.preventDefault();
-                }
-
-                lastTap = now;
-            },
-            { passive: false }
-        );
-        /* =========================
-           FINAL POLISH / BUG FIX
-        ========================== */
-
-        /* ---------- SAFE HELPERS ---------- */
-
-        function safeNumber(value, fallback = 0) {
-            return Number.isFinite(value)
-                ? value
-                : fallback;
-        }
-
-        function refreshBestScore() {
-            highScore = safeNumber(
-                Number(
-                    localStorage.getItem(
-                        "cyberTaxiHighScore"
-                    )
-                ),
-                0
-            );
-
-            const best =
-                document.getElementById(
-                    "bestHud"
-                );
-
-            if (best) {
-                best.innerText =
-                    `BEST: ${highScore}`;
-            }
-        }
-
-        /* ---------- RESPONSIVE RESIZE ---------- */
-
-        let resizeTimeout = null;
-
-        function handleResize() {
-            clearTimeout(
-                resizeTimeout
-            );
-
-            resizeTimeout =
-                setTimeout(() => {
-                    const oldHeight =
-                        canvas.height;
-
-                    resizeCanvas();
-
-                    if (
-                        !isFinite(canvas.width) ||
-                        !isFinite(canvas.height)
-                    ) {
-                        return;
-                    }
-
-                    /*
-                     * Player tetap berada di
-                     * posisi bawah layar setelah resize.
-                     */
-                    const targetY =
-                        canvas.height -
-                        112;
-
-                    if (
-                        !Number.isFinite(
-                            player.y
-                        ) ||
-                        oldHeight <= 0
-                    ) {
-                        player.y =
-                            targetY;
+                    if (player.shields > 0) {
+                        player.shields--;
+                        playSound("shield_break");
+                        createParticles(lanes[playerLane], player.y, "#00ffcc", 18);
+                        obstacles.splice(i, 1);
                     } else {
-                        const ratio =
-                            canvas.height /
-                            oldHeight;
-
-                        player.y =
-                            clamp(
-                                player.y *
-                                ratio,
-                                20,
-                                targetY
-                            );
+                        gameOver();
+                        return;
                     }
+                } else if (obstacles[i].y > canvas.height) {
+                    obstacles.splice(i, 1);
+                }
+            }
 
-                    updateLanePositions(
-                        false
-                    );
+            for (let i = powerups.length - 1; i >= 0; i--) {
+                powerups[i].y += currentSpeed;
+                if (
+                    powerups[i].lane === playerLane &&
+                    powerups[i].y < player.y + player.height &&
+                    powerups[i].y + powerups[i].size > player.y
+                ) {
+                    playSound("powerup");
+                    createParticles(lanes[playerLane], powerups[i].y, "#ffb86c", 15);
 
-                    player.targetX =
-                        getLanes()[
-                            player.lane
-                        ];
-
-                    if (
-                        !isPlaying
-                    ) {
-                        draw();
+                    if (powerups[i].type === "shield") {
+                        player.shields++;
+                        activePowerupName = `SHIELD +1`;
+                    } else if (powerups[i].type === "turbo") {
+                        turboActive = true;
+                        activePowerupName = "TURBO BOOST!";
+                        powerupTimer = 180;
                     }
-                }, 80);
-        }
-
-        window.addEventListener(
-            "resize",
-            handleResize,
-            { passive: true }
-        );
-
-        window.addEventListener(
-            "orientationchange",
-            () => {
-                setTimeout(
-                    handleResize,
-                    120
-                );
-            },
-            { passive: true }
-        );
-
-        /* ---------- SWIPE CONTROL ---------- */
-
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let touchStartTime = 0;
-
-        canvas.addEventListener(
-            "touchstart",
-            event => {
-                if (
-                    !isPlaying ||
-                    countdownActive
-                ) {
-                    return;
-                }
-
-                const touch =
-                    event.changedTouches[0];
-
-                touchStartX =
-                    touch.clientX;
-
-                touchStartY =
-                    touch.clientY;
-
-                touchStartTime =
-                    Date.now();
-            },
-            { passive: true }
-        );
-
-        canvas.addEventListener(
-            "touchend",
-            event => {
-                if (
-                    !isPlaying ||
-                    countdownActive
-                ) {
-                    return;
-                }
-
-                const touch =
-                    event.changedTouches[0];
-
-                const dx =
-                    touch.clientX -
-                    touchStartX;
-
-                const dy =
-                    touch.clientY -
-                    touchStartY;
-
-                const duration =
-                    Date.now() -
-                    touchStartTime;
-
-                /*
-                 * Hanya anggap sebagai swipe
-                 * jika gerak horizontal cukup besar.
-                 */
-                if (
-                    duration < 550 &&
-                    Math.abs(dx) > 35 &&
-                    Math.abs(dx) >
-                        Math.abs(dy) * 1.25
-                ) {
-                    movePlayer(
-                        dx > 0
-                            ? 1
-                            : -1
-                    );
-                }
-            },
-            { passive: true }
-        );
-
-        /* ---------- KEYBOARD ---------- */
-
-        window.addEventListener(
-            "keydown",
-            event => {
-                const key =
-                    event.key.toLowerCase();
-
-                if (
-                    key === "p" ||
-                    key === " "
-                ) {
-                    event.preventDefault();
-
-                    if (
-                        isPlaying &&
-                        !countdownActive
-                    ) {
-                        togglePause();
-                    }
-
-                    return;
-                }
-
-                if (
-                    key === "arrowleft" ||
-                    key === "a"
-                ) {
-                    event.preventDefault();
-
-                    movePlayer(-1);
-
-                    return;
-                }
-
-                if (
-                    key === "arrowright" ||
-                    key === "d"
-                ) {
-                    event.preventDefault();
-
-                    movePlayer(1);
-                }
-            }
-        );
-
-        /* ---------- PLAYER MOVEMENT PATCH ---------- */
-
-        const originalMovePlayer =
-            movePlayer;
-
-        movePlayer = function(
-            direction
-        ) {
-            if (
-                !isPlaying ||
-                isPaused ||
-                countdownActive
-            ) {
-                return;
-            }
-
-            if (
-                player.moveCooldown > 0
-            ) {
-                return;
-            }
-
-            const oldLane =
-                player.lane;
-
-            originalMovePlayer(
-                direction
-            );
-
-            if (
-                player.lane !== oldLane
-            ) {
-                player.moveCooldown = 4;
-
-                /*
-                 * Sedikit squash/stretch
-                 * saat pindah lane.
-                 */
-                player.steeringPunch =
-                    direction;
-            }
-        };
-
-        /* ---------- PLAYER VISUAL MOTION ---------- */
-
-        function updatePlayerPolish() {
-            if (
-                player.steeringPunch
-            ) {
-                player.steeringPunch *=
-                    .72;
-
-                if (
-                    Math.abs(
-                        player.steeringPunch
-                    ) < .05
-                ) {
-                    player.steeringPunch = 0;
+                    powerups.splice(i, 1);
+                } else if (powerups[i].y > canvas.height) {
+                    powerups.splice(i, 1);
                 }
             }
 
-            if (
-                player.hitCooldown > 0
-            ) {
-                player.hitCooldown--;
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx; p.y += p.vy; p.alpha -= 0.05;
+                if (p.alpha <= 0) particles.splice(i, 1);
             }
         }
 
-        /* ---------- COLLISION INVULNERABILITY PATCH ---------- */
-
-        const originalHandleCollision =
-            handleCollision;
-
-        handleCollision = function(
-            car,
-            index
-        ) {
-            if (
-                player.hitCooldown > 0
-            ) {
-                return;
-            }
-
-            originalHandleCollision(
-                car,
-                index
-            );
-        };
-
-        /* ---------- EXTRA CAR DETAIL ---------- */
-
-        function drawCarGlow(
-            x,
-            y,
-            color,
-            intensity = 1
-        ) {
+        // FUNGSI RENDER MOBIL BARU: Bentuk Vektor Presisi Mirip Mobil Sport/Sedan Nyata
+        function drawRealisticCar(x, y, w, h, primaryColor, isPlayer) {
             ctx.save();
+            let cx = x - w / 2;
 
-            ctx.globalAlpha =
-                .22 * intensity;
+            // Bayangan bodi mobil
+            ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+            ctx.fillRect(cx - 4, y + 8, w + 8, h - 14);
 
-            ctx.fillStyle =
-                color;
+            // Ban Roda Kiri & Kanan (Detail dengan Tapak Ban)
+            ctx.fillStyle = "#010103";
+            ctx.fillRect(cx - 7, y + 16, 6, 22);
+            ctx.fillRect(cx + w + 1, y + 16, 6, 22);
+            ctx.fillRect(cx - 7, y + h - 32, 6, 22);
+            ctx.fillRect(cx + w + 1, y + h - 32, 6, 22);
+            
+            // Velg Roda Crom
+            ctx.fillStyle = "#64748b";
+            ctx.fillRect(cx - 6, y + 23, 4, 8);
+            ctx.fillRect(cx + w + 2, y + 23, 4, 8);
+            ctx.fillRect(cx - 6, y + h - 25, 4, 8);
+            ctx.fillRect(cx + w + 2, y + h - 25, 4, 8);
 
-            ctx.shadowColor =
-                color;
-
-            ctx.shadowBlur =
-                18 * intensity;
-
+            // Bodi Utama Mobil (Bentuk aerodinamis bersudut tajam ala mobil retro)
+            ctx.fillStyle = primaryColor;
             ctx.beginPath();
-
-            ctx.ellipse(
-                x,
-                y + 72,
-                22,
-                7,
-                0,
-                0,
-                Math.PI * 2
-            );
-
+            ctx.moveTo(cx + 8, y + 2);                    // Hidung moncong depan
+            ctx.lineTo(cx + w - 8, y + 2);
+            ctx.quadraticCurveTo(cx + w - 2, y + 10, cx + w, y + 26); // Fender kanan depan
+            ctx.lineTo(cx + w - 3, y + h - 6);            // Samping bodi kanan
+            ctx.quadraticCurveTo(cx + w / 2, y + h + 2, cx + 3, y + h - 6); // Bumper belakang
+            ctx.lineTo(cx, y + 26);                        // Samping bodi kiri
+            ctx.quadraticCurveTo(cx + 2, y + 10, cx + 8, y + 2); // Fender kiri depan
+            ctx.closePath();
             ctx.fill();
 
-            ctx.restore();
-        }
-
-        /* ---------- ROAD NEON GLOW ---------- */
-
-        function drawNeonEdge() {
-            const w =
-                gameWidth();
-
-            const h =
-                gameHeight();
-
-            ctx.save();
-
-            ctx.globalAlpha = .55;
-
-            ctx.strokeStyle =
-                COLORS.cyan;
-
-            ctx.lineWidth = 2;
-
-            ctx.shadowColor =
-                COLORS.cyan;
-
-            ctx.shadowBlur = 8;
-
-            ctx.beginPath();
-
-            ctx.moveTo(
-                18,
-                0
-            );
-
-            ctx.lineTo(
-                18,
-                h
-            );
-
-            ctx.moveTo(
-                w - 18,
-                0
-            );
-
-            ctx.lineTo(
-                w - 18,
-                h
-            );
-
+            // Garis Kontur Luar Bodi
+            ctx.strokeStyle = isPlayer ? "#ffffff" : "#ff1a75";
+            ctx.lineWidth = 1.5;
             ctx.stroke();
 
+            // Kap Mesin Depan
+            ctx.fillStyle = isPlayer ? "#00b38f" : "#cc0052";
+            ctx.fillRect(cx + 8, y + 6, w - 16, 12);
+
+            // Kaca Depan (Windshield Miring Trapezoid)
+            ctx.fillStyle = "#050508";
+            ctx.beginPath();
+            ctx.moveTo(cx + 6, y + 22);
+            ctx.lineTo(cx + w - 6, y + 22);
+            ctx.lineTo(cx + w - 4, y + 42);
+            ctx.lineTo(cx + 4, y + 42);
+            ctx.closePath();
+            ctx.fill();
+
+            // Atap Kabin Mobil
+            ctx.fillStyle = primaryColor;
+            ctx.fillRect(cx + 5, y + 44, w - 10, 20);
+            ctx.strokeStyle = isPlayer ? "#ffffff" : "#ff1a75";
+            ctx.strokeRect(cx + 5, y + 44, w - 10, 20);
+
+            // Kaca Belakang
+            ctx.fillStyle = "#050508";
+            ctx.fillRect(cx + 6, y + 66, w - 12, 8);
+
+            // Lampu (Headlights & Taillights)
+            if (isPlayer) {
+                // Lampu Sorot Depan Taksi
+                ctx.fillStyle = "#ffff00";
+                ctx.fillRect(cx + 2, y, 7, 5);
+                ctx.fillRect(cx + w - 9, y, 7, 5);
+                // Papan Taksi "TAXI" di Atap
+                ctx.fillStyle = "#ff007f";
+                ctx.fillRect(cx + 10, y + 49, w - 20, 8);
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "bold 9px 'VT323', monospace";
+                ctx.textAlign = "center";
+                ctx.fillText("TAXI", x, y + 56);
+            } else {
+                // Lampu Belakang Merah Musuh
+                ctx.fillStyle = "#ff1a1a";
+                ctx.fillRect(cx + 2, y + h - 5, 8, 5);
+                ctx.fillRect(cx + w - 10, y + h - 5, 8, 5);
+                // Lampu Depan Musuh
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(cx + 3, y, 6, 4);
+                ctx.fillRect(cx + w - 9, y, 6, 4);
+            }
+
             ctx.restore();
         }
 
-        /* ---------- PLAYER FLASH ---------- */
-
-        function drawPlayerDamageFlash() {
-            if (
-                player.hitCooldown <= 0
-            ) {
-                return;
+        function draw() {
+            ctx.save();
+            
+            // Efek Getar Layar (Screen Shake) saat terjadi tabrakan / shield pecah
+            if (screenShakeTimer > 0) {
+                let shakeX = (Math.random() - 0.5) * 8;
+                let shakeY = (Math.random() - 0.5) * 8;
+                ctx.translate(shakeX, shakeY);
+                screenShakeTimer--;
             }
 
-            /*
-             * Blink player sebentar setelah
-             * shield menyerap tabrakan.
-             */
-            if (
-                Math.floor(
-                    player.hitCooldown / 3
-                ) % 2 === 0
-            ) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Retro Asphalt Road
+            ctx.fillStyle = "#0d1117";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Sidewalk Shoulders
+            ctx.fillStyle = "#161b22";
+            ctx.fillRect(0, 0, 18, canvas.height);
+            ctx.fillRect(canvas.width - 18, 0, 18, canvas.height);
+
+            // Neon Road Striping Line
+            ctx.strokeStyle = "#00ffcc";
+            ctx.lineWidth = 3;
+            ctx.setLineDash([20, 20]);
+            ctx.lineDashOffset = -roadOffset;
+
+            let lanes = getLanes();
+            ctx.beginPath();
+            ctx.moveTo((lanes[0] + lanes[1]) / 2, 0);
+            ctx.lineTo((lanes[0] + lanes[1]) / 2, canvas.height);
+            ctx.moveTo((lanes[1] + lanes[2]) / 2, 0);
+            ctx.lineTo((lanes[1] + lanes[2]) / 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            for (let p of particles) {
                 ctx.save();
-
-                ctx.globalAlpha = .42;
-
-                ctx.strokeStyle =
-                    COLORS.white;
-
-                ctx.lineWidth = 3;
-
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
                 ctx.beginPath();
-
-                ctx.arc(
-                    player.x,
-                    player.y +
-                        player.height / 2,
-                    40,
-                    0,
-                    Math.PI * 2
-                );
-
-                ctx.stroke();
-
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
                 ctx.restore();
             }
+
+            // Draw Player Car (Cyber Taxi Desain Baru)
+            drawRealisticCar(lanes[playerLane], player.y, player.width, player.height, "#00ffcc", true);
+
+            // Shield Aura Ring
+            if (player.shields > 0) {
+                ctx.strokeStyle = "#00ffcc";
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(lanes[playerLane], player.y + player.height / 2, 48, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Draw Obstacle Cars (Musuh Desain Baru)
+            for (let obs of obstacles) {
+                drawRealisticCar(lanes[obs.lane], obs.y, obs.width, obs.height, "#ff0066", false);
+            }
+
+            // Draw Power-ups
+            for (let p of powerups) {
+                let px = lanes[p.lane];
+                let py = p.y + p.size / 2;
+                
+                ctx.save();
+                ctx.fillStyle = p.type === "shield" ? "#00ffcc" : "#ffb86c";
+                ctx.beginPath();
+                ctx.arc(px, py, p.size / 2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = "#030305";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                ctx.fillStyle = "#030305";
+                ctx.font = "bold 18px 'VT323', monospace";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(p.type === "shield" ? "S" : "T", px, py);
+                ctx.restore();
+            }
+
+            // CRT Scanline Overlay Effect
+            ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+            for (let sy = 0; sy < canvas.height; sy += 4) {
+                ctx.fillRect(0, sy, canvas.width, 1);
+            }
+
+            ctx.restore(); // Mengembalikan posisi canvas dari screen shake
+
+            document.getElementById("scoreDisplay").innerText = `SCORE: ${Math.floor(score).toString().padStart(4, '0')}`;
+            document.getElementById("speedDisplay").innerText = `${gameSpeed.toFixed(1)}X`;
+            document.getElementById("shieldStatus").innerText = `SHIELD: ${player.shields} 🛡️`;
+            document.getElementById("activePowerup").innerText = activePowerupName;
         }
 
-        /* ---------- DRAW PATCH ---------- */
-
-        const finalDraw =
-            draw;
-
-        draw = function() {
-            finalDraw();
-
-            if (
-                isPlaying
-            ) {
-                drawNeonEdge();
-                drawPlayerDamageFlash();
-            }
-        };
-
-        /* ---------- UPDATE PATCH ---------- */
-
-        const finalUpdate =
-            update;
-
-        update = function() {
-            if (
-                !isPlaying ||
-                isPaused ||
-                countdownActive
-            ) {
-                return;
-            }
-
-            finalUpdate();
-
-            updatePlayerPolish();
-        };
-
-        /* ---------- BUTTON TOUCH FEEDBACK ---------- */
-
-        document
-            .querySelectorAll(
-                ".control-btn, .btn"
-            )
-            .forEach(button => {
-                button.addEventListener(
-                    "touchstart",
-                    () => {
-                        button.style.transform =
-                            "scale(.96)";
-                    },
-                    { passive: true }
-                );
-
-                button.addEventListener(
-                    "touchend",
-                    () => {
-                        button.style.transform =
-                            "";
-                    },
-                    { passive: true }
-                );
-
-                button.addEventListener(
-                    "touchcancel",
-                    () => {
-                        button.style.transform =
-                            "";
-                    },
-                    { passive: true }
-                );
-            });
-
-        /* ---------- PREVENT SCROLLING ---------- */
-
-        document.body.addEventListener(
-            "touchmove",
-            event => {
-                /*
-                 * Jangan blokir gesture di input
-                 * tertentu, tetapi game area tetap
-                 * tidak boleh melakukan page scroll.
-                 */
-                if (
-                    event.target === canvas ||
-                    event.target.closest(
-                        "#game-container"
-                    )
-                ) {
-                    event.preventDefault();
-                }
-            },
-            { passive: false }
-        );
-
-        /* ---------- AUDIO SAFETY ---------- */
-
-        document.addEventListener(
-            "visibilitychange",
-            () => {
-                if (
-                    !audioCtx
-                ) {
-                    return;
-                }
-
-                if (
-                    document.hidden
-                ) {
-                    if (
-                        audioCtx.state ===
-                        "running"
-                    ) {
-                        audioCtx.suspend()
-                            .catch(() => {});
-                    }
-                } else if (
-                    isPlaying &&
-                    !isPaused
-                ) {
-                    audioCtx.resume()
-                        .catch(() => {});
-                }
-            }
-        );
-
-        /* ---------- CLEAN RESTART ---------- */
-
-        function resetGameState() {
-            score = 0;
-
-            gameSpeed =
-                BASE_SPEED;
-
-            roadOffset = 0;
-
-            spawnTimer = 0;
-            powerupSpawnTimer = 80;
-
-            combo = 0;
-            comboTimer = 0;
-
-            turboTimer = 0;
-
-            activePowerupName =
-                "READY";
-
-            powerupMessageTimer =
-                0;
-
-            screenShake = 0;
-            flashTimer = 0;
-
-            obstacles.length = 0;
-            powerups.length = 0;
-            particles.length = 0;
-            floatingTexts.length = 0;
-
-            player.lane = 1;
-            player.shields = 0;
-            player.hitCooldown = 0;
-            player.moveCooldown = 0;
-            player.steeringPunch = 0;
-
-            player.y =
-                gameHeight() - 112;
-
-            updateLanePositions(
-                true
-            );
+        function loop() {
+            if (!isPlaying) return;
+            update();
+            draw();
+            requestAnimationFrame(loop);
         }
-
-        /* ---------- GAME RESET OVERRIDE ---------- */
-
-        const cleanStartGame =
-            startGame;
-
-        startGame = function() {
-            /*
-             * Stop previous animation frame.
-             */
-            if (
-                animationId
-            ) {
-                cancelAnimationFrame(
-                    animationId
-                );
-
-                animationId = null;
-            }
-
-            resetGameState();
-
-            refreshBestScore();
-
-            cleanStartGame();
-        };
-
-        /* ---------- GAME OVER PATCH ---------- */
-
-        const cleanGameOver =
-            gameOver;
-
-        gameOver = function() {
-            if (
-                !isPlaying
-            ) {
-                return;
-            }
-
-            cleanGameOver();
-
-            combo = 0;
-            comboTimer = 0;
-
-            comboHud.style.opacity =
-                "0";
-
-            pauseScreen
-                .classList
-                .add("hidden");
-
-            bestHud.innerText =
-                `BEST: ${highScore}`;
-        };
-
-        /* ---------- GAME OVER BUTTON ---------- */
-
-        const playAgainButton =
-            document.querySelector(
-                "#gameOverScreen .btn"
-            );
-
-        if (
-            playAgainButton
-        ) {
-            playAgainButton.addEventListener(
-                "click",
-                () => {
-                    /*
-                     * Pastikan pause state tidak
-                     * terbawa ke game berikutnya.
-                     */
-                    isPaused = false;
-                    countdownActive = false;
-
-                    pauseScreen
-                        .classList
-                        .add("hidden");
-                }
-            );
-        }
-
-        /* ---------- DOUBLE START PROTECTION ---------- */
-
-        let startingGame = false;
-
-        const protectedStart =
-            startGame;
-
-        startGame = function() {
-            if (
-                startingGame
-            ) {
-                return;
-            }
-
-            startingGame = true;
-
-            protectedStart();
-
-            setTimeout(() => {
-                startingGame = false;
-            }, 500);
-        };
-
-        /* ---------- INITIAL STATE ---------- */
-
-        refreshBestScore();
-
-        isPlaying = false;
-        isPaused = false;
-        countdownActive = false;
-
-        /*
-         * Pastikan canvas tidak kosong
-         * ketika halaman pertama kali dibuka.
-         */
-        resizeCanvas();
-
-        player.y =
-            gameHeight() - 112;
-
-        updateLanePositions(
-            true
-        );
-
-        draw();
-
-        /* ---------- DEBUG CLEANUP ---------- */
-
-        /*
-         * Tidak ada console spam di production.
-         * Error audio tetap ditangani secara silent.
-         */
-        window.addEventListener(
-            "error",
-            event => {
-                if (
-                    event &&
-                    event.message &&
-                    event.message
-                        .toLowerCase()
-                        .includes("audio")
-                ) {
-                    event.preventDefault();
-                }
-            }
-        );
+    </script>
+</body>
+</html>
