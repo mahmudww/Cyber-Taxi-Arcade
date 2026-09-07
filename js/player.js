@@ -55,57 +55,75 @@ INITIALIZE PLAYER
 
 function initPlayer(canvas) {
 
-updatePlayerDimensions(canvas);
+    /*
+     * Always resolve the main game canvas.
+     * This prevents crashes when initPlayer()
+     * is called without an argument.
+     */
 
-const lanes =
-    getLanePositions(canvas.width);
+    if (!canvas) {
+        canvas = document.getElementById("gameCanvas");
+    }
 
-
-const startingLane =
-    GAME_CONFIG.PLAYER.startingLane;
-
-
-gameState.player.lane =
-    startingLane;
-
-gameState.player.targetLane =
-    startingLane;
-
-
-gameState.player.x =
-    lanes[startingLane];
-
-gameState.player.targetX =
-    lanes[startingLane];
+    if (!canvas) {
+        console.error(
+            "[Cyber Taxi] initPlayer(): gameCanvas not found."
+        );
+        return;
+    }
 
 
-gameState.player.y =
-    getPlayerY(canvas.height);
+    updatePlayerDimensions(canvas);
 
 
-playerAnimation.visualX =
-    gameState.player.x;
+    const lanes =
+        getLanePositions(canvas.width);
 
-playerAnimation.visualY =
-    gameState.player.y;
 
-playerAnimation.velocityX = 0;
+    const startingLane =
+        GAME_CONFIG.PLAYER.startingLane;
 
-playerAnimation.lean = 0;
 
-playerAnimation.targetLean = 0;
+    gameState.player.lane =
+        startingLane;
 
-playerAnimation.bob = 0;
+    gameState.player.targetLane =
+        startingLane;
 
-playerAnimation.pulse = 0;
 
-playerAnimation.trailTimer = 0;
+    gameState.player.x =
+        lanes[startingLane];
 
-playerAnimation.lastLane =
-    startingLane;
+    gameState.player.targetX =
+        lanes[startingLane];
 
-playerAnimation.laneChangeFlash = 0;
 
+    gameState.player.y =
+        getPlayerY(canvas.height);
+
+
+    playerAnimation.visualX =
+        gameState.player.x;
+
+    playerAnimation.visualY =
+        gameState.player.y;
+
+    playerAnimation.velocityX = 0;
+
+    playerAnimation.lean = 0;
+
+    playerAnimation.targetLean = 0;
+
+    playerAnimation.bob = 0;
+
+    playerAnimation.pulse = 0;
+
+    playerAnimation.trailTimer = 0;
+
+    playerAnimation.lastLane =
+        startingLane;
+
+    playerAnimation.laneChangeFlash = 0;
 
 }
 
@@ -116,20 +134,18 @@ UPDATE PLAYER DIMENSIONS
 function updatePlayerDimensions(canvas) {
 
     /*
-     * Fallback ke canvas utama.
+     * Resolve canvas automatically if no
+     * canvas argument was provided.
      */
 
     if (!canvas) {
         canvas = document.getElementById("gameCanvas");
     }
 
-    /*
-     * Safety check.
-     */
 
     if (!canvas) {
         console.error(
-            "[Cyber Taxi] Cannot update player dimensions: canvas not found."
+            "[Cyber Taxi] updatePlayerDimensions(): gameCanvas not found."
         );
         return;
     }
@@ -138,8 +154,10 @@ function updatePlayerDimensions(canvas) {
     gameState.player.width =
         GAME_CONFIG.ROAD.playerWidth;
 
+
     gameState.player.height =
         GAME_CONFIG.ROAD.playerHeight;
+
 
     gameState.player.y =
         getPlayerY(canvas.height);
@@ -777,25 +795,18 @@ PLAYER RESET
 
 function resetPlayer(canvas) {
 
-    /*
-     * Jika canvas tidak diberikan oleh game.js,
-     * ambil canvas utama secara otomatis.
-     */
-
     if (!canvas) {
         canvas = document.getElementById("gameCanvas");
     }
 
-    /*
-     * Safety check.
-     */
 
     if (!canvas) {
         console.error(
-            "[Cyber Taxi] Cannot reset player: game canvas not found."
+            "[Cyber Taxi] resetPlayer(): gameCanvas not found."
         );
         return;
     }
+
 
     initPlayer(canvas);
 
