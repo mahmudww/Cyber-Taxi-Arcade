@@ -1351,74 +1351,38 @@ TRAFFIC VEHICLE
 ========================================================= */
 
 function drawTrafficVehicle(
-ctx,
-vehicle
+    ctx,
+    vehicle
 ) {
 
-const lane =
-    Number.isFinite(
-        vehicle.lane
-    )
+    const x =
+        getLaneX(
+            vehicle.lane
+        );
 
-        ? vehicle.lane
+    const color =
+        vehicle.color ||
+        COLORS.neonPink;
 
-        : 0;
+    drawCar(
 
+        ctx,
 
-const x =
-    Number.isFinite(
-        vehicle.x
-    )
+        x,
 
-        ? vehicle.x
+        vehicle.y,
 
-        : getLaneX(lane);
+        vehicle.width,
 
+        vehicle.height,
 
-const y =
-    Number.isFinite(
-        vehicle.y
-    )
+        color,
 
-        ? vehicle.y
+        false,
 
-        : -100;
+        vehicle.type
 
-
-const width =
-    vehicle.width ||
-    42;
-
-
-const height =
-    vehicle.height ||
-    76;
-
-
-const color =
-    vehicle.color ||
-    COLORS.neonPink;
-
-
-drawCar(
-
-    ctx,
-
-    x,
-
-    y,
-
-    width,
-
-    height,
-
-    color,
-
-    false,
-
-    vehicle.type
-
-);
+    );
 
 }
 
