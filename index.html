@@ -1,170 +1,1514 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
+    <meta name="theme-color" content="#030305">
 
-    <title>Cyber Taxi Arcade</title>
+    <title>Cyber Taxi</title>
 
-    <link
-        rel="stylesheet"
-        href="css/style.css"
-    >
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+        :root {
+            --bg: #030305;
+            --panel: #090a0f;
+            --road: #0d1117;
+            --border: #1f293d;
+            --cyan: #00ffcc;
+            --pink: #ff007f;
+            --orange: #ffb86c;
+            --white: #ffffff;
+            --danger: #ff3333;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            font-family: 'VT323', monospace;
+            color: var(--cyan);
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button {
+            font-family: 'VT323', monospace;
+        }
+
+        /* =========================================================
+           GAME CONTAINER
+           ========================================================= */
+
+        #game-container {
+            position: relative;
+
+            width: min(100vw, 500px);
+            height: min(100vh, 900px);
+
+            background: var(--panel);
+            overflow: hidden;
+
+            border: 2px solid var(--border);
+            box-shadow:
+                0 0 30px rgba(0, 255, 204, 0.20),
+                inset 0 0 30px rgba(0, 0, 0, 0.5);
+
+            display: flex;
+            flex-direction: column;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            background: var(--road);
+        }
+
+        /* =========================================================
+           HUD
+           ========================================================= */
+
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            width: 100%;
+            padding:
+                max(12px, env(safe-area-inset-top))
+                15px
+                10px;
+
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .header-hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            font-size: clamp(21px, 6vw, 28px);
+            font-weight: bold;
+            letter-spacing: 2px;
+
+            text-shadow: 0 0 8px rgba(0, 255, 204, 0.6);
+        }
+
+        .status-hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            min-height: 30px;
+
+            font-size: clamp(16px, 4.5vw, 20px);
+
+            background: rgba(13, 17, 23, 0.88);
+            padding: 4px 10px;
+
+            border-radius: 4px;
+            border: 1px solid var(--border);
+
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.35);
+        }
+
+        #speedDisplay {
+            color: var(--pink);
+        }
+
+        #activePowerup {
+            color: var(--orange);
+        }
+
+        /* =========================================================
+           MOBILE CONTROLS
+           ========================================================= */
+
+        .mobile-controls {
+            display: flex;
+
+            width: 100%;
+            height: clamp(74px, 13vh, 100px);
+
+            background: #030305;
+
+            border-top: 2px solid var(--border);
+
+            flex-shrink: 0;
+
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .control-btn {
+            flex: 1;
+
+            min-width: 0;
+
+            background: #0d1117;
+            border: none;
+
+            color: var(--cyan);
+
+            font-size: clamp(25px, 7vw, 36px);
+            letter-spacing: 2px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            cursor: pointer;
+
+            transition:
+                background 0.08s ease,
+                color 0.08s ease,
+                transform 0.08s ease;
+
+            -webkit-touch-callout: none;
+        }
+
+        .control-btn:first-child {
+            border-right: 2px solid var(--border);
+        }
+
+        .control-btn:active {
+            background: #1f293d;
+            color: var(--white);
+            box-shadow: inset 0 0 15px rgba(0, 255, 204, 0.5);
+            transform: scale(0.98);
+        }
+
+        /* =========================================================
+           GENERAL SCREEN
+           ========================================================= */
+
+        .screen {
+            position: absolute;
+
+            top: 0;
+            left: 0;
+
+            width: 100%;
+            height: 100%;
+
+            background: rgba(3, 3, 5, 0.96);
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            padding:
+                30px
+                20px
+                calc(30px + env(safe-area-inset-bottom));
+
+            z-index: 10;
+        }
+
+        .screen h1 {
+            font-size: clamp(44px, 14vw, 68px);
+
+            line-height: 0.9;
+
+            margin: 0 0 10px;
+
+            color: var(--pink);
+
+            text-shadow:
+                0 0 10px rgba(255, 0, 127, 0.8),
+                0 0 25px rgba(255, 0, 127, 0.5);
+
+            letter-spacing: 3px;
+        }
+
+        .screen p {
+            max-width: 360px;
+
+            color: var(--cyan);
+
+            font-size: clamp(18px, 5vw, 24px);
+
+            margin: 0 0 30px;
+
+            letter-spacing: 1px;
+
+            text-shadow: 0 0 6px rgba(0, 255, 204, 0.4);
+        }
+
+        .btn {
+            background: var(--cyan);
+            color: #030305;
+
+            border: none;
+
+            padding: 11px 35px;
+
+            font-size: clamp(24px, 7vw, 32px);
+            font-weight: bold;
+
+            letter-spacing: 2px;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 0 15px rgba(0, 255, 204, 0.4);
+
+            transition:
+                transform 0.08s ease,
+                background 0.08s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            background: var(--white);
+        }
+
+        .small-info {
+            color: #8b949e !important;
+            font-size: 17px !important;
+            margin-top: 14px !important;
+            margin-bottom: 0 !important;
+        }
+
+        /* =========================================================
+           PAUSE SCREEN
+           ========================================================= */
+
+        #pauseScreen h1 {
+            color: var(--cyan);
+
+            text-shadow:
+                0 0 12px rgba(0, 255, 204, 0.8),
+                0 0 25px rgba(0, 255, 204, 0.4);
+        }
+
+        /* =========================================================
+           GAME OVER
+           ========================================================= */
+
+        #gameOverScreen h1 {
+            color: var(--danger);
+
+            text-shadow:
+                0 0 15px rgba(255, 51, 51, 0.8),
+                0 0 30px rgba(255, 51, 51, 0.35);
+        }
+
+        #finalScoreText {
+            color: #8b949e;
+        }
+
+        #bestScoreText {
+            color: var(--cyan);
+            font-size: 20px;
+            margin-top: -18px;
+        }
+
+        .new-record {
+            color: var(--orange) !important;
+
+            animation: recordPulse 0.7s infinite alternate;
+        }
+
+        @keyframes recordPulse {
+            from {
+                opacity: 0.55;
+                transform: scale(1);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1.06);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* =========================================================
+           DESKTOP
+           ========================================================= */
+
+        @media (min-width: 700px) {
+            #game-container {
+                border-radius: 6px;
+            }
+
+            .mobile-controls {
+                height: 82px;
+            }
+        }
+
+        /* =========================================================
+           REDUCED MOTION
+           ========================================================= */
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+    </style>
 </head>
-
 
 <body>
 
-    <div id="game-container">
+<div id="game-container">
 
-        <!-- =================================
-             GAME CANVAS
-             ================================= -->
+    <canvas id="gameCanvas"></canvas>
 
-        <canvas id="gameCanvas"></canvas>
+    <!-- =========================================================
+         HUD
+         ========================================================= -->
 
+    <div class="ui-layer">
 
-        <!-- =================================
-             HUD
-             ================================= -->
-
-        <div class="ui-layer">
-
-            <div class="header-hud">
-
-                <span id="scoreDisplay">
-                    SCORE: 0000
-                </span>
-
-                <span
-                    id="speedDisplay"
-                    style="color: #ff007f;"
-                >
-                    1.0X
-                </span>
-
-            </div>
-
-
-            <div class="status-hud">
-
-                <span id="shieldStatus">
-                    SHIELD: 0 🛡️
-                </span>
-
-                <span
-                    id="activePowerup"
-                    style="color: #ffb86c;"
-                >
-                    READY
-                </span>
-
-            </div>
-
+        <div class="header-hud">
+            <span id="scoreDisplay">SCORE: 0000</span>
+            <span id="speedDisplay">1.0X</span>
         </div>
 
-
-        <!-- =================================
-             MOBILE CONTROLS
-             ================================= -->
-
-        <div class="mobile-controls">
-
-            <button
-                class="control-btn"
-                id="leftButton"
-            >
-                &lt; LEFT
-            </button>
-
-
-            <button
-                class="control-btn"
-                id="rightButton"
-            >
-                RIGHT &gt;
-            </button>
-
-        </div>
-
-
-        <!-- =================================
-             START SCREEN
-             ================================= -->
-
-        <div
-            id="startScreen"
-            class="screen"
-        >
-
-            <h1>
-                CYBER TAXI
-            </h1>
-
-
-            <p>
-                Dodge the Grid. Own the Neon Night.
-            </p>
-
-
-            <button
-                class="btn"
-                id="startButton"
-            >
-                INSERT COIN
-            </button>
-
-        </div>
-
-
-        <!-- =================================
-             GAME OVER SCREEN
-             ================================= -->
-
-        <div
-            id="gameOverScreen"
-            class="screen hidden"
-        >
-
-            <h1 class="game-over-title">
-                GAME OVER
-            </h1>
-
-
-            <p
-                id="finalScoreText"
-                class="final-score"
-            >
-                FINAL SCORE: 0
-            </p>
-
-
-            <button
-                class="btn"
-                id="restartButton"
-            >
-                PLAY AGAIN
-            </button>
-
+        <div class="status-hud">
+            <span id="shieldStatus">SHIELD: 0 🛡️</span>
+            <span id="activePowerup">READY</span>
         </div>
 
     </div>
 
+    <!-- =========================================================
+         MOBILE CONTROLS
+         ========================================================= -->
 
-    <!-- =====================================
-         GAME JAVASCRIPT
-         ===================================== -->
+    <div class="mobile-controls">
 
-    <script
-        type="module"
-        src="js/main.js"
-    ></script>
+        <button
+            id="leftButton"
+            class="control-btn"
+            aria-label="Move left">
+            &lt; LEFT
+        </button>
 
-</body>
+        <button
+            id="rightButton"
+            class="control-btn"
+            aria-label="Move right">
+            RIGHT &gt;
+        </button>
 
-</html>
+    </div>
+
+    <!-- =========================================================
+         START SCREEN
+         ========================================================= -->
+
+    <div id="startScreen" class="screen">
+
+        <h1>CYBER<br>TAXI</h1>
+
+        <p>
+            Dodge the Grid.<br>
+            Own the Neon Night.
+        </p>
+
+        <button id="startButton" class="btn">
+            INSERT COIN
+        </button>
+
+        <p class="small-info">
+            ← → &nbsp; / &nbsp; A D
+        </p>
+
+    </div>
+
+    <!-- =========================================================
+         PAUSE SCREEN
+         ========================================================= -->
+
+    <div id="pauseScreen" class="screen hidden">
+
+        <h1>PAUSED</h1>
+
+        <p>
+            TAKE A BREATH, DRIVER.
+        </p>
+
+        <button id="resumeButton" class="btn">
+            RESUME
+        </button>
+
+    </div>
+
+    <!-- =========================================================
+         GAME OVER SCREEN
+         ========================================================= -->
+
+    <div id="gameOverScreen" class="screen hidden">
+
+        <h1>GAME OVER</h1>
+
+        <p id="finalScoreText">
+            FINAL SCORE: 0
+        </p>
+
+        <p id="bestScoreText">
+            BEST: 0
+        </p>
+
+        <button id="restartButton" class="btn">
+            PLAY AGAIN
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+/* ================================================================
+   CYBER TAXI
+   PART 1 — FOUNDATION & RESPONSIVE ENGINE
+   ================================================================ */
+
+
+/* ================================================================
+   DOM
+   ================================================================ */
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+const container = document.getElementById("game-container");
+
+const startScreen = document.getElementById("startScreen");
+const pauseScreen = document.getElementById("pauseScreen");
+const gameOverScreen = document.getElementById("gameOverScreen");
+
+const startButton = document.getElementById("startButton");
+const resumeButton = document.getElementById("resumeButton");
+const restartButton = document.getElementById("restartButton");
+
+const leftButton = document.getElementById("leftButton");
+const rightButton = document.getElementById("rightButton");
+
+const scoreDisplay = document.getElementById("scoreDisplay");
+const speedDisplay = document.getElementById("speedDisplay");
+const shieldStatus = document.getElementById("shieldStatus");
+const activePowerupDisplay = document.getElementById("activePowerup");
+
+const finalScoreText = document.getElementById("finalScoreText");
+const bestScoreText = document.getElementById("bestScoreText");
+
+
+/* ================================================================
+   GAME CONSTANTS
+   ================================================================ */
+
+const GAME = {
+
+    BASE_SPEED: 270,
+
+    MAX_SPEED: 900,
+
+    SCORE_RATE: 18,
+
+    TURBO_MULTIPLIER: 1.8,
+
+    TURBO_DURATION: 3,
+
+    MAX_SHIELDS: 3,
+
+    SPAWN_START: 0.75,
+
+    SPAWN_MIN: 0.34,
+
+    POWERUP_INTERVAL: 4.0,
+
+    ROAD_MARGIN: 22,
+
+    LANE_WIDTH: 70,
+
+    PLAYER_WIDTH: 44,
+
+    PLAYER_HEIGHT: 84,
+
+    OBSTACLE_WIDTH: 44,
+
+    OBSTACLE_HEIGHT: 84,
+
+    POWERUP_SIZE: 34,
+
+    HIGH_SCORE_KEY: "cyberTaxiHighScore"
+
+};
+
+
+/* ================================================================
+   GAME STATE
+   ================================================================ */
+
+const STATE = {
+
+    MENU: "menu",
+
+    PLAYING: "playing",
+
+    PAUSED: "paused",
+
+    GAME_OVER: "gameover"
+
+};
+
+let gameState = STATE.MENU;
+
+
+/* ================================================================
+   CANVAS / RESIZE
+   ================================================================ */
+
+let canvasWidth = 400;
+let canvasHeight = 600;
+
+function resizeCanvas() {
+
+    const rect = canvas.getBoundingClientRect();
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvasWidth = Math.max(1, Math.floor(rect.width));
+    canvasHeight = Math.max(1, Math.floor(rect.height));
+
+    canvas.width = Math.floor(canvasWidth * dpr);
+    canvas.height = Math.floor(canvasHeight * dpr);
+
+    /*
+     * We draw using CSS-pixel coordinates.
+     * This keeps the game visually consistent on
+     * high-DPI phone screens and laptop displays.
+     */
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    if (player) {
+        player.y = canvasHeight - 110;
+    }
+}
+
+
+/* ================================================================
+   RESPONSIVE ROAD / LANES
+   ================================================================ */
+
+function getRoadWidth() {
+
+    return Math.min(
+        canvasWidth - GAME.ROAD_MARGIN * 2,
+        GAME.LANE_WIDTH * 3
+    );
+
+}
+
+function getLanes() {
+
+    const roadWidth = getRoadWidth();
+
+    const center = canvasWidth / 2;
+
+    const laneWidth = roadWidth / 3;
+
+    return [
+        center - laneWidth,
+        center,
+        center + laneWidth
+    ];
+
+}
+
+
+/* ================================================================
+   AUDIO
+   ================================================================ */
+
+let audioCtx = null;
+
+let engineOsc = null;
+let engineGain = null;
+let engineFilter = null;
+
+let bgmInterval = null;
+
+function initAudio() {
+
+    try {
+
+        if (!audioCtx) {
+
+            audioCtx = new (
+                window.AudioContext ||
+                window.webkitAudioContext
+            )();
+
+        }
+
+        if (audioCtx.state === "suspended") {
+            audioCtx.resume();
+        }
+
+        startEngineSound();
+        startBGM();
+
+    } catch (error) {
+
+        console.log("Audio unavailable:", error);
+
+    }
+
+}
+
+
+function startEngineSound() {
+
+    if (!audioCtx || engineOsc) {
+        return;
+    }
+
+    try {
+
+        engineOsc = audioCtx.createOscillator();
+        engineGain = audioCtx.createGain();
+        engineFilter = audioCtx.createBiquadFilter();
+
+        engineOsc.type = "sawtooth";
+
+        engineOsc.frequency.setValueAtTime(
+            55,
+            audioCtx.currentTime
+        );
+
+        engineFilter.type = "lowpass";
+
+        engineFilter.frequency.setValueAtTime(
+            150,
+            audioCtx.currentTime
+        );
+
+        engineGain.gain.setValueAtTime(
+            0.012,
+            audioCtx.currentTime
+        );
+
+        engineOsc
+            .connect(engineFilter)
+            .connect(engineGain)
+            .connect(audioCtx.destination);
+
+        engineOsc.start();
+
+    } catch (error) {
+
+        engineOsc = null;
+
+    }
+
+}
+
+
+function updateEngineSound() {
+
+    if (
+        !audioCtx ||
+        !engineOsc ||
+        !engineGain ||
+        !engineFilter
+    ) {
+        return;
+    }
+
+    try {
+
+        const normalizedSpeed =
+            Math.min(
+                gameSpeed / GAME.BASE_SPEED,
+                3
+            );
+
+        const frequency =
+            55 + normalizedSpeed * 28;
+
+        const filterFrequency =
+            150 + normalizedSpeed * 100;
+
+        engineOsc.frequency.setTargetAtTime(
+            frequency,
+            audioCtx.currentTime,
+            0.05
+        );
+
+        engineFilter.frequency.setTargetAtTime(
+            filterFrequency,
+            audioCtx.currentTime,
+            0.05
+        );
+
+    } catch (error) {}
+
+}
+
+
+function stopEngineSound() {
+
+    if (engineOsc) {
+
+        try {
+            engineOsc.stop();
+            engineOsc.disconnect();
+        } catch (error) {}
+
+    }
+
+    engineOsc = null;
+    engineGain = null;
+    engineFilter = null;
+
+}
+
+
+function startBGM() {
+
+    if (!audioCtx || bgmInterval) {
+        return;
+    }
+
+    const notes = [
+        110,
+        130.81,
+        146.83,
+        164.81,
+        196,
+        220
+    ];
+
+    let step = 0;
+
+    bgmInterval = setInterval(() => {
+
+        if (
+            gameState !== STATE.PLAYING ||
+            !audioCtx
+        ) {
+            return;
+        }
+
+        try {
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = "triangle";
+
+            osc.frequency.setValueAtTime(
+                notes[step % notes.length],
+                audioCtx.currentTime
+            );
+
+            gain.gain.setValueAtTime(
+                0.025,
+                audioCtx.currentTime
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                audioCtx.currentTime + 0.2
+            );
+
+            osc
+                .connect(gain)
+                .connect(audioCtx.destination);
+
+            osc.start();
+
+            osc.stop(
+                audioCtx.currentTime + 0.2
+            );
+
+            step++;
+
+        } catch (error) {}
+
+    }, 250);
+
+}
+
+
+function stopBGM() {
+
+    if (bgmInterval) {
+
+        clearInterval(bgmInterval);
+
+        bgmInterval = null;
+
+    }
+
+}
+
+
+function playSound(type) {
+
+    if (!audioCtx) {
+        return;
+    }
+
+    try {
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === "move") {
+
+            osc.type = "sine";
+
+            osc.frequency.setValueAtTime(
+                240,
+                now
+            );
+
+            osc.frequency.exponentialRampToValueAtTime(
+                480,
+                now + 0.08
+            );
+
+            gain.gain.setValueAtTime(
+                0.07,
+                now
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                now + 0.08
+            );
+
+            osc.start(now);
+            osc.stop(now + 0.08);
+
+        }
+
+        else if (type === "powerup") {
+
+            osc.type = "triangle";
+
+            osc.frequency.setValueAtTime(
+                350,
+                now
+            );
+
+            osc.frequency.exponentialRampToValueAtTime(
+                950,
+                now + 0.15
+            );
+
+            gain.gain.setValueAtTime(
+                0.12,
+                now
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                now + 0.15
+            );
+
+            osc.start(now);
+            osc.stop(now + 0.15);
+
+        }
+
+        else if (type === "shield_break") {
+
+            osc.type = "sawtooth";
+
+            osc.frequency.setValueAtTime(
+                220,
+                now
+            );
+
+            osc.frequency.linearRampToValueAtTime(
+                60,
+                now + 0.3
+            );
+
+            gain.gain.setValueAtTime(
+                0.15,
+                now
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                now + 0.3
+            );
+
+            osc.start(now);
+            osc.stop(now + 0.3);
+
+        }
+
+        else if (type === "gameover") {
+
+            osc.type = "sawtooth";
+
+            osc.frequency.setValueAtTime(
+                140,
+                now
+            );
+
+            osc.frequency.linearRampToValueAtTime(
+                25,
+                now + 0.6
+            );
+
+            gain.gain.setValueAtTime(
+                0.2,
+                now
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                now + 0.6
+            );
+
+            osc.start(now);
+            osc.stop(now + 0.6);
+
+        }
+
+        else if (type === "pause") {
+
+            osc.type = "sine";
+
+            osc.frequency.setValueAtTime(
+                320,
+                now
+            );
+
+            gain.gain.setValueAtTime(
+                0.05,
+                now
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                now + 0.1
+            );
+
+            osc.start(now);
+            osc.stop(now + 0.1);
+
+        }
+
+    } catch (error) {}
+
+}
+
+
+/* ================================================================
+   PLAYER
+   ================================================================ */
+
+const player = {
+
+    width: GAME.PLAYER_WIDTH,
+
+    height: GAME.PLAYER_HEIGHT,
+
+    y: 0,
+
+    lane: 1,
+
+    x: 0,
+
+    targetX: 0,
+
+    shields: 0
+
+};
+
+
+/* ================================================================
+   ENTITIES
+   ================================================================ */
+
+let obstacles = [];
+let powerups = [];
+let particles = [];
+
+
+/* ================================================================
+   RUN VARIABLES
+   ================================================================ */
+
+let score = 0;
+
+let gameSpeed = GAME.BASE_SPEED;
+
+let turboActive = false;
+
+let turboTimer = 0;
+
+let activePowerupName = "READY";
+
+let spawnTimer = 0;
+
+let powerupSpawnTimer = 0;
+
+let screenShakeTimer = 0;
+
+let lastTime = 0;
+
+
+/* ================================================================
+   HIGH SCORE
+   ================================================================ */
+
+function getHighScore() {
+
+    try {
+
+        return Number(
+            localStorage.getItem(
+                GAME.HIGH_SCORE_KEY
+            )
+        ) || 0;
+
+    } catch (error) {
+
+        return 0;
+
+    }
+
+}
+
+
+function saveHighScore(value) {
+
+    try {
+
+        localStorage.setItem(
+            GAME.HIGH_SCORE_KEY,
+            String(value)
+        );
+
+    } catch (error) {}
+
+}
+
+
+/* ================================================================
+   INPUT
+   ================================================================ */
+
+function movePlayer(direction) {
+
+    if (gameState !== STATE.PLAYING) {
+        return;
+    }
+
+    const newLane =
+        player.lane + direction;
+
+    if (
+        newLane < 0 ||
+        newLane > 2
+    ) {
+        return;
+    }
+
+    player.lane = newLane;
+
+    const lanes = getLanes();
+
+    player.targetX =
+        lanes[player.lane];
+
+    playSound("move");
+
+    createParticles(
+        player.x,
+        player.y + player.height - 5,
+        "#00ffcc",
+        5
+    );
+
+}
+
+
+function handleKeyDown(event) {
+
+    const key =
+        event.key.toLowerCase();
+
+    if (
+        key === "arrowleft" ||
+        key === "a"
+    ) {
+
+        event.preventDefault();
+
+        movePlayer(-1);
+
+        return;
+
+    }
+
+    if (
+        key === "arrowright" ||
+        key === "d"
+    ) {
+
+        event.preventDefault();
+
+        movePlayer(1);
+
+        return;
+
+    }
+
+    if (
+        key === "escape" ||
+        key === "p"
+    ) {
+
+        event.preventDefault();
+
+        togglePause();
+
+    }
+
+}
+
+
+window.addEventListener(
+    "keydown",
+    handleKeyDown
+);
+
+
+/* ================================================================
+   TOUCH INPUT
+   ================================================================ */
+
+function setupTouchButton(
+    button,
+    direction
+) {
+
+    button.addEventListener(
+        "pointerdown",
+        event => {
+
+            event.preventDefault();
+
+            movePlayer(direction);
+
+        },
+        {
+            passive: false
+        }
+    );
+
+}
+
+
+setupTouchButton(
+    leftButton,
+    -1
+);
+
+setupTouchButton(
+    rightButton,
+    1
+);
+
+
+/* ================================================================
+   PARTICLES
+   ================================================================ */
+
+function createParticles(
+    x,
+    y,
+    color,
+    count
+) {
+
+    for (
+        let i = 0;
+        i < count;
+        i++
+    ) {
+
+        particles.push({
+
+            x,
+
+            y,
+
+            vx:
+                (Math.random() - 0.5) *
+                100,
+
+            vy:
+                (Math.random() - 0.5) *
+                100,
+
+            radius:
+                Math.random() * 3 + 1,
+
+            color,
+
+            alpha: 1,
+
+            life:
+                0.3 +
+                Math.random() * 0.35
+
+        });
+
+    }
+
+}
+
+
+/* ================================================================
+   START GAME
+   ================================================================ */
+
+function startGame() {
+
+    initAudio();
+
+    resizeCanvas();
+
+    const lanes = getLanes();
+
+    player.lane = 1;
+
+    player.x =
+        lanes[player.lane];
+
+    player.targetX =
+        player.x;
+
+    player.y =
+        canvasHeight - 110;
+
+    player.shields = 0;
+
+    obstacles = [];
+
+    powerups = [];
+
+    particles = [];
+
+    score = 0;
+
+    gameSpeed =
+        GAME.BASE_SPEED;
+
+    turboActive = false;
+
+    turboTimer = 0;
+
+    activePowerupName =
+        "READY";
+
+    spawnTimer = 0;
+
+    powerupSpawnTimer = 0;
+
+    screenShakeTimer = 0;
+
+    gameState =
+        STATE.PLAYING;
+
+    startScreen.classList.add(
+        "hidden"
+    );
+
+    gameOverScreen.classList.add(
+        "hidden"
+    );
+
+    pauseScreen.classList.add(
+        "hidden"
+    );
+
+    lastTime =
+        performance.now();
+
+    requestAnimationFrame(loop);
+
+}
+
+
+/* ================================================================
+   PAUSE
+   ================================================================ */
+
+function togglePause() {
+
+    if (
+        gameState === STATE.PLAYING
+    ) {
+
+        gameState =
+            STATE.PAUSED;
+
+        pauseScreen.classList.remove(
+            "hidden"
+        );
+
+        playSound("pause");
+
+        return;
+
+    }
+
+    if (
+        gameState === STATE.PAUSED
+    ) {
+
+        gameState =
+            STATE.PLAYING;
+
+        pauseScreen.classList.add(
+            "hidden"
+        );
+
+        lastTime =
+            performance.now();
+
+        requestAnimationFrame(loop);
+
+    }
+
+}
+
+
+resumeButton.addEventListener(
+    "click",
+    togglePause
+);
+
+
+/* ================================================================
+   GAME OVER
+   ================================================================ */
+
+function gameOver() {
+
+    if (
+        gameState !== STATE.PLAYING
+    ) {
+        return;
+    }
+
+    gameState =
+        STATE.GAME_OVER;
+
+    stopEngineSound();
+
+    playSound("gameover");
+
+    screenShakeTimer = 0.45;
+
+    const lanes = getLanes();
+
+    createParticles(
+        lanes[player.lane],
+        player.y + player.height / 2,
+        "#ff007f",
+        30
+    );
+
+    const finalScore =
+        Math.floor(score);
+
+    const oldBest =
+        getHighScore();
+
+    const isNewRecord =
+        finalScore > oldBest;
+
+    if (isNewRecord) {
+
+        saveHighScore(finalScore);
+
+    }
+
+    finalScoreText.innerText =
+        `FINAL SCORE: ${finalScore}`;
+
+    bestScoreText.innerText =
+        `BEST: ${Math.max(finalScore, oldBest)}`;
+
+    bestScoreText.classList.toggle(
+        "new-record",
+        isNewRecord
+    );
+
+    gameOverScreen.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+/* ================================================================
+   SPAWN SYSTEM
+   ================================================================ */
+
+function getSpawnInterval() {
+
+    /*
+     * Difficulty slowly increases with score.
+     * It never goes below SPAWN_MIN.
+     */
+
+    const difficulty =
+        Math.min(score
