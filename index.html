@@ -5,156 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cyber Taxi Arcade</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
+        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+        html, body {
+            margin:0; width:100%; height:100%; overflow:hidden;
+            background:#02040a; color:#eafcff;
+            font-family:'Rajdhani',sans-serif;
         }
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #030305;
-            font-family: 'VT323', monospace;
-            color: #00ffcc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
+        body { display:flex; justify-content:center; align-items:center; }
         #game-container {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            height: 100%;
-            max-height: 100vh;
-            background: #090a0f;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.25);
-            overflow: hidden;
-            border: 2px solid #1f293d;
+            position:relative; width:100%; max-width:420px; height:100%; max-height:100vh;
+            background:#050914; overflow:hidden; border:1px solid #26334a;
+            box-shadow:0 0 0 1px rgba(255,255,255,.03), 0 22px 70px rgba(0,0,0,.7);
         }
-        canvas {
-            display: block;
-            width: 100%;
-            flex-grow: 1;
-            background: #0d1117;
-        }
+        canvas { display:block; width:100%; flex-grow:1; background:#060a12; }
         .ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 12px 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            pointer-events: none;
-            z-index: 5;
+            position:absolute; inset:0 0 auto 0; padding:14px 14px 0;
+            display:flex; flex-direction:column; gap:8px; pointer-events:none; z-index:5;
         }
         .header-hud {
-            display: flex;
-            justify-content: space-between;
-            font-size: 24px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            text-shadow: 0 0 8px rgba(0, 255, 204, 0.6);
+            display:flex; justify-content:space-between; align-items:center;
+            font-size:20px; font-weight:700; letter-spacing:2px;
+            text-shadow:0 2px 10px rgba(0,0,0,.8);
+        }
+        #scoreDisplay { color:#f4fbff; }
+        #speedDisplay {
+            color:#5cf5d2 !important; font-size:16px; padding:5px 9px;
+            border:1px solid rgba(92,245,210,.35); background:rgba(4,12,18,.72);
+            border-radius:6px;
         }
         .status-hud {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 18px;
-            background: rgba(13, 17, 23, 0.85);
-            padding: 4px 10px;
-            border-radius: 4px;
-            border: 1px solid #1f293d;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
+            display:flex; justify-content:space-between; align-items:center;
+            font-family:'VT323',monospace; font-size:17px; letter-spacing:1px;
+            color:#b8c7d9; padding:7px 10px; border-radius:7px;
+            background:rgba(4,8,15,.72); border:1px solid rgba(148,163,184,.16);
+            backdrop-filter:blur(5px);
         }
+        #activePowerup { color:#ffbd69 !important; }
         .mobile-controls {
-            display: flex;
-            width: 100%;
-            height: 90px;
-            background: #030305;
-            border-top: 2px solid #1f293d;
-            flex-shrink: 0;
+            display:flex; width:100%; height:82px; background:#070b13;
+            border-top:1px solid #243047; flex-shrink:0; padding:8px; gap:8px;
         }
         .control-btn {
-            flex: 1;
-            background: #0d1117;
-            border: none;
-            color: #00ffcc;
-            font-family: 'VT323', monospace;
-            font-size: 32px;
-            letter-spacing: 2px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.1s;
+            flex:1; border:1px solid #27344b; border-radius:9px;
+            background:linear-gradient(#101827,#0b111d); color:#c7d4e4;
+            font-family:'Rajdhani',sans-serif; font-size:17px; font-weight:700;
+            letter-spacing:2px; cursor:pointer;
+            box-shadow:inset 0 1px rgba(255,255,255,.05);
+            transition:transform .08s, background .08s, border-color .08s;
         }
         .control-btn:active {
-            background: #1f293d;
-            color: #ffffff;
-            box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.5);
-        }
-        .control-btn:first-child {
-            border-right: 2px solid #1f293d;
+            transform:translateY(2px); background:#172338; border-color:#4fe7cb;
+            color:#fff;
         }
         .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(3, 3, 5, 0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 20px;
-            z-index: 10;
+            position:absolute; inset:0; background:
+                radial-gradient(circle at 50% 40%, rgba(19,42,61,.45), transparent 45%),
+                linear-gradient(180deg,rgba(2,4,10,.86),rgba(2,4,10,.97));
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            text-align:center; padding:24px; z-index:10;
         }
         h1 {
-            font-size: 56px;
-            margin-bottom: 5px;
-            color: #ff007f;
-            text-shadow: 0 0 20px rgba(255, 0, 127, 0.7);
-            letter-spacing: 3px;
+            font-family:'VT323',monospace; font-size:64px; line-height:.8; margin:0 0 16px;
+            color:#f3fbff; letter-spacing:5px;
+            text-shadow:0 0 0 #fff, 0 0 22px rgba(82,236,214,.32);
         }
-        p {
-            color: #00ffcc;
-            font-size: 22px;
-            margin-bottom: 35px;
-            letter-spacing: 1px;
-            text-shadow: 0 0 6px rgba(0, 255, 204, 0.4);
+        .screen p {
+            max-width:280px; color:#8fa4ba; font-size:17px; line-height:1.25;
+            margin:0 0 30px; letter-spacing:1px;
         }
         .btn {
-            background: #00ffcc;
-            color: #030305;
-            border: none;
-            padding: 10px 35px;
-            font-family: 'VT323', monospace;
-            font-size: 28px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
-            transition: all 0.1s;
+            border:1px solid #5cf5d2; border-radius:7px;
+            background:#5cf5d2; color:#04100e; padding:12px 34px;
+            font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:700;
+            letter-spacing:2px; cursor:pointer;
+            box-shadow:0 0 24px rgba(92,245,210,.16);
         }
-        .btn:active {
-            transform: scale(0.95);
-            background: #ffffff;
-        }
-        .hidden {
-            display: none !important;
-        }
+        .btn:active { transform:scale(.97); }
+        .hidden { display:none !important; }
+
     </style>
 </head>
 <body>
@@ -177,15 +105,15 @@
 
         <!-- Mobile Controls -->
         <div class="mobile-controls">
-            <button class="control-btn" onclick="movePlayer(-1)">&lt; LEFT</button>
-            <button class="control-btn" onclick="movePlayer(1)">RIGHT &gt;</button>
+            <button class="control-btn" aria-label="Move left" onclick="movePlayer(-1)">‹ LEFT</button>
+            <button class="control-btn" aria-label="Move right" onclick="movePlayer(1)">RIGHT ›</button>
         </div>
 
         <!-- Start Screen -->
         <div id="startScreen" class="screen">
             <h1>CYBER TAXI</h1>
-            <p>Dodge the Grid. Own the Neon Night.</p>
-            <button class="btn" onclick="startGame()">INSERT COIN</button>
+            <p>SURVIVE THE NIGHT • BEAT YOUR SCORE</p>
+            <button class="btn" onclick="startGame()">START RUN</button>
         </div>
 
         <!-- Game Over Screen -->
@@ -533,197 +461,208 @@
             }
         }
 
-        // FUNGSI RENDER MOBIL BARU: Bentuk Vektor Presisi Mirip Mobil Sport/Sedan Nyata
+        // Vector car renderer: no external assets.
         function drawRealisticCar(x, y, w, h, primaryColor, isPlayer) {
             ctx.save();
-            let cx = x - w / 2;
+            const cx = x - w / 2;
 
-            // Bayangan bodi mobil
-            ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-            ctx.fillRect(cx - 4, y + 8, w + 8, h - 14);
+            // soft ground shadow
+            ctx.fillStyle = "rgba(0,0,0,.42)";
+            ctx.beginPath();
+            ctx.ellipse(x, y + h - 2, w * .62, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
 
-            // Ban Roda Kiri & Kanan (Detail dengan Tapak Ban)
-            ctx.fillStyle = "#010103";
-            ctx.fillRect(cx - 7, y + 16, 6, 22);
-            ctx.fillRect(cx + w + 1, y + 16, 6, 22);
-            ctx.fillRect(cx - 7, y + h - 32, 6, 22);
-            ctx.fillRect(cx + w + 1, y + h - 32, 6, 22);
-            
-            // Velg Roda Crom
-            ctx.fillStyle = "#64748b";
-            ctx.fillRect(cx - 6, y + 23, 4, 8);
-            ctx.fillRect(cx + w + 2, y + 23, 4, 8);
-            ctx.fillRect(cx - 6, y + h - 25, 4, 8);
-            ctx.fillRect(cx + w + 2, y + h - 25, 4, 8);
+            // neon underglow
+            ctx.globalAlpha = .18;
+            ctx.fillStyle = isPlayer ? "#5cf5d2" : "#ff477e";
+            ctx.fillRect(cx - 2, y + h - 5, w + 4, 7);
+            ctx.globalAlpha = 1;
 
-            // Bodi Utama Mobil (Bentuk aerodinamis bersudut tajam ala mobil retro)
+            // wheels
+            ctx.fillStyle = "#05070c";
+            [[cx-5,y+19],[cx+w-1,y+19],[cx-5,y+h-31],[cx+w-1,y+h-31]].forEach(([wx,wy])=>{
+                ctx.fillRect(wx, wy, 7, 19);
+                ctx.fillStyle="#64748b";
+                ctx.fillRect(wx+2, wy+4, 3, 10);
+                ctx.fillStyle="#05070c";
+            });
+
+            // body
             ctx.fillStyle = primaryColor;
             ctx.beginPath();
-            ctx.moveTo(cx + 8, y + 2);                    // Hidung moncong depan
-            ctx.lineTo(cx + w - 8, y + 2);
-            ctx.quadraticCurveTo(cx + w - 2, y + 10, cx + w, y + 26); // Fender kanan depan
-            ctx.lineTo(cx + w - 3, y + h - 6);            // Samping bodi kanan
-            ctx.quadraticCurveTo(cx + w / 2, y + h + 2, cx + 3, y + h - 6); // Bumper belakang
-            ctx.lineTo(cx, y + 26);                        // Samping bodi kiri
-            ctx.quadraticCurveTo(cx + 2, y + 10, cx + 8, y + 2); // Fender kiri depan
+            ctx.moveTo(cx+8,y+3);
+            ctx.lineTo(cx+w-8,y+3);
+            ctx.quadraticCurveTo(cx+w-2,y+10,cx+w-1,y+25);
+            ctx.lineTo(cx+w-4,y+h-7);
+            ctx.quadraticCurveTo(cx+w/2,y+h+1,cx+4,y+h-7);
+            ctx.lineTo(cx+1,y+25);
+            ctx.quadraticCurveTo(cx+2,y+10,cx+8,y+3);
             ctx.closePath();
             ctx.fill();
 
-            // Garis Kontur Luar Bodi
-            ctx.strokeStyle = isPlayer ? "#ffffff" : "#ff1a75";
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
+            // edge
+            ctx.strokeStyle = isPlayer ? "#dffff9" : "#ff7b9e";
+            ctx.lineWidth = 1.4; ctx.stroke();
 
-            // Kap Mesin Depan
-            ctx.fillStyle = isPlayer ? "#00b38f" : "#cc0052";
-            ctx.fillRect(cx + 8, y + 6, w - 16, 12);
-
-            // Kaca Depan (Windshield Miring Trapezoid)
-            ctx.fillStyle = "#050508";
+            // cabin
+            ctx.fillStyle = "#07111a";
             ctx.beginPath();
-            ctx.moveTo(cx + 6, y + 22);
-            ctx.lineTo(cx + w - 6, y + 22);
-            ctx.lineTo(cx + w - 4, y + 42);
-            ctx.lineTo(cx + 4, y + 42);
-            ctx.closePath();
-            ctx.fill();
+            ctx.moveTo(cx+7,y+24); ctx.lineTo(cx+w-7,y+24);
+            ctx.lineTo(cx+w-10,y+52); ctx.lineTo(cx+10,y+52); ctx.closePath(); ctx.fill();
 
-            // Atap Kabin Mobil
-            ctx.fillStyle = primaryColor;
-            ctx.fillRect(cx + 5, y + 44, w - 10, 20);
-            ctx.strokeStyle = isPlayer ? "#ffffff" : "#ff1a75";
-            ctx.strokeRect(cx + 5, y + 44, w - 10, 20);
+            // windshield split
+            ctx.strokeStyle="rgba(176,226,235,.34)"; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.moveTo(x,y+25); ctx.lineTo(x,y+51); ctx.stroke();
 
-            // Kaca Belakang
-            ctx.fillStyle = "#050508";
-            ctx.fillRect(cx + 6, y + 66, w - 12, 8);
+            // hood / rear accent
+            ctx.fillStyle = isPlayer ? "#36cdb6" : "#c92d5e";
+            ctx.fillRect(cx+7,y+7,w-14,7);
+            ctx.fillStyle = "rgba(255,255,255,.16)";
+            ctx.fillRect(cx+8,y+17,w-16,2);
 
-            // Lampu (Headlights & Taillights)
             if (isPlayer) {
-                // Lampu Sorot Depan Taksi
-                ctx.fillStyle = "#ffff00";
-                ctx.fillRect(cx + 2, y, 7, 5);
-                ctx.fillRect(cx + w - 9, y, 7, 5);
-                // Papan Taksi "TAXI" di Atap
-                ctx.fillStyle = "#ff007f";
-                ctx.fillRect(cx + 10, y + 49, w - 20, 8);
-                ctx.fillStyle = "#ffffff";
-                ctx.font = "bold 9px 'VT323', monospace";
-                ctx.textAlign = "center";
-                ctx.fillText("TAXI", x, y + 56);
-            } else {
-                // Lampu Belakang Merah Musuh
-                ctx.fillStyle = "#ff1a1a";
-                ctx.fillRect(cx + 2, y + h - 5, 8, 5);
-                ctx.fillRect(cx + w - 10, y + h - 5, 8, 5);
-                // Lampu Depan Musuh
-                ctx.fillStyle = "#ffffff";
-                ctx.fillRect(cx + 3, y, 6, 4);
-                ctx.fillRect(cx + w - 9, y, 6, 4);
-            }
+                // headlights
+                ctx.fillStyle="#f5ffcf";
+                ctx.fillRect(cx+3,y+2,7,5); ctx.fillRect(cx+w-10,y+2,7,5);
 
+                // taxi roof sign
+                ctx.fillStyle="#f4fbff"; ctx.fillRect(cx+12,y+55,w-24,9);
+                ctx.fillStyle="#07111a";
+                ctx.font="700 7px Rajdhani, sans-serif"; ctx.textAlign="center";
+                ctx.fillText("TAXI",x,y+62);
+            } else {
+                ctx.fillStyle="#ff3e61";
+                ctx.fillRect(cx+3,y+h-6,8,4); ctx.fillRect(cx+w-11,y+h-6,8,4);
+            }
             ctx.restore();
         }
 
         function draw() {
             ctx.save();
-            
-            // Efek Getar Layar (Screen Shake) saat terjadi tabrakan / shield pecah
+
             if (screenShakeTimer > 0) {
-                let shakeX = (Math.random() - 0.5) * 8;
-                let shakeY = (Math.random() - 0.5) * 8;
-                ctx.translate(shakeX, shakeY);
+                ctx.translate((Math.random()-.5)*7, (Math.random()-.5)*7);
                 screenShakeTimer--;
             }
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0,0,canvas.width,canvas.height);
 
-            // Retro Asphalt Road
-            ctx.fillStyle = "#0d1117";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const W = canvas.width, H = canvas.height;
+            const horizon = Math.max(105, H * .22);
 
-            // Sidewalk Shoulders
-            ctx.fillStyle = "#161b22";
-            ctx.fillRect(0, 0, 18, canvas.height);
-            ctx.fillRect(canvas.width - 18, 0, 18, canvas.height);
+            // Night sky / city atmosphere
+            const sky = ctx.createLinearGradient(0,0,0,horizon);
+            sky.addColorStop(0,"#050812"); sky.addColorStop(1,"#101b27");
+            ctx.fillStyle=sky; ctx.fillRect(0,0,W,horizon);
 
-            // Neon Road Striping Line
-            ctx.strokeStyle = "#00ffcc";
-            ctx.lineWidth = 3;
-            ctx.setLineDash([20, 20]);
-            ctx.lineDashOffset = -roadOffset;
+            // distant skyline made from rectangles
+            ctx.fillStyle="#0a111b";
+            for(let i=0;i<16;i++){
+                const bw=16+(i*13)%25, bh=20+(i*29)%65;
+                const bx=i*29-10;
+                ctx.fillRect(bx,horizon-bh,bw,bh);
+                ctx.fillStyle="rgba(115,190,186,.10)";
+                for(let wy=horizon-bh+9;wy<horizon-5;wy+=13) {
+                    if(((i+Math.floor(wy/13))%3)===0) ctx.fillRect(bx+5,wy,3,5);
+                }
+                ctx.fillStyle="#0a111b";
+            }
 
-            let lanes = getLanes();
+            // moon glow
+            const moon = ctx.createRadialGradient(W*.78,horizon*.35,3,W*.78,horizon*.35,42);
+            moon.addColorStop(0,"rgba(210,240,232,.18)");
+            moon.addColorStop(1,"rgba(210,240,232,0)");
+            ctx.fillStyle=moon; ctx.fillRect(0,0,W,horizon);
+
+            // road body
+            ctx.fillStyle="#090e16";
+            ctx.fillRect(0,horizon,W,H-horizon);
+
+            // road perspective shoulders
+            ctx.fillStyle="#131c28";
+            ctx.beginPath(); ctx.moveTo(0,horizon); ctx.lineTo(W*.18,horizon); ctx.lineTo(W*.08,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(W,horizon); ctx.lineTo(W*.82,horizon); ctx.lineTo(W*.92,H); ctx.lineTo(W,H); ctx.closePath(); ctx.fill();
+
+            // subtle road center gradient
+            const roadGrad=ctx.createLinearGradient(0,horizon,0,H);
+            roadGrad.addColorStop(0,"rgba(32,52,68,.16)");
+            roadGrad.addColorStop(1,"rgba(0,0,0,.08)");
+            ctx.fillStyle=roadGrad; ctx.fillRect(W*.12,horizon,W*.76,H-horizon);
+
+            // lane dividers
+            const lanes=getLanes();
+            ctx.strokeStyle="rgba(120,155,166,.35)";
+            ctx.lineWidth=2; ctx.setLineDash([26,30]); ctx.lineDashOffset=-roadOffset;
             ctx.beginPath();
-            ctx.moveTo((lanes[0] + lanes[1]) / 2, 0);
-            ctx.lineTo((lanes[0] + lanes[1]) / 2, canvas.height);
-            ctx.moveTo((lanes[1] + lanes[2]) / 2, 0);
-            ctx.lineTo((lanes[1] + lanes[2]) / 2, canvas.height);
-            ctx.stroke();
-            ctx.setLineDash([]);
+            ctx.moveTo((lanes[0]+lanes[1])/2,horizon);
+            ctx.lineTo((lanes[0]+lanes[1])/2,H);
+            ctx.moveTo((lanes[1]+lanes[2])/2,horizon);
+            ctx.lineTo((lanes[1]+lanes[2])/2,H);
+            ctx.stroke(); ctx.setLineDash([]);
 
+            // glowing road edge lines
+            ctx.strokeStyle="rgba(92,245,210,.55)"; ctx.lineWidth=2;
+            ctx.beginPath(); ctx.moveTo(W*.12,horizon); ctx.lineTo(W*.08,H); ctx.moveTo(W*.88,horizon); ctx.lineTo(W*.92,H); ctx.stroke();
+
+            // moving road streaks for speed
+            ctx.globalAlpha=.22;
+            ctx.strokeStyle="#8ab0bd"; ctx.lineWidth=1;
+            for(let i=0;i<9;i++){
+                const yy=horizon+((i*83+roadOffset*1.8)%(H-horizon));
+                const t=(yy-horizon)/(H-horizon);
+                const spread=20+t*45;
+                ctx.beginPath(); ctx.moveTo(W*.5-spread,yy); ctx.lineTo(W*.5+spread,yy); ctx.stroke();
+            }
+            ctx.globalAlpha=1;
+
+            // particles behind entities
             for (let p of particles) {
+                ctx.save(); ctx.globalAlpha=p.alpha; ctx.fillStyle=p.color;
+                ctx.beginPath(); ctx.arc(p.x,p.y,p.radius,0,Math.PI*2); ctx.fill(); ctx.restore();
+            }
+
+            // player
+            drawRealisticCar(lanes[playerLane],player.y,player.width,player.height,"#22d7bb",true);
+
+            // shield ring
+            if(player.shields>0){
+                ctx.strokeStyle="rgba(92,245,210,.9)"; ctx.lineWidth=2;
+                ctx.beginPath(); ctx.arc(lanes[playerLane],player.y+player.height/2,49+Math.sin(Date.now()/120)*2,0,Math.PI*2); ctx.stroke();
+                ctx.strokeStyle="rgba(92,245,210,.18)"; ctx.lineWidth=7; ctx.stroke();
+            }
+
+            for(let obs of obstacles)
+                drawRealisticCar(lanes[obs.lane],obs.y,obs.width,obs.height,"#d93663",false);
+
+            // powerups: diamond badge instead of flat circle
+            for(let p of powerups){
+                const px=lanes[p.lane], py=p.y+p.size/2;
+                const col=p.type==="shield"?"#5cf5d2":"#ffbd69";
                 ctx.save();
-                ctx.globalAlpha = p.alpha;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.translate(px,py); ctx.rotate(Math.PI/4);
+                ctx.fillStyle="rgba(0,0,0,.45)"; ctx.fillRect(-17,-17,34,34);
+                ctx.fillStyle=col; ctx.fillRect(-12,-12,24,24);
                 ctx.restore();
+                ctx.fillStyle="#071019"; ctx.font="700 16px Rajdhani,sans-serif";
+                ctx.textAlign="center"; ctx.textBaseline="middle";
+                ctx.fillText(p.type==="shield"?"S":"T",px,py);
             }
 
-            // Draw Player Car (Cyber Taxi Desain Baru)
-            drawRealisticCar(lanes[playerLane], player.y, player.width, player.height, "#00ffcc", true);
+            // subtle scanlines + vignette
+            ctx.fillStyle="rgba(255,255,255,.018)";
+            for(let sy=0;sy<H;sy+=5) ctx.fillRect(0,sy,W,1);
 
-            // Shield Aura Ring
-            if (player.shields > 0) {
-                ctx.strokeStyle = "#00ffcc";
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.arc(lanes[playerLane], player.y + player.height / 2, 48, 0, Math.PI * 2);
-                ctx.stroke();
-            }
+            const vignette=ctx.createRadialGradient(W/2,H*.55,Math.min(W,H)*.2,W/2,H*.55,Math.max(W,H)*.72);
+            vignette.addColorStop(0,"rgba(0,0,0,0)");
+            vignette.addColorStop(1,"rgba(0,0,0,.42)");
+            ctx.fillStyle=vignette; ctx.fillRect(0,0,W,H);
 
-            // Draw Obstacle Cars (Musuh Desain Baru)
-            for (let obs of obstacles) {
-                drawRealisticCar(lanes[obs.lane], obs.y, obs.width, obs.height, "#ff0066", false);
-            }
+            ctx.restore();
 
-            // Draw Power-ups
-            for (let p of powerups) {
-                let px = lanes[p.lane];
-                let py = p.y + p.size / 2;
-                
-                ctx.save();
-                ctx.fillStyle = p.type === "shield" ? "#00ffcc" : "#ffb86c";
-                ctx.beginPath();
-                ctx.arc(px, py, p.size / 2, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.strokeStyle = "#030305";
-                ctx.lineWidth = 3;
-                ctx.stroke();
-
-                ctx.fillStyle = "#030305";
-                ctx.font = "bold 18px 'VT323', monospace";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-                ctx.fillText(p.type === "shield" ? "S" : "T", px, py);
-                ctx.restore();
-            }
-
-            // CRT Scanline Overlay Effect
-            ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
-            for (let sy = 0; sy < canvas.height; sy += 4) {
-                ctx.fillRect(0, sy, canvas.width, 1);
-            }
-
-            ctx.restore(); // Mengembalikan posisi canvas dari screen shake
-
-            document.getElementById("scoreDisplay").innerText = `SCORE: ${Math.floor(score).toString().padStart(4, '0')}`;
-            document.getElementById("speedDisplay").innerText = `${gameSpeed.toFixed(1)}X`;
-            document.getElementById("shieldStatus").innerText = `SHIELD: ${player.shields} 🛡️`;
-            document.getElementById("activePowerup").innerText = activePowerupName;
+            document.getElementById("scoreDisplay").innerText=`SCORE: ${Math.floor(score).toString().padStart(4,"0")}`;
+            document.getElementById("speedDisplay").innerText=`${gameSpeed.toFixed(1)}X`;
+            document.getElementById("shieldStatus").innerText=`SHIELD: ${player.shields} 🛡️`;
+            document.getElementById("activePowerup").innerText=activePowerupName;
         }
 
         function loop() {
